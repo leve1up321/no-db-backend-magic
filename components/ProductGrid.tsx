@@ -2,6 +2,7 @@
 
 import { Star, ShoppingCart, Heart } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { showToast } from '@/components/ToastContainer';
 import products from '@/data/products.json';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -28,11 +29,13 @@ export default function ProductGrid() {
       price: amount,
       image: product.image,
     });
+    showToast('تمت إضافة المنتج إلى السلة بنجاح! ✅', 'cart');
   };
 
   const handleWishlist = (productId: number) => {
     if (!wishlist.includes(productId)) {
       addToWishlist(productId);
+      showToast('تمت إضافة المنتج إلى قائمة الأمنيات! ❤️', 'wishlist');
     }
   };
 

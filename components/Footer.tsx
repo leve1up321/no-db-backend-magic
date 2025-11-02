@@ -1,7 +1,7 @@
 'use client';
 
-import { Facebook, Twitter, Instagram, Mail, Phone, MessageCircle } from 'lucide-react';
-import { FaTiktok } from 'react-icons/fa';
+import { Mail } from 'lucide-react';
+import { FaTiktok, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -32,34 +32,29 @@ export default function Footer() {
             </p>
             <div className="flex gap-4">
               <a
-                href="https://facebook.com"
+                href="https://wa.me/971503492848"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition"
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition"
+                aria-label="WhatsApp"
               >
-                <Facebook className="w-5 h-5" />
+                <FaWhatsapp className="w-5 h-5" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://www.instagram.com/lvlup3211/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition"
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition"
+                aria-label="Instagram"
               >
-                <Twitter className="w-5 h-5" />
+                <FaInstagram className="w-5 h-5" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.tiktok.com/@lvlup321"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a
-                href="https://tiktok.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition"
+                aria-label="TikTok"
               >
                 <FaTiktok className="w-5 h-5" />
               </a>
@@ -121,31 +116,22 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="mailto:support@levelup.com"
+                  href="mailto:leve1up999q@gmail.com"
                   className="flex items-center gap-3 text-gray-400 hover:text-white transition"
                 >
                   <Mail className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm">support@levelup.com</span>
+                  <span className="text-sm">leve1up999q@gmail.com</span>
                 </a>
               </li>
               <li>
                 <a
-                  href="https://wa.me/966501234567"
+                  href="https://wa.me/971503492848"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-gray-400 hover:text-white transition"
                 >
-                  <MessageCircle className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm" dir="ltr">+966 50 123 4567</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="tel:+966501234567"
-                  className="flex items-center gap-3 text-gray-400 hover:text-white transition"
-                >
-                  <Phone className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm" dir="ltr">+966 50 123 4567</span>
+                  <FaWhatsapp className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm" dir="ltr">+971503492848</span>
                 </a>
               </li>
             </ul>

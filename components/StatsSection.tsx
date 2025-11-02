@@ -16,36 +16,36 @@ interface Stat {
 export default function StatsSection() {
   const [stats, setStats] = useState<Stat[]>([
     {
+      icon: ShoppingBag,
+      value: 950,
+      suffix: '+',
+      label: 'عدد المبيعات',
+      color: 'text-green-600 dark:text-green-400',
+      bgColor: 'bg-green-100 dark:bg-green-900/20',
+      increment: 0.5,
+    },
+    {
       icon: Users,
-      value: 5000,
+      value: 450,
       suffix: '+',
       label: 'عميل سعيد',
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-100 dark:bg-blue-900/20',
-      increment: 0.01, // زيادة 0.01 كل يوم
-    },
-    {
-      icon: ShoppingBag,
-      value: 10000,
-      suffix: '+',
-      label: 'طلب مكتمل',
-      color: 'text-green-600 dark:text-green-400',
-      bgColor: 'bg-green-100 dark:bg-green-900/20',
-      increment: 0.02,
+      increment: 0.2,
     },
     {
       icon: Star,
-      value: 4.9,
+      value: 4.6,
       suffix: '/5',
       label: 'تقييم العملاء',
       color: 'text-yellow-600 dark:text-yellow-400',
       bgColor: 'bg-yellow-100 dark:bg-yellow-900/20',
-      increment: 0.0001,
+      increment: 0.001,
     },
     {
       icon: Zap,
-      value: 5,
-      suffix: ' دقائق',
+      value: 2,
+      suffix: ' دقيقة',
       label: 'وقت التسليم',
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-100 dark:bg-purple-900/20',
@@ -124,4 +124,3 @@ export default function StatsSection() {
     </section>
   );
 }
-

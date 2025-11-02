@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ShoppingCart, Heart, Star, Check, Users, Shield, Zap } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { showToast } from '@/components/ToastContainer';
 import testimonials from '@/data/testimonials.json';
 import Image from 'next/image';
 
@@ -46,11 +47,13 @@ export default function ProductDetail({ product }: { product: Product }) {
         image: product.image,
       });
     }
+    showToast('تمت إضافة المنتج إلى السلة بنجاح! ✅', 'cart');
   };
 
   const handleWishlist = () => {
     if (!isInWishlist) {
       addToWishlist(product.id);
+      showToast('تمت إضافة المنتج إلى قائمة الأمنيات! ❤️', 'wishlist');
     }
   };
 
@@ -238,4 +241,3 @@ export default function ProductDetail({ product }: { product: Product }) {
     </section>
   );
 }
-

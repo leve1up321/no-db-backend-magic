@@ -38,13 +38,28 @@ export const Navbar = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full"
+              onClick={() => alert('تسجيل الدخول')}
+            >
               <User className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full"
+              onClick={() => alert('المفضلة')}
+            >
               <Heart className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full"
+              onClick={() => alert('السلة فارغة')}
+            >
               <ShoppingCart className="w-5 h-5" />
             </Button>
             <Button variant="ghost" size="sm" className="gap-2">

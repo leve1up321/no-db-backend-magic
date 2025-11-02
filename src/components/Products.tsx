@@ -86,10 +86,18 @@ export const Products = () => {
               </CardContent>
 
               <CardFooter className="p-6 pt-0 flex gap-2">
-                <Button className="flex-1 bg-gradient-to-r from-primary to-secondary hover:opacity-90">
+                <Button 
+                  className="flex-1 bg-gradient-to-r from-primary to-secondary hover:opacity-90"
+                  onClick={() => window.location.href = `/product/${product.id}`}
+                >
                   شراء الآن
                 </Button>
-                <Button variant="outline" size="icon" className="border-primary/30 hover:bg-primary/10">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="border-primary/30 hover:bg-primary/10"
+                  onClick={() => alert('تمت إضافة المنتج للسلة')}
+                >
                   <ShoppingCart className="w-4 h-4" />
                 </Button>
               </CardFooter>

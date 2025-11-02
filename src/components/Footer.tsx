@@ -33,8 +33,8 @@ export const Footer = () => {
             <h3 className="font-bold mb-4">الدعم</h3>
             <ul className="space-y-2">
               <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">اتصل بنا</Link></li>
-              <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">الشروط والأحكام</Link></li>
-              <li><Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">سياسة الخصوصية</Link></li>
+              <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">الشروط والأحكام</a></li>
+              <li><a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">سياسة الخصوصية</a></li>
             </ul>
           </div>
 

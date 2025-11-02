@@ -87,6 +87,7 @@ const ProductDetail = () => {
                 <Button 
                   size="lg" 
                   className="w-full text-lg py-6 bg-gradient-to-r from-primary to-secondary hover:opacity-90"
+                  onClick={() => alert('سيتم توجيهك لصفحة الدفع')}
                 >
                   <ShoppingCart className="w-5 h-5 ml-2" />
                   شراء الآن
@@ -97,6 +98,7 @@ const ProductDetail = () => {
                     variant="outline" 
                     size="lg"
                     className="flex-1 border-primary/30 hover:bg-primary/10"
+                    onClick={() => alert('تمت إضافة المنتج للسلة')}
                   >
                     إضافة للسلة
                   </Button>
@@ -104,6 +106,7 @@ const ProductDetail = () => {
                     variant="outline" 
                     size="lg"
                     className="border-primary/30 hover:bg-primary/10"
+                    onClick={() => alert('تمت الإضافة للمفضلة')}
                   >
                     <Heart className="w-5 h-5" />
                   </Button>

@@ -35,6 +35,7 @@ export const Hero = () => {
             <Button 
               size="lg" 
               className="w-full sm:w-auto text-lg px-8 py-6 bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
+              onClick={() => window.location.href = '/contact'}
             >
               <span>ابدأ رحلتك الآن</span>
               <ArrowLeft className="w-5 h-5 mr-2" />
@@ -43,6 +44,7 @@ export const Hero = () => {
               size="lg" 
               variant="outline"
               className="w-full sm:w-auto text-lg px-8 py-6 border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/10"
+              onClick={() => window.location.href = '/products'}
             >
               تسوق الآن
             </Button>

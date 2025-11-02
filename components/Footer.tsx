@@ -3,6 +3,7 @@
 import { Facebook, Twitter, Instagram, Mail, Phone, MessageCircle } from 'lucide-react';
 import { FaTiktok } from 'react-icons/fa';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -14,8 +15,13 @@ export default function Footer() {
           {/* Company Info */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">LU</span>
+              <div className="relative w-10 h-10">
+                <Image
+                  src="/logo.png"
+                  alt="Level Up Logo"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
                 LevelUp
@@ -155,4 +161,3 @@ export default function Footer() {
     </footer>
   );
 }
-

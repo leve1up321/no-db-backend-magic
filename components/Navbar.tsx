@@ -23,8 +23,14 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">LU</span>
+            <div className="relative w-10 h-10">
+              <Image
+                src="/logo.png"
+                alt="Level Up Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
               LevelUp
@@ -181,4 +187,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

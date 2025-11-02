@@ -1,53 +1,39 @@
 [
   {
     "id": 1,
-    "name": "محمد الأحمد",
-    "nameEn": "Mohammed Al-Ahmad",
+    "name": "أحمد محمد",
+    "nameEn": "Ahmed Mohammed",
     "rating": 5,
-    "text": "تجربة رائعة! حصلت على الكود فوراً بعد الدفع. خدمة سريعة وموثوقة 100%. أنصح الجميع بالتعامل مع هذا المتجر.",
-    "date": "2024-12-15",
+    "text": "منتجات رائعة وعملية! استفدت كثيراً من الأفكار المطروحة وبدأت مشروعي الأول بنجاح. شكراً لفريق لفل اب!",
+    "date": "2025-10-15",
+    "timeAgo": "منذ أسبوعين",
     "productId": 1,
-    "verified": true
+    "verified": true,
+    "avatar": "https://ui-avatars.com/api/?name=Ahmed+Mohammed&background=8b5cf6&color=fff&size=128"
   },
   {
     "id": 2,
-    "name": "سارة العتيبي",
-    "nameEn": "Sara Al-Otaibi",
+    "name": "فاطمة العلي",
+    "nameEn": "Fatima Al-Ali",
     "rating": 5,
-    "text": "أفضل متجر رقمي جربته! الأسعار ممتازة والدعم الفني متعاون جداً. اشتريت أكثر من منتج وكلها شغالة بدون مشاكل.",
-    "date": "2024-12-10",
-    "productId": 3,
-    "verified": true
+    "text": "كتب مفيدة جداً ومكتوبة بطريقة سهلة ومفهومة. الأفكار عملية ويمكن تطبيقها فوراً. أنصح بها بشدة!",
+    "date": "2025-10-29",
+    "timeAgo": "منذ 3 أيام",
+    "productId": 2,
+    "verified": true,
+    "avatar": "https://ui-avatars.com/api/?name=Fatima+Al-Ali&background=6366f1&color=fff&size=128"
   },
   {
     "id": 3,
-    "name": "عبدالله الشمري",
-    "nameEn": "Abdullah Al-Shammari",
+    "name": "خالد السعيد",
+    "nameEn": "Khaled Al-Saeed",
     "rating": 5,
-    "text": "سرعة في التسليم وأسعار منافسة. المنتجات أصلية ومضمونة. سأكرر الشراء بالتأكيد.",
-    "date": "2024-12-08",
-    "productId": 2,
-    "verified": true
-  },
-  {
-    "id": 4,
-    "name": "نورة القحطاني",
-    "nameEn": "Noura Al-Qahtani",
-    "rating": 5,
-    "text": "خدمة احترافية وموثوقية عالية. التعامل سهل والدفع آمن. أنصح بشدة!",
-    "date": "2024-12-05",
+    "text": "استثمار ممتاز! المحتوى قيم والأسعار معقولة. حققت أول ربح لي من الإنترنت بفضل هذه الكتب.",
+    "date": "2025-10-27",
+    "timeAgo": "منذ 5 أيام",
     "productId": 1,
-    "verified": true
-  },
-  {
-    "id": 5,
-    "name": "خالد المطيري",
-    "nameEn": "Khaled Al-Mutairi",
-    "rating": 4,
-    "text": "تعامل ممتاز ودعم فني سريع الاستجابة. المنتجات كما هو موصوف تماماً.",
-    "date": "2024-12-01",
-    "productId": 2,
-    "verified": true
+    "verified": true,
+    "avatar": "https://ui-avatars.com/api/?name=Khaled+Al-Saeed&background=3b82f6&color=fff&size=128"
   }
 ]
 

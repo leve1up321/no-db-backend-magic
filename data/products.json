@@ -5,6 +5,7 @@
     "nameEn": "15 Profitable Digital Project Ideas",
     "description": "دليلك العملي لبدء مشروعك الرقمي من الصفر وبناء مصدر دخل حقيقي",
     "price": 57.00,
+    "priceAED": 55.50,
     "priceUSD": 15.20,
     "priceEUR": 14.20,
     "currency": "SAR",
@@ -38,6 +39,7 @@
     "nameEn": "Profit from Digital Products",
     "description": "الخطة الكاملة خطوة بخطوة لتبدأ مشروعك الرقمي الأول وتبني دخل حقيقي",
     "price": 39.00,
+    "priceAED": 38.00,
     "priceUSD": 10.40,
     "priceEUR": 9.70,
     "currency": "SAR",
@@ -72,6 +74,7 @@
     "nameEn": "Beginner's Guide to Digital Products Profit",
     "description": "دليل تمهيدي بسيط يساعدك تفهم الخطوات الأساسية لبناء منتج رقمي ناجح",
     "price": 4.00,
+    "priceAED": 3.90,
     "priceUSD": 1.07,
     "priceEUR": 1.00,
     "currency": "SAR",
@@ -98,4 +101,3 @@
     ]
   }
 ]
-

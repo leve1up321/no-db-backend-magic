@@ -23,7 +23,7 @@ export default function Hero() {
 
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight animate-slide-up">
               متجرك الموثوق للمنتجات{' '}
-              <span className="bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary-600 via-accent-500 to-primary-600 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]">
                 الرقمية
               </span>
             </h1>
@@ -95,4 +95,3 @@ export default function Hero() {
     </section>
   );
 }
-

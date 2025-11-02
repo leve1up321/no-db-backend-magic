@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/Toaster';
 import { AppProvider } from '@/contexts/AppContext';
 import ToastContainer from '@/components/ToastContainer';
 
-const inter = Inter({ subsets: ['latin'] });
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({ 
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['arabic'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'LevelUp Digital Store | متجر لفل اب الرقمي',
@@ -67,7 +71,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className={`${inter.className} bg-white dark:bg-gray-900 transition-colors duration-300`}>
+      <body className={`${ibmPlexArabic.className} bg-white dark:bg-gray-900 transition-colors duration-300`}>
         <AppProvider>
           {children}
           <Toaster />

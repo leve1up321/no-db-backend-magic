@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Currency = 'SAR' | 'USD' | 'EUR';
+type Currency = 'SAR' | 'AED' | 'USD' | 'EUR';
 type Theme = 'light' | 'dark';
 
 interface CartItem {
@@ -148,4 +148,3 @@ export function useApp() {
   }
   return context;
 }
-

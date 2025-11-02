@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Search, ShoppingCart, Heart, Sun, Moon, Globe } from 'lucide-react';
+import { Menu, X, ShoppingCart, Heart, Sun, Moon, Globe } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -13,6 +13,7 @@ export default function Navbar() {
 
   const currencies = [
     { code: 'SAR', symbol: 'ر.س', name: 'ريال سعودي' },
+    { code: 'AED', symbol: 'د.إ', name: 'درهم إماراتي' },
     { code: 'USD', symbol: '$', name: 'دولار أمريكي' },
     { code: 'EUR', symbol: '€', name: 'يورو' },
   ];
@@ -90,11 +91,6 @@ export default function Navbar() {
               ) : (
                 <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               )}
-            </button>
-
-            {/* Search */}
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition">
-              <Search className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
 
             {/* Wishlist */}

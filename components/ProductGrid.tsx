@@ -12,6 +12,8 @@ export default function ProductGrid() {
 
   const getPrice = (product: any) => {
     switch (currency) {
+      case 'AED':
+        return { amount: product.priceAED, symbol: 'د.إ' };
       case 'USD':
         return { amount: product.priceUSD, symbol: '$' };
       case 'EUR':

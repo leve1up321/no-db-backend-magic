@@ -13,6 +13,7 @@ interface Product {
   nameEn: string;
   description: string;
   price: number;
+  priceAED: number;
   priceUSD: number;
   priceEUR: number;
   currency: string;
@@ -30,8 +31,8 @@ export default function ProductDetail({ product }: { product: Product }) {
   const { currency, addToCart, addToWishlist, wishlist } = useApp();
   const [quantity, setQuantity] = useState(1);
 
-  const price = currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : product.price;
-  const currencySymbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : 'ر.س';
+  const price = currency === 'AED' ? product.priceAED : currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : product.price;
+  const currencySymbol = currency === 'AED' ? 'د.إ' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : 'ر.س';
 
   // Get testimonials for this product
   const productTestimonials = testimonials.filter(t => t.productId === product.id);

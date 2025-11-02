@@ -285,7 +285,14 @@ export default function ProductDetail({ product }: { product: Product }) {
                     {testimonial.name}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(testimonial.date).toLocaleDateString('ar-SA')}
+                    {new Date(testimonial.purchaseDate).toLocaleDateString('ar-SA', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    {testimonial.timeAgo}
                   </p>
                 </div>
               ))}

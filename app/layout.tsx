@@ -2,16 +2,17 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/Toaster';
+import { AppProvider } from '@/contexts/AppContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'LevelUp Digital Store | منتجات رقمية عالية الجودة',
-  description: 'متجرك الموثوق للمنتجات الرقمية والاشتراكات المميزة بأفضل الأسعار',
-  keywords: ['متجر رقمي', 'منتجات رقمية', 'لفل اب', 'خدمات إلكترونية', 'اشتراكات', 'بطاقات هدايا'],
-  authors: [{ name: 'LevelUp Team' }],
+  title: 'LevelUp Digital Store | متجر لفل اب الرقمي',
+  description: 'متجرك الموثوق للمنتجات الرقمية والاشتراكات المميزة بأفضل الأسعار. اشتراكات نتفليكس، سبوتيفاي، بطاقات iTunes والمزيد',
+  keywords: ['متجر رقمي', 'منتجات رقمية', 'لفل اب', 'Level Up', 'خدمات إلكترونية', 'اشتراكات', 'بطاقات هدايا', 'نتفليكس', 'سبوتيفاي'],
+  authors: [{ name: 'Level Up Team' }],
   openGraph: {
-    title: 'LevelUp Digital Store',
+    title: 'LevelUp Digital Store | متجر لفل اب الرقمي',
     description: 'متجرك الموثوق للمنتجات الرقمية والاشتراكات المميزة',
     type: 'website',
     locale: 'ar_SA',
@@ -33,10 +34,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className={inter.className}>
-        {children}
-        <Toaster />
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <body className={`${inter.className} bg-white dark:bg-gray-900 transition-colors duration-300`}>
+        <AppProvider>
+          {children}
+          <Toaster />
+        </AppProvider>
       </body>
     </html>
   );

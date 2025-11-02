@@ -1,52 +1,118 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Search, ShoppingCart, User } from 'lucide-react';
+import { Menu, X, Search, ShoppingCart, Heart, Sun, Moon, Globe } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
+  const { theme, toggleTheme, currency, setCurrency, cartCount, wishlist } = useApp();
+
+  const currencies = [
+    { code: 'SAR', symbol: 'ر.س', name: 'ريال سعودي' },
+    { code: 'USD', symbol: '$', name: 'دولار أمريكي' },
+    { code: 'EUR', symbol: '€', name: 'يورو' },
+  ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-md">
+    <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-md transition-colors duration-300 animate-slide-down">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <a href="#home" className="text-2xl font-bold text-primary-600">
-              🚀 LevelUp
-            </a>
-          </div>
+          <Link href="/" className="flex-shrink-0 flex items-center gap-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">LU</span>
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
+              LevelUp
+            </span>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-reverse space-x-8">
-            <a href="#home" className="text-gray-700 hover:text-primary-600 transition">
+            <Link href="/" className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition">
               الرئيسية
-            </a>
-            <a href="#products" className="text-gray-700 hover:text-primary-600 transition">
+            </Link>
+            <Link href="/#products" className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition">
               المنتجات
-            </a>
-            <a href="#about" className="text-gray-700 hover:text-primary-600 transition">
-              من نحن
-            </a>
-            <a href="#contact" className="text-gray-700 hover:text-primary-600 transition">
+            </Link>
+            <Link href="/contact" className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition">
               تواصل معنا
-            </a>
+            </Link>
           </div>
 
           {/* Right Icons */}
-          <div className="hidden md:flex items-center gap-4">
-            <button className="p-2 hover:bg-gray-100 rounded-full transition">
-              <Search className="w-5 h-5 text-gray-600" />
+          <div className="hidden md:flex items-center gap-3">
+            {/* Currency Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setShowCurrencyMenu(!showCurrencyMenu)}
+                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
+              >
+                <Globe className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  {currency}
+                </span>
+              </button>
+              {showCurrencyMenu && (
+                <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 animate-scale-in">
+                  {currencies.map((curr) => (
+                    <button
+                      key={curr.code}
+                      onClick={() => {
+                        setCurrency(curr.code as any);
+                        setShowCurrencyMenu(false);
+                      }}
+                      className={`w-full text-right px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
+                        currency === curr.code ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'
+                      }`}
+                    >
+                      {curr.symbol} {curr.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition"
+            >
+              {theme === 'light' ? (
+                <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              ) : (
+                <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              )}
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition relative">
-              <ShoppingCart className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                3
-              </span>
+
+            {/* Search */}
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition">
+              <Search className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition">
-              <User className="w-5 h-5 text-gray-600" />
-            </button>
+
+            {/* Wishlist */}
+            <Link href="/wishlist" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition relative">
+              <Heart className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              {wishlist.length > 0 && (
+                <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {wishlist.length}
+                </span>
+              )}
+            </Link>
+
+            {/* Cart */}
+            <Link href="/cart" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition relative">
+              <ShoppingCart className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-accent-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -55,41 +121,59 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? (
-              <X className="w-6 h-6" />
+              <X className="w-6 h-6 text-gray-700 dark:text-gray-200" />
             ) : (
-              <Menu className="w-6 h-6" />
+              <Menu className="w-6 h-6 text-gray-700 dark:text-gray-200" />
             )}
           </button>
         </div>
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden pb-4">
+          <div className="md:hidden pb-4 animate-slide-down">
             <div className="flex flex-col space-y-3">
-              <a
-                href="#home"
-                className="text-gray-700 hover:text-primary-600 transition py-2"
+              <Link
+                href="/"
+                className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 الرئيسية
-              </a>
-              <a
-                href="#products"
-                className="text-gray-700 hover:text-primary-600 transition py-2"
+              </Link>
+              <Link
+                href="/#products"
+                className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 المنتجات
-              </a>
-              <a
-                href="#about"
-                className="text-gray-700 hover:text-primary-600 transition py-2"
-              >
-                من نحن
-              </a>
-              <a
-                href="#contact"
-                className="text-gray-700 hover:text-primary-600 transition py-2"
+              </Link>
+              <Link
+                href="/contact"
+                className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 تواصل معنا
-              </a>
+              </Link>
+              <div className="flex items-center gap-4 pt-4 border-t dark:border-gray-700">
+                <button onClick={toggleTheme} className="p-2">
+                  {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                </button>
+                <Link href="/wishlist" className="p-2 relative">
+                  <Heart className="w-5 h-5" />
+                  {wishlist.length > 0 && (
+                    <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center text-[10px]">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </Link>
+                <Link href="/cart" className="p-2 relative">
+                  <ShoppingCart className="w-5 h-5" />
+                  {cartCount > 0 && (
+                    <span className="absolute top-0 right-0 bg-accent-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center text-[10px]">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              </div>
             </div>
           </div>
         )}

@@ -104,23 +104,6 @@ export default function RefundPage() {
               </div>
             </div>
 
-            {/* الضمان الذهبي */}
-            <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-8 rounded-xl mb-8 border-2 border-yellow-400 dark:border-yellow-600">
-              <div className="text-center">
-                <span className="text-6xl mb-4 block">✨</span>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                  الضمان الذهبي
-                </h2>
-                <p className="text-xl text-gray-700 dark:text-gray-300 mb-4">
-                  جميع الحسابات والأكواد تشمل <strong className="text-yellow-600 dark:text-yellow-400">ضمان ذهبي لمدة 6 أشهر</strong>
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  ضد أي مشكلة في التفعيل أو الوصول للحساب
-                </p>
-              </div>
-            </div>
-
-            {/* إخلاء المسؤولية */}
             <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl border-r-4 border-gray-600 dark:border-gray-400 mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                 إخلاء المسؤولية

@@ -148,13 +148,9 @@ export default function TermsPage() {
               {/* المادة السابعة */}
               <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border-r-4 border-accent-600 dark:border-accent-400">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                  المادة السابعة – سياسة الضمان والاستبدال
+                  المادة السابعة – سياسة الاستبدال
                 </h2>
                 <ul className="space-y-3 text-gray-700 dark:text-gray-300">
-                  <li className="flex gap-3">
-                    <span className="text-accent-600 dark:text-accent-400">✨</span>
-                    <span>جميع الحسابات والأكواد تشمل ضمان ذهبي لمدة 6 أشهر ضد أي مشكلة في التفعيل أو الوصول.</span>
-                  </li>
                   <li className="flex gap-3">
                     <span className="text-primary-600 dark:text-primary-400">•</span>
                     <span>لا يمكن استرجاع أو استبدال المنتج بعد التسليم نظرًا لطبيعته الرقمية.</span>

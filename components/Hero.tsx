@@ -1,103 +1,103 @@
 'use client';
 
-import { ArrowLeft, Sparkles, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Sparkles, Zap, Shield, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Hero() {
   return (
-    <section id="home" className="relative bg-gradient-to-br from-primary-50 via-white to-accent-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-20 md:py-32 overflow-hidden transition-colors duration-300">
+    <section id="home" className="relative bg-dark-400 py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden">
       {/* Animated Grid Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-grid-pattern opacity-20 dark:opacity-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-transparent to-accent-500/20 animate-gradient-slow"></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-30"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-300/10 via-transparent to-accent-600/10 animate-gradient-slow"></div>
       </div>
       
       {/* Animated background shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-10 w-72 h-72 bg-primary-300 dark:bg-primary-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-bounce-slow"></div>
-        <div className="absolute bottom-20 left-10 w-72 h-72 bg-accent-300 dark:bg-accent-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-bounce-slow" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-10 right-5 sm:top-20 sm:right-10 w-40 h-40 sm:w-72 sm:h-72 bg-primary-300/20 rounded-full filter blur-3xl opacity-40 animate-bounce-slow"></div>
+        <div className="absolute bottom-10 left-5 sm:bottom-20 sm:left-10 w-40 h-40 sm:w-72 sm:h-72 bg-accent-600/20 rounded-full filter blur-3xl opacity-40 animate-bounce-slow" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+      <div className="container-mobile relative z-10">
+        <div className="max-w-4xl mx-auto">
           {/* Content */}
-          <div className="text-center md:text-right animate-fade-in">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-100 to-accent-100 dark:from-primary-900/20 dark:to-accent-900/20 text-primary-700 dark:text-primary-400 px-4 py-2 rounded-full mb-6 animate-scale-in">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-semibold">أفضل العروض الرقمية</span>
+          <div className="text-center animate-fade-in">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-300/20 to-accent-600/20 backdrop-blur-sm text-primary-300 px-4 py-2 sm:px-6 sm:py-3 rounded-full mb-4 sm:mb-6 border border-primary-300/30 animate-scale-in">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-xs sm:text-sm font-bold">أفضل العروض الرقمية 2024</span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight animate-slide-up">
-              متجرك الموثوق للمنتجات{' '}
-              <span className="bg-gradient-to-r from-primary-600 via-accent-500 to-primary-600 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]">
+            {/* Main Heading */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 sm:mb-6 leading-tight animate-slide-up">
+              متجرك الموثوق<br className="sm:hidden" />{' '}
+              <span className="block sm:inline mt-2 sm:mt-0">للمنتجات{' '}</span>
+              <span className="bg-gradient-to-r from-primary-300 via-primary-200 to-primary-300 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]">
                 الرقمية
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              احصل على أفضل الاشتراكات والبطاقات الرقمية بأسعار تنافسية وتسليم فوري
+            {/* Description */}
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 leading-relaxed max-w-2xl mx-auto px-4 sm:px-0 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              احصل على أفضل الكتب الإلكترونية والمنتجات الرقمية بأسعار تنافسية مع تسليم فوري ⚡
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            {/* CTA Buttons - Mobile First */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center px-4 sm:px-0 mb-8 sm:mb-12 animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <Link
                 href="#products"
-                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary-600 to-accent-600 text-white px-8 py-4 rounded-lg font-semibold hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary-300 to-primary-400 text-gray-900 px-6 py-4 sm:px-8 sm:py-4 rounded-2xl font-bold text-base sm:text-lg shadow-lg shadow-primary-300/30 hover:shadow-2xl hover:shadow-primary-300/50 transition-all duration-300 transform hover:-translate-y-1 active:scale-95 touch-manipulation"
               >
-                تصفح المنتجات
+                <span>اشترِ الآن</span>
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 border-2 border-primary-600 dark:border-primary-400 px-8 py-4 rounded-lg font-semibold hover:bg-primary-50 dark:hover:bg-gray-700 transition-all duration-300"
+                href="#products"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-accent-600 to-accent-700 text-white px-6 py-4 sm:px-8 sm:py-4 rounded-2xl font-bold text-base sm:text-lg shadow-lg shadow-accent-600/30 hover:shadow-2xl hover:shadow-accent-600/50 transition-all duration-300 transform hover:-translate-y-1 active:scale-95 touch-manipulation border border-accent-500/30"
               >
-                تواصل معنا
+                <span>تصفح المنتجات</span>
               </Link>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 mt-12 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <div className="text-center p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl">
-                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-                  5000+
+            {/* Trust Badges - Mobile Optimized */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 max-w-3xl mx-auto px-4 sm:px-0 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <div className="text-center p-3 sm:p-4 md:p-6 bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all duration-300">
+                <div className="flex justify-center mb-2">
+                  <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-primary-300" />
+                </div>
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary-300 to-primary-400 bg-clip-text text-transparent">
+                  فوري
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">عميل سعيد</p>
+                <p className="text-xs sm:text-sm text-gray-400 mt-1">تسليم فوري</p>
               </div>
-              <div className="text-center p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl">
-                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
+              
+              <div className="text-center p-3 sm:p-4 md:p-6 bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-accent-600/10 hover:border-accent-600/30 transition-all duration-300">
+                <div className="flex justify-center mb-2">
+                  <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-accent-600" />
+                </div>
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-accent-600 to-accent-700 bg-clip-text text-transparent">
                   99%
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">رضا العملاء</p>
+                <p className="text-xs sm:text-sm text-gray-400 mt-1">رضا العملاء</p>
               </div>
-              <div className="text-center p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl">
-                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-                  24/7
+              
+              <div className="text-center p-3 sm:p-4 md:p-6 bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all duration-300">
+                <div className="flex justify-center mb-2">
+                  <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-primary-300" />
+                </div>
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary-300 to-primary-400 bg-clip-text text-transparent">
+                  5000+
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">دعم فني</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Visual Element */}
-          <div className="relative animate-slide-up hidden md:block" style={{ animationDelay: '0.4s' }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-accent-600 rounded-3xl rotate-6 opacity-20 dark:opacity-10"></div>
-            <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8">
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl animate-pulse" style={{ animationDelay: `${i * 0.2}s` }}>
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-600 rounded-xl flex items-center justify-center">
-                      <TrendingUp className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                ))}
+                <p className="text-xs sm:text-sm text-gray-400 mt-1">عميل سعيد</p>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-dark-400 to-transparent pointer-events-none"></div>
     </section>
   );
 }
+

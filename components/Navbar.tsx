@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Menu, X, ShoppingCart, Heart, Sun, Moon, Globe } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X, ShoppingCart, Heart, Sun, Moon, Globe, Home } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,7 +9,16 @@ import Image from 'next/image';
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { theme, toggleTheme, currency, setCurrency, cartCount, wishlist } = useApp();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const currencies = [
     { code: 'SAR', symbol: 'ر.س', name: 'ريال سعودي' },
@@ -31,12 +40,16 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-md transition-colors duration-300 animate-slide-down">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 safe-top ${
+      isScrolled 
+        ? 'bg-dark-400/95 backdrop-blur-lg shadow-lg border-b border-primary-300/10' 
+        : 'bg-transparent'
+    }`}>
+      <div className="container-mobile">
+        <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0 flex items-center">
-            <div className="relative w-12 h-12">
+          <Link href="/" className="flex-shrink-0 flex items-center group">
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 transition-transform duration-300 group-hover:scale-110">
               <Image
                 src="/logo.png"
                 alt="Level Up Logo"
@@ -45,145 +58,180 @@ export default function Navbar() {
                 priority
               />
             </div>
+            <span className="mr-2 sm:mr-3 text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-300 to-accent-600 bg-clip-text text-transparent hidden sm:inline">
+              Level Up
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-reverse space-x-8">
-            <Link href="/" className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+            <Link 
+              href="/" 
+              className="text-gray-300 hover:text-primary-300 transition-colors duration-200 font-semibold text-sm lg:text-base"
+            >
               الرئيسية
             </Link>
-            <Link href="/#products" className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition">
+            <Link 
+              href="/#products" 
+              className="text-gray-300 hover:text-primary-300 transition-colors duration-200 font-semibold text-sm lg:text-base"
+            >
               المنتجات
             </Link>
-            <Link href="/contact" className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition">
+            <Link 
+              href="/contact" 
+              className="text-gray-300 hover:text-primary-300 transition-colors duration-200 font-semibold text-sm lg:text-base"
+            >
               تواصل معنا
             </Link>
           </div>
 
           {/* Right Icons */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Currency Selector */}
-            <div className="relative">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Currency Selector - Hidden on small mobile */}
+            <div className="relative hidden sm:block">
               <button
                 onClick={() => setShowCurrencyMenu(!showCurrencyMenu)}
-                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-primary-300/10 rounded-xl transition-colors touch-manipulation"
+                aria-label="تغيير العملة"
               >
-                <Globe className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {currency}
+                <Globe className="w-5 h-5 text-primary-300" />
+                <span className="text-sm font-semibold text-gray-300 hidden lg:inline">
+                  {currencies.find(c => c.code === currency)?.symbol}
                 </span>
               </button>
+              
               {showCurrencyMenu && (
-                <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 animate-scale-in">
-                  {currencies.map((curr) => (
-                    <button
-                      key={curr.code}
-                      onClick={() => {
-                        setCurrency(curr.code as any);
-                        setShowCurrencyMenu(false);
-                      }}
-                      className={`w-full text-right px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
-                        currency === curr.code ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'
-                      }`}
-                    >
-                      {curr.symbol} {curr.name}
-                    </button>
-                  ))}
-                </div>
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowCurrencyMenu(false)}
+                  />
+                  <div className="absolute left-0 mt-2 w-48 bg-dark-300/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-primary-300/20 overflow-hidden z-50 animate-scale-in">
+                    <div className="max-h-80 overflow-y-auto">
+                      {currencies.map((curr) => (
+                        <button
+                          key={curr.code}
+                          onClick={() => {
+                            setCurrency(curr.code as any);
+                            setShowCurrencyMenu(false);
+                          }}
+                          className={`w-full text-right px-4 py-3 transition-colors touch-manipulation ${
+                            currency === curr.code
+                              ? 'bg-primary-300/20 text-primary-300 font-bold'
+                              : 'text-gray-300 hover:bg-primary-300/10 hover:text-primary-300'
+                          }`}
+                        >
+                          <span className="block text-sm">{curr.name}</span>
+                          <span className="block text-xs text-gray-500 mt-0.5">{curr.symbol}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
             </div>
 
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition"
+              className="p-2 sm:p-2.5 hover:bg-accent-600/10 rounded-xl transition-colors touch-manipulation"
+              aria-label="تبديل الوضع الليلي"
             >
-              {theme === 'light' ? (
-                <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5 text-accent-600" />
               ) : (
-                <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <Moon className="w-5 h-5 text-accent-600" />
               )}
             </button>
 
             {/* Wishlist */}
-            <Link href="/wishlist" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition relative">
-              <Heart className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <Link
+              href="/wishlist"
+              className="relative p-2 sm:p-2.5 hover:bg-primary-300/10 rounded-xl transition-colors touch-manipulation"
+              aria-label="قائمة الأمنيات"
+            >
+              <Heart className="w-5 h-5 text-primary-300" />
               {wishlist.length > 0 && (
-                <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-accent-600 to-accent-700 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-dark-400">
                   {wishlist.length}
                 </span>
               )}
             </Link>
 
             {/* Cart */}
-            <Link href="/cart" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition relative">
-              <ShoppingCart className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <Link
+              href="/cart"
+              className="relative p-2 sm:p-2.5 hover:bg-primary-300/10 rounded-xl transition-colors touch-manipulation"
+              aria-label="سلة التسوق"
+            >
+              <ShoppingCart className="w-5 h-5 text-primary-300" />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-accent-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-primary-300 to-primary-400 text-gray-900 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-dark-400">
                   {cartCount}
                 </span>
               )}
             </Link>
-          </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6 text-gray-700 dark:text-gray-200" />
-            ) : (
-              <Menu className="w-6 h-6 text-gray-700 dark:text-gray-200" />
-            )}
-          </button>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 hover:bg-primary-300/10 rounded-xl transition-colors touch-manipulation"
+              aria-label="فتح القائمة"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6 text-primary-300" />
+              ) : (
+                <Menu className="w-6 h-6 text-primary-300" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden pb-4 animate-slide-down">
-            <div className="flex flex-col space-y-3">
+          <div className="md:hidden animate-slide-down border-t border-primary-300/10 safe-bottom">
+            <div className="py-4 space-y-2">
               <Link
                 href="/"
-                className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition py-2"
+                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-primary-300/10 hover:text-primary-300 rounded-xl transition-colors font-semibold touch-manipulation"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
+                <Home className="w-5 h-5" />
                 الرئيسية
               </Link>
               <Link
                 href="/#products"
-                className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition py-2"
+                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-primary-300/10 hover:text-primary-300 rounded-xl transition-colors font-semibold touch-manipulation"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
+                <ShoppingCart className="w-5 h-5" />
                 المنتجات
               </Link>
               <Link
                 href="/contact"
-                className="text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 transition py-2"
+                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-primary-300/10 hover:text-primary-300 rounded-xl transition-colors font-semibold touch-manipulation"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 تواصل معنا
               </Link>
-              <div className="flex items-center gap-4 pt-4 border-t dark:border-gray-700">
-                <button onClick={toggleTheme} className="p-2">
-                  {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-                </button>
-                <Link href="/wishlist" className="p-2 relative">
-                  <Heart className="w-5 h-5" />
-                  {wishlist.length > 0 && (
-                    <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center text-[10px]">
-                      {wishlist.length}
-                    </span>
-                  )}
-                </Link>
-                <Link href="/cart" className="p-2 relative">
-                  <ShoppingCart className="w-5 h-5" />
-                  {cartCount > 0 && (
-                    <span className="absolute top-0 right-0 bg-accent-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center text-[10px]">
-                      {cartCount}
-                    </span>
-                  )}
-                </Link>
+              
+              {/* Currency selector for mobile */}
+              <div className="sm:hidden px-4 py-2">
+                <p className="text-xs text-gray-500 mb-2 font-semibold">العملة</p>
+                <select
+                  value={currency}
+                  onChange={(e) => {
+                    setCurrency(e.target.value as any);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-dark-300 text-gray-300 px-4 py-3 rounded-xl border border-primary-300/20 focus:border-primary-300/50 focus:outline-none font-semibold touch-manipulation"
+                >
+                  {currencies.map((curr) => (
+                    <option key={curr.code} value={curr.code}>
+                      {curr.name} ({curr.symbol})
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -192,3 +240,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

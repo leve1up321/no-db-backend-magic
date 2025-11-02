@@ -1,0 +1,53 @@
+[
+  {
+    "id": 1,
+    "name": "محمد الأحمد",
+    "nameEn": "Mohammed Al-Ahmad",
+    "avatar": "https://i.pravatar.cc/150?img=33",
+    "rating": 5,
+    "text": "تجربة رائعة! حصلت على الكود فوراً بعد الدفع. خدمة سريعة وموثوقة 100%",
+    "date": "2024-03-15",
+    "product": "Netflix Premium"
+  },
+  {
+    "id": 2,
+    "name": "سارة العتيبي",
+    "nameEn": "Sara Al-Otaibi",
+    "avatar": "https://i.pravatar.cc/150?img=45",
+    "rating": 5,
+    "text": "أفضل متجر رقمي جربته! الأسعار ممتازة والدعم الفني متعاون جداً",
+    "date": "2024-03-10",
+    "product": "Spotify Premium"
+  },
+  {
+    "id": 3,
+    "name": "عبدالله الشمري",
+    "nameEn": "Abdullah Al-Shammari",
+    "avatar": "https://i.pravatar.cc/150?img=12",
+    "rating": 5,
+    "text": "سرعة في التسليم وأسعار منافسة. أنصح الجميع بالشراء من هنا",
+    "date": "2024-03-08",
+    "product": "PlayStation Plus"
+  },
+  {
+    "id": 4,
+    "name": "نورة القحطاني",
+    "nameEn": "Noura Al-Qahtani",
+    "avatar": "https://i.pravatar.cc/150?img=48",
+    "rating": 5,
+    "text": "خدمة احترافية وموثوقية عالية. اشتريت أكثر من منتج وكلها شغالة 100%",
+    "date": "2024-03-05",
+    "product": "iTunes Gift Card"
+  },
+  {
+    "id": 5,
+    "name": "خالد المطيري",
+    "nameEn": "Khaled Al-Mutairi",
+    "avatar": "https://i.pravatar.cc/150?img=15",
+    "rating": 4,
+    "text": "تعامل ممتاز ودعم فني سريع الاستجابة. سأكرر الشراء بالتأكيد",
+    "date": "2024-03-01",
+    "product": "Google Play Card"
+  }
+]
+

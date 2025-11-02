@@ -1,0 +1,87 @@
+[
+  {
+    "id": 1,
+    "name": "اشتراك Netflix Premium",
+    "nameEn": "Netflix Premium Subscription",
+    "description": "اشتراك Netflix Premium لمدة شهر واحد - جودة 4K Ultra HD",
+    "price": 59.99,
+    "currency": "SAR",
+    "category": "streaming",
+    "image": "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=300&fit=crop",
+    "rating": 4.8,
+    "reviews": 1250,
+    "inStock": true,
+    "featured": true
+  },
+  {
+    "id": 2,
+    "name": "بطاقة هدايا iTunes بقيمة 100$",
+    "nameEn": "iTunes $100 Gift Card",
+    "description": "بطاقة هدايا iTunes للمتجر الأمريكي - قابلة للاستخدام فوراً",
+    "price": 375.00,
+    "currency": "SAR",
+    "category": "gift-cards",
+    "image": "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=300&fit=crop",
+    "rating": 4.9,
+    "reviews": 2100,
+    "inStock": true,
+    "featured": true
+  },
+  {
+    "id": 3,
+    "name": "Spotify Premium - 3 أشهر",
+    "nameEn": "Spotify Premium 3 Months",
+    "description": "استمتع بالموسيقى بدون إعلانات لمدة 3 أشهر",
+    "price": 89.99,
+    "currency": "SAR",
+    "category": "streaming",
+    "image": "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=300&fit=crop",
+    "rating": 4.7,
+    "reviews": 890,
+    "inStock": true,
+    "featured": true
+  },
+  {
+    "id": 4,
+    "name": "بطاقة PlayStation Plus",
+    "nameEn": "PlayStation Plus Card",
+    "description": "اشتراك PlayStation Plus لمدة 12 شهر - ألعاب مجانية شهرياً",
+    "price": 299.99,
+    "currency": "SAR",
+    "category": "gaming",
+    "image": "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=300&fit=crop",
+    "rating": 4.9,
+    "reviews": 1580,
+    "inStock": false,
+    "featured": true
+  },
+  {
+    "id": 5,
+    "name": "Microsoft Office 365 سنة كاملة",
+    "nameEn": "Microsoft Office 365 1 Year",
+    "description": "اشتراك Office 365 لمدة سنة - جميع برامج Microsoft",
+    "price": 349.99,
+    "currency": "SAR",
+    "category": "software",
+    "image": "https://images.unsplash.com/photo-1633419461186-7d40a38105ec?w=400&h=300&fit=crop",
+    "rating": 4.6,
+    "reviews": 750,
+    "inStock": true,
+    "featured": false
+  },
+  {
+    "id": 6,
+    "name": "بطاقة Google Play بقيمة 50$",
+    "nameEn": "Google Play $50 Gift Card",
+    "description": "بطاقة هدايا Google Play للمتجر الأمريكي",
+    "price": 187.50,
+    "currency": "SAR",
+    "category": "gift-cards",
+    "image": "https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?w=400&h=300&fit=crop",
+    "rating": 4.7,
+    "reviews": 1120,
+    "inStock": true,
+    "featured": true
+  }
+]
+

@@ -1,7 +1,8 @@
 'use client';
 
-import { Star, Quote, CheckCircle } from 'lucide-react';
+import { Star, Quote, CheckCircle, ShoppingBag } from 'lucide-react';
 import testimonials from '@/data/testimonials.json';
+import Image from 'next/image';
 
 export default function TestimonialsSection() {
   return (
@@ -23,10 +24,36 @@ export default function TestimonialsSection() {
               className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-slide-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="mb-4">
-                <Quote className="w-10 h-10 text-primary-300 dark:text-primary-600" />
+              {/* Header with Avatar and Name */}
+              <div className="flex items-start gap-4 mb-4">
+                <div className="relative w-14 h-14 rounded-full overflow-hidden ring-2 ring-primary-200 dark:ring-primary-800">
+                  <Image
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    {testimonial.name}
+                    {testimonial.verified && (
+                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 fill-green-600 dark:fill-green-400" />
+                    )}
+                  </p>
+                  {testimonial.verified && (
+                    <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1 mt-1">
+                      <ShoppingBag className="w-3 h-3" />
+                      قام بالشراء
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {testimonial.timeAgo}
+                  </p>
+                </div>
               </div>
 
+              {/* Rating */}
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star
@@ -40,26 +67,20 @@ export default function TestimonialsSection() {
                 ))}
               </div>
 
-              <p className="text-gray-700 dark:text-gray-200 mb-6 leading-relaxed">
+              {/* Review Text */}
+              <p className="text-gray-700 dark:text-gray-200 mb-4 leading-relaxed">
                 "{testimonial.text}"
               </p>
 
-              <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
-                <div>
-                  <p className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    {testimonial.name}
-                    {testimonial.verified && (
-                      <CheckCircle className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                    )}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {new Date(testimonial.date).toLocaleDateString('ar-SA', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
-                </div>
+              {/* Purchase Date */}
+              <div className="pt-4 border-t dark:border-gray-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  تاريخ الشراء: {new Date(testimonial.purchaseDate).toLocaleDateString('ar-SA', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
               </div>
             </div>
           ))}
@@ -68,4 +89,3 @@ export default function TestimonialsSection() {
     </section>
   );
 }
-

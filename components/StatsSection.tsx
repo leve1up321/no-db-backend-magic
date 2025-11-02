@@ -44,9 +44,9 @@ export default function StatsSection() {
     },
     {
       icon: Zap,
-      value: 2,
-      suffix: ' دقيقة',
-      label: 'وقت التسليم',
+      value: 0,
+      suffix: '',
+      label: 'تسليم فوري',
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-100 dark:bg-purple-900/20',
       increment: 0,
@@ -86,6 +86,9 @@ export default function StatsSection() {
   const formatValue = (value: number, suffix: string) => {
     if (suffix === '/5') {
       return value.toFixed(1);
+    }
+    if (suffix === '') {
+      return '⚡'; // رمز البرق للتسليم الفوري
     }
     return Math.floor(value);
   };

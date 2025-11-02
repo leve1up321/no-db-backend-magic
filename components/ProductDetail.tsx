@@ -14,6 +14,18 @@ interface Product {
   description: string;
   price: number;
   priceAED: number;
+  priceKWD: number;
+  priceQAR: number;
+  priceBHD: number;
+  priceOMR: number;
+  priceJOD: number;
+  priceEGP: number;
+  priceLBP: number;
+  priceSYP: number;
+  priceIQD: number;
+  priceTND: number;
+  priceMAD: number;
+  priceDZD: number;
   priceUSD: number;
   priceEUR: number;
   currency: string;
@@ -31,8 +43,50 @@ export default function ProductDetail({ product }: { product: Product }) {
   const { currency, addToCart, addToWishlist, wishlist } = useApp();
   const [quantity, setQuantity] = useState(1);
 
-  const price = currency === 'AED' ? product.priceAED : currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : product.price;
-  const currencySymbol = currency === 'AED' ? 'د.إ' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : 'ر.س';
+  const getPrice = () => {
+    switch (currency) {
+      case 'AED': return product.priceAED;
+      case 'KWD': return product.priceKWD;
+      case 'QAR': return product.priceQAR;
+      case 'BHD': return product.priceBHD;
+      case 'OMR': return product.priceOMR;
+      case 'JOD': return product.priceJOD;
+      case 'EGP': return product.priceEGP;
+      case 'LBP': return product.priceLBP;
+      case 'SYP': return product.priceSYP;
+      case 'IQD': return product.priceIQD;
+      case 'TND': return product.priceTND;
+      case 'MAD': return product.priceMAD;
+      case 'DZD': return product.priceDZD;
+      case 'USD': return product.priceUSD;
+      case 'EUR': return product.priceEUR;
+      default: return product.price;
+    }
+  };
+
+  const getCurrencySymbol = () => {
+    switch (currency) {
+      case 'AED': return 'د.إ';
+      case 'KWD': return 'د.ك';
+      case 'QAR': return 'ر.ق';
+      case 'BHD': return 'د.ب';
+      case 'OMR': return 'ر.ع';
+      case 'JOD': return 'د.أ';
+      case 'EGP': return 'ج.م';
+      case 'LBP': return 'ل.ل';
+      case 'SYP': return 'ل.س';
+      case 'IQD': return 'ع.د';
+      case 'TND': return 'د.ت';
+      case 'MAD': return 'د.م';
+      case 'DZD': return 'د.ج';
+      case 'USD': return '$';
+      case 'EUR': return '€';
+      default: return 'ر.س';
+    }
+  };
+
+  const price = getPrice();
+  const currencySymbol = getCurrencySymbol();
 
   // Get testimonials for this product
   const productTestimonials = testimonials.filter(t => t.productId === product.id);

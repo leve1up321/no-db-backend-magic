@@ -12,14 +12,22 @@ export default function ProductGrid() {
 
   const getPrice = (product: any) => {
     switch (currency) {
-      case 'AED':
-        return { amount: product.priceAED, symbol: 'د.إ' };
-      case 'USD':
-        return { amount: product.priceUSD, symbol: '$' };
-      case 'EUR':
-        return { amount: product.priceEUR, symbol: '€' };
-      default:
-        return { amount: product.price, symbol: 'ر.س' };
+      case 'AED': return { amount: product.priceAED, symbol: 'د.إ' };
+      case 'KWD': return { amount: product.priceKWD, symbol: 'د.ك' };
+      case 'QAR': return { amount: product.priceQAR, symbol: 'ر.ق' };
+      case 'BHD': return { amount: product.priceBHD, symbol: 'د.ب' };
+      case 'OMR': return { amount: product.priceOMR, symbol: 'ر.ع' };
+      case 'JOD': return { amount: product.priceJOD, symbol: 'د.أ' };
+      case 'EGP': return { amount: product.priceEGP, symbol: 'ج.م' };
+      case 'LBP': return { amount: product.priceLBP, symbol: 'ل.ل' };
+      case 'SYP': return { amount: product.priceSYP, symbol: 'ل.س' };
+      case 'IQD': return { amount: product.priceIQD, symbol: 'ع.د' };
+      case 'TND': return { amount: product.priceTND, symbol: 'د.ت' };
+      case 'MAD': return { amount: product.priceMAD, symbol: 'د.م' };
+      case 'DZD': return { amount: product.priceDZD, symbol: 'د.ج' };
+      case 'USD': return { amount: product.priceUSD, symbol: '$' };
+      case 'EUR': return { amount: product.priceEUR, symbol: '€' };
+      default: return { amount: product.price, symbol: 'ر.س' };
     }
   };
 

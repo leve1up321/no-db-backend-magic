@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Currency = 'SAR' | 'AED' | 'USD' | 'EUR';
+type Currency = 'SAR' | 'AED' | 'KWD' | 'QAR' | 'BHD' | 'OMR' | 'JOD' | 'EGP' | 'LBP' | 'SYP' | 'IQD' | 'TND' | 'MAD' | 'DZD' | 'USD' | 'EUR';
 type Theme = 'light' | 'dark';
 
 interface CartItem {

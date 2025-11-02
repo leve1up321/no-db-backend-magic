@@ -14,6 +14,18 @@ export default function Navbar() {
   const currencies = [
     { code: 'SAR', symbol: 'ر.س', name: 'ريال سعودي' },
     { code: 'AED', symbol: 'د.إ', name: 'درهم إماراتي' },
+    { code: 'KWD', symbol: 'د.ك', name: 'دينار كويتي' },
+    { code: 'QAR', symbol: 'ر.ق', name: 'ريال قطري' },
+    { code: 'BHD', symbol: 'د.ب', name: 'دينار بحريني' },
+    { code: 'OMR', symbol: 'ر.ع', name: 'ريال عماني' },
+    { code: 'JOD', symbol: 'د.أ', name: 'دينار أردني' },
+    { code: 'EGP', symbol: 'ج.م', name: 'جنيه مصري' },
+    { code: 'LBP', symbol: 'ل.ل', name: 'ليرة لبنانية' },
+    { code: 'SYP', symbol: 'ل.س', name: 'ليرة سورية' },
+    { code: 'IQD', symbol: 'ع.د', name: 'دينار عراقي' },
+    { code: 'TND', symbol: 'د.ت', name: 'دينار تونسي' },
+    { code: 'MAD', symbol: 'د.م', name: 'درهم مغربي' },
+    { code: 'DZD', symbol: 'د.ج', name: 'دينار جزائري' },
     { code: 'USD', symbol: '$', name: 'دولار أمريكي' },
     { code: 'EUR', symbol: '€', name: 'يورو' },
   ];

@@ -1,39 +1,107 @@
 [
   {
     "id": 1,
-    "name": "أحمد محمد",
+    "name": "أحمد محمد العتيبي",
     "nameEn": "Ahmed Mohammed",
+    "gender": "male",
     "rating": 5,
     "text": "منتجات رائعة وعملية! استفدت كثيراً من الأفكار المطروحة وبدأت مشروعي الأول بنجاح. شكراً لفريق لفل اب!",
-    "date": "2025-10-15",
+    "purchaseDate": "2025-10-15",
     "timeAgo": "منذ أسبوعين",
     "productId": 1,
     "verified": true,
-    "avatar": "https://ui-avatars.com/api/?name=Ahmed+Mohammed&background=8b5cf6&color=fff&size=128"
+    "avatar": "https://avatar.iran.liara.run/public/boy?username=ahmed"
   },
   {
     "id": 2,
     "name": "فاطمة العلي",
     "nameEn": "Fatima Al-Ali",
+    "gender": "female",
     "rating": 5,
     "text": "كتب مفيدة جداً ومكتوبة بطريقة سهلة ومفهومة. الأفكار عملية ويمكن تطبيقها فوراً. أنصح بها بشدة!",
-    "date": "2025-10-29",
+    "purchaseDate": "2025-10-29",
     "timeAgo": "منذ 3 أيام",
     "productId": 2,
     "verified": true,
-    "avatar": "https://ui-avatars.com/api/?name=Fatima+Al-Ali&background=6366f1&color=fff&size=128"
+    "avatar": "https://avatar.iran.liara.run/public/girl?username=fatima"
   },
   {
     "id": 3,
     "name": "خالد السعيد",
     "nameEn": "Khaled Al-Saeed",
+    "gender": "male",
     "rating": 5,
     "text": "استثمار ممتاز! المحتوى قيم والأسعار معقولة. حققت أول ربح لي من الإنترنت بفضل هذه الكتب.",
-    "date": "2025-10-27",
+    "purchaseDate": "2025-10-27",
     "timeAgo": "منذ 5 أيام",
     "productId": 1,
     "verified": true,
-    "avatar": "https://ui-avatars.com/api/?name=Khaled+Al-Saeed&background=3b82f6&color=fff&size=128"
+    "avatar": "https://avatar.iran.liara.run/public/boy?username=khaled"
+  },
+  {
+    "id": 4,
+    "name": "سارة الأحمد",
+    "nameEn": "Sarah Al-Ahmad",
+    "gender": "female",
+    "rating": 5,
+    "text": "محتوى رائع ومفيد جداً! بديت مشروعي الخاص بفضل الأفكار اللي في الكتاب. تسلم إيديكم!",
+    "purchaseDate": "2025-10-20",
+    "timeAgo": "منذ 10 أيام",
+    "productId": 1,
+    "verified": true,
+    "avatar": "https://avatar.iran.liara.run/public/girl?username=sarah"
+  },
+  {
+    "id": 5,
+    "name": "محمد الشمري",
+    "nameEn": "Mohammed Al-Shamri",
+    "gender": "male",
+    "rating": 5,
+    "text": "أفضل استثمار سويته! التسليم فوري والمحتوى عالي الجودة. صرت أطبق الأفكار وشفت نتائج سريعة.",
+    "purchaseDate": "2025-10-25",
+    "timeAgo": "منذ أسبوع",
+    "productId": 2,
+    "verified": true,
+    "avatar": "https://avatar.iran.liara.run/public/boy?username=mohammed"
+  },
+  {
+    "id": 6,
+    "name": "نورة المطيري",
+    "nameEn": "Noura Al-Mutairi",
+    "gender": "female",
+    "rating": 5,
+    "text": "كنت متردده لكن والله ما ندمت! الكتب واضحة والشرح سهل. بديت أشتغل على مشروعي وأنا متحمسة!",
+    "purchaseDate": "2025-10-22",
+    "timeAgo": "منذ 8 أيام",
+    "productId": 1,
+    "verified": true,
+    "avatar": "https://avatar.iran.liara.run/public/girl?username=noura"
+  },
+  {
+    "id": 7,
+    "name": "عبدالله القحطاني",
+    "nameEn": "Abdullah Al-Qahtani",
+    "gender": "male",
+    "rating": 5,
+    "text": "صراحة محتوى يستاهل كل ريال دفعته! معلومات قيمة وأفكار مبتكرة. الدعم ممتاز والتسليم سريع.",
+    "purchaseDate": "2025-10-28",
+    "timeAgo": "منذ 4 أيام",
+    "productId": 2,
+    "verified": true,
+    "avatar": "https://avatar.iran.liara.run/public/boy?username=abdullah"
+  },
+  {
+    "id": 8,
+    "name": "مريم الدوسري",
+    "nameEn": "Maryam Al-Dosari",
+    "gender": "female",
+    "rating": 5,
+    "text": "جداً راضية عن المشتريات! الأفكار عملية والتطبيق سهل. حققت أرباح من أول شهر. شكراً لفل اب! 💜",
+    "purchaseDate": "2025-10-18",
+    "timeAgo": "منذ 12 يوم",
+    "productId": 1,
+    "verified": true,
+    "avatar": "https://avatar.iran.liara.run/public/girl?username=maryam"
   }
 ]
 

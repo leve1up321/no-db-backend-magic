@@ -149,3 +149,33 @@ body, html {
 .animate-gradient-x {
   animation: gradient-x 3s ease infinite;
 }
+
+/* Grid pattern background */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.dark .bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(139, 92, 246, 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(139, 92, 246, 0.2) 1px, transparent 1px);
+}
+
+/* Slow gradient animation for background */
+@keyframes gradient-slow {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.5;
+  }
+}
+
+.animate-gradient-slow {
+  animation: gradient-slow 15s ease-in-out infinite;
+}

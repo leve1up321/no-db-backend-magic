@@ -38,8 +38,8 @@ export const metadata: Metadata = {
     userScalable: true,
   },
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#8b5cf6' },
-    { media: '(prefers-color-scheme: dark)', color: '#1f2937' },
+    { media: '(prefers-color-scheme: light)', color: '#5AC8FA' },
+    { media: '(prefers-color-scheme: dark)', color: '#121212' },
   ],
   appleWebApp: {
     capable: true,
@@ -71,7 +71,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className={`${ibmPlexArabic.className} bg-white dark:bg-gray-900 transition-colors duration-300`}>
+      <body className={`${ibmPlexArabic.className} antialiased`}>
         <AppProvider>
           {children}
           <Toaster />

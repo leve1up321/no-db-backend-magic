@@ -33,7 +33,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark'); // الوضع الداكن افتراضياً
   const [currency, setCurrency] = useState<Currency>('SAR');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<number[]>([]);
@@ -47,8 +47,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     if (savedTheme) {
       setTheme(savedTheme);
-      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    } else {
+      // إذا لم يكن هناك theme محفوظ، استخدم الوضع الداكن افتراضياً
+      setTheme('dark');
     }
+    
+    // تطبيق الوضع على document
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark' || !savedTheme);
+    
     if (savedCurrency) setCurrency(savedCurrency);
     if (savedCart) setCart(JSON.parse(savedCart));
     if (savedWishlist) setWishlist(JSON.parse(savedWishlist));

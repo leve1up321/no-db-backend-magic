@@ -1,17 +1,31 @@
 'use client';
 
-import { ShoppingCart, Heart, Star, Check, Users, Shield, Zap, CheckCircle, ShoppingBag } from 'lucide-react';
+import { ShoppingCart, Heart, Star, Check, Users, Shield, Zap, CheckCircle, ShoppingBag, Download } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { showToast } from '@/components/ToastContainer';
 import testimonials from '@/data/testimonials.json';
 import Image from 'next/image';
 import WhyBuySection from './WhyBuySection';
 
+interface ProductSection {
+  title: string;
+  items: string[];
+}
+
+interface ProductSections {
+  features?: ProductSection;
+  whatYouWillLearn?: ProductSection;
+  requirements?: ProductSection;
+  whatYouWillGet?: ProductSection;
+}
+
 interface Product {
   id: number;
   name: string;
   nameEn: string;
+  shortDescription?: string;
   description: string;
+  sections?: ProductSections;
   price: number;
   priceAED: number;
   priceKWD: number;
@@ -109,40 +123,45 @@ export default function ProductDetail({ product }: { product: Product }) {
   };
 
   return (
-    <section className="pt-24 pb-12 bg-white dark:bg-gray-900 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Left Column: Image + Description */}
+    <section className="pt-20 sm:pt-24 pb-12 bg-dark-500 transition-colors duration-300">
+      <div className="container-mobile">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* Left Column: Image */}
           <div className="animate-scale-in">
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 mb-6">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-dark-400 shadow-2xl">
               <Image
                 src={product.image}
                 alt={product.name}
                 fill
                 className="object-cover"
+                priority
               />
-            </div>
-            
-            {/* Description under image */}
-            <div className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-              {product.description}
             </div>
           </div>
 
           {/* Right Column: Product Info */}
-          <div className="animate-slide-up">
-            <div className="mb-4">
-              <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 rounded-full text-sm font-semibold">
-                {product.category}
+          <div className="animate-slide-up space-y-6">
+            {/* Category Badge */}
+            <div>
+              <span className="inline-block px-4 py-2 bg-primary-300/20 border border-primary-300/40 text-primary-300 rounded-xl text-sm font-bold">
+                {product.category === 'ebooks' ? 'كتاب رقمي' : product.category}
               </span>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {/* Product Title - Large & Prominent */}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
               {product.name}
             </h1>
 
+            {/* Short Description - Simple & Clear */}
+            {product.shortDescription && (
+              <p className="text-base sm:text-lg text-gray-300 leading-relaxed" style={{ fontSize: '16px' }}>
+                {product.shortDescription}
+              </p>
+            )}
+
             {/* Rating and Buyers */}
-            <div className="flex items-center gap-6 mb-6">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
               <div className="flex items-center gap-2">
                 {[...Array(5)].map((_, i) => (
                   <Star
@@ -150,87 +169,164 @@ export default function ProductDetail({ product }: { product: Product }) {
                     className={`w-5 h-5 ${
                       i < Math.floor(product.rating)
                         ? 'text-yellow-400 fill-yellow-400'
-                        : 'text-gray-300 dark:text-gray-600'
+                        : 'text-gray-600'
                     }`}
                   />
                 ))}
-                <span className="text-gray-700 dark:text-gray-300 font-semibold">
+                <span className="text-white font-bold text-lg">
                   {product.rating}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                <Users className="w-5 h-5" />
-                <span>{product.buyers.toLocaleString()} مشتري</span>
+              <div className="flex items-center gap-2 text-gray-300">
+                <Users className="w-5 h-5 text-primary-300" />
+                <span className="font-semibold">{product.buyers.toLocaleString()} مشتري</span>
               </div>
             </div>
 
-            {/* Price */}
-            <div className="mb-6">
-              <p className="text-4xl font-bold text-primary-600 dark:text-primary-400">
-                {price.toFixed(2)} {currencySymbol}
-              </p>
+            {/* Price - Prominent */}
+            <div className="flex items-center gap-4 p-4 sm:p-6 bg-dark-300/50 border border-primary-300/20 rounded-2xl">
+              <div className="flex-1">
+                <p className="text-gray-400 text-sm mb-1">السعر</p>
+                <p className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-primary-300 to-accent-600 bg-clip-text text-transparent">
+                  {price.toFixed(2)} {currencySymbol}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/40 rounded-xl">
+                <Zap className="w-5 h-5 text-green-400" />
+                <span className="text-green-400 font-bold text-sm">تسليم فوري</span>
+              </div>
             </div>
 
-            {/* Features */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                المميزات:
-              </h3>
-              <ul className="space-y-3">
-                {product.features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-4 mb-8">
+            {/* CTA Buttons - Full Width Mobile */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 onClick={handleAddToCart}
-                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-primary-600 to-accent-600 text-white px-6 py-4 rounded-lg font-semibold hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-primary-300 to-accent-600 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-300/30 active:scale-95 transition-all duration-300 touch-manipulation"
+                style={{ fontSize: '16px' }}
               >
-                <ShoppingCart className="w-5 h-5" />
-                أضف للسلة
+                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+                اشتر الآن
               </button>
               <button
                 onClick={handleWishlist}
-                className={`p-4 border-2 rounded-lg transition ${
+                className={`p-4 sm:p-5 border-2 rounded-xl transition-all duration-300 touch-manipulation hover:scale-110 active:scale-95 ${
                   isInWishlist
-                    ? 'bg-primary-600 border-primary-600 text-white'
-                    : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-600 dark:hover:border-primary-400'
+                    ? 'bg-accent-600/20 border-accent-600 text-accent-600'
+                    : 'bg-dark-300/50 border-primary-300/30 text-gray-300 hover:border-accent-600 hover:text-accent-600'
                 }`}
+                aria-label="إضافة للأمنيات"
               >
-                <Heart className={`w-6 h-6 ${isInWishlist ? 'fill-white' : ''}`} />
+                <Heart className={`w-6 h-6 ${isInWishlist ? 'fill-current' : ''}`} />
               </button>
             </div>
 
             {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
-              <div className="text-center">
-                <Zap className="w-8 h-8 text-primary-600 dark:text-primary-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-700 dark:text-gray-300">تسليم فوري</p>
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-4">
+              <div className="text-center p-3 sm:p-4 bg-dark-300/30 rounded-xl border border-primary-300/10">
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-primary-300 mx-auto mb-2" />
+                <p className="text-xs sm:text-sm text-gray-300 font-semibold">دفع آمن</p>
               </div>
-              <div className="text-center">
-                <Shield className="w-8 h-8 text-primary-600 dark:text-primary-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-700 dark:text-gray-300">دفع آمن</p>
+              <div className="text-center p-3 sm:p-4 bg-dark-300/30 rounded-xl border border-primary-300/10">
+                <Download className="w-6 h-6 sm:w-8 sm:h-8 text-primary-300 mx-auto mb-2" />
+                <p className="text-xs sm:text-sm text-gray-300 font-semibold">تحميل فوري</p>
               </div>
-              <div className="text-center">
-                <Check className="w-8 h-8 text-primary-600 dark:text-primary-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-700 dark:text-gray-300">ضمان الجودة</p>
+              <div className="text-center p-3 sm:p-4 bg-dark-300/30 rounded-xl border border-primary-300/10">
+                <Check className="w-6 h-6 sm:w-8 sm:h-8 text-primary-300 mx-auto mb-2" />
+                <p className="text-xs sm:text-sm text-gray-300 font-semibold">ضمان الجودة</p>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Sectioned Details - Mobile First */}
+        {product.sections && (
+          <div className="mt-12 sm:mt-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              {/* Features Section */}
+              {product.sections.features && (
+                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#6A0DAD' }}>
+                    {product.sections.features.title}
+                  </h2>
+                  <ul className="space-y-3 sm:space-y-4">
+                    {product.sections.features.items.map((item, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
+                        <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
+                          {item}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* What You Will Learn Section */}
+              {product.sections.whatYouWillLearn && (
+                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#6A0DAD' }}>
+                    {product.sections.whatYouWillLearn.title}
+                  </h2>
+                  <ul className="space-y-3 sm:space-y-4">
+                    {product.sections.whatYouWillLearn.items.map((item, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
+                        <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
+                          {item}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Requirements Section */}
+              {product.sections.requirements && (
+                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#6A0DAD' }}>
+                    {product.sections.requirements.title}
+                  </h2>
+                  <ul className="space-y-3 sm:space-y-4">
+                    {product.sections.requirements.items.map((item, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
+                        <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
+                          {item}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* What You Will Get Section */}
+              {product.sections.whatYouWillGet && (
+                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#6A0DAD' }}>
+                    {product.sections.whatYouWillGet.title}
+                  </h2>
+                  <ul className="space-y-3 sm:space-y-4">
+                    {product.sections.whatYouWillGet.items.map((item, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
+                        <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
+                          {item}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Product Reviews - Mobile & Desktop Optimized */}
         {productTestimonials.length > 0 && (
           <div className="mt-12 sm:mt-16">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 sm:mb-8">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
                 تقييمات المنتج
               </h2>
               <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary-300/10 border border-primary-300/30 rounded-xl">
@@ -300,8 +396,9 @@ export default function ProductDetail({ product }: { product: Product }) {
         )}
 
         {/* Why Buy Section */}
-        <WhyBuySection compact />
+        <WhyBuySection />
       </div>
     </section>
   );
 }
+

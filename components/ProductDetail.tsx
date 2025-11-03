@@ -5,6 +5,7 @@ import { useApp } from '@/contexts/AppContext';
 import { showToast } from '@/components/ToastContainer';
 import testimonials from '@/data/testimonials.json';
 import Image from 'next/image';
+import WhyBuySection from './WhyBuySection';
 
 interface Product {
   id: number;
@@ -282,6 +283,9 @@ export default function ProductDetail({ product }: { product: Product }) {
             </div>
           </div>
         )}
+
+        {/* Why Buy Section */}
+        <WhyBuySection compact />
       </div>
     </section>
   );

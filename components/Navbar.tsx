@@ -131,8 +131,6 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Theme Toggle */}
-            <button
             {/* Wishlist */}
             <Link
               href="/wishlist"
@@ -229,3 +227,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

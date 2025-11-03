@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ShoppingCart, Heart, Star, Check, Users, Shield, Zap } from 'lucide-react';
+import { ShoppingCart, Heart, Star, Check, Users, Shield, Zap, CheckCircle, ShoppingBag } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { showToast } from '@/components/ToastContainer';
 import testimonials from '@/data/testimonials.json';
@@ -266,7 +266,7 @@ export default function ProductDetail({ product }: { product: Product }) {
               {productTestimonials.map((testimonial) => (
                 <div
                   key={testimonial.id}
-                  className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl"
+                  className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-5 sm:p-6 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all"
                 >
                   <div className="flex items-center gap-1 mb-3">
                     {[...Array(5)].map((_, i) => (
@@ -275,25 +275,40 @@ export default function ProductDetail({ product }: { product: Product }) {
                         className={`w-4 h-4 ${
                           i < testimonial.rating
                             ? 'text-yellow-400 fill-yellow-400'
-                            : 'text-gray-300 dark:text-gray-600'
+                            : 'text-gray-600'
                         }`}
                       />
                     ))}
                   </div>
-                  <p className="text-gray-700 dark:text-gray-200 mb-4">"{testimonial.text}"</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {testimonial.name}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(testimonial.purchaseDate).toLocaleDateString('ar-SA', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {testimonial.timeAgo}
-                  </p>
+                  <p className="text-gray-300 mb-4 leading-relaxed">"{testimonial.text}"</p>
+                  
+                  {/* User info with verification */}
+                  <div className="flex items-start gap-3 pt-4 border-t border-primary-300/10">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-primary-300/30 flex-shrink-0">
+                      <Image
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        fill
+                        className="object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white flex items-center gap-2 truncate">
+                        {testimonial.name}
+                        {testimonial.verified && (
+                          <CheckCircle className="w-4 h-4 text-green-400 fill-green-400 flex-shrink-0" />
+                        )}
+                      </p>
+                      {testimonial.verified && (
+                        <p className="text-xs text-green-400 flex items-center gap-1 mt-0.5">
+                          <ShoppingBag className="w-3 h-3" />
+                          قام بالشراء
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-500 mt-1">{testimonial.timeAgo}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

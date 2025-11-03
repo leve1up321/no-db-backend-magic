@@ -373,9 +373,8 @@ export default function ProductDetail({ product }: { product: Product }) {
                         {testimonial.name}
                       </p>
                       {testimonial.verified && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-300/20 border border-primary-300/40 rounded-full text-primary-300 text-xs font-bold flex-shrink-0">
-                          <CheckCircle className="w-3 h-3 fill-primary-300" />
-                          موثق
+                        <span className="inline-flex items-center justify-center w-5 h-5 bg-primary-300/20 border border-primary-300/40 rounded-full flex-shrink-0" title="موثق">
+                          <CheckCircle className="w-3.5 h-3.5 text-primary-300 fill-primary-300" />
                         </span>
                       )}
                     </div>
@@ -401,4 +400,3 @@ export default function ProductDetail({ product }: { product: Product }) {
     </section>
   );
 }
-

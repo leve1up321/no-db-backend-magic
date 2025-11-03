@@ -140,7 +140,7 @@
     "priceEUR": 12.20,
     "currency": "SAR",
     "category": "ebooks",
-    "image": "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=800&h=600&fit=crop",
+    "image": "/images/products/digital-products-guide.png",
     "rating": 4.9,
     "buyers": 120,
     "inStock": true,

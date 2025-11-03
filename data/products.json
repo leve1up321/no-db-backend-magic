@@ -63,7 +63,7 @@
     "priceEUR": 14.20,
     "currency": "SAR",
     "category": "ebooks",
-    "image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop",
+    "image": "/images/products/15-project-ideas.png",
     "rating": 4.8,
     "buyers": 150,
     "inStock": true,
@@ -228,4 +228,3 @@
     ]
   }
 ]
-

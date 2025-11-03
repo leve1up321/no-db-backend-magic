@@ -100,13 +100,8 @@ export default function TestimonialsSection() {
                   {/* User Info */}
                   <div className="flex items-center gap-2 pt-4 border-t border-primary-300/10 mt-auto">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm sm:text-base font-bold text-white flex items-center gap-2 truncate">
+                      <p className="text-sm sm:text-base font-bold text-white truncate">
                         {testimonial.name}
-                        {testimonial.verified && (
-                          <span className="inline-flex items-center justify-center w-5 h-5 bg-primary-300/20 border border-primary-300/40 rounded-full flex-shrink-0" title="موثق">
-                            <CheckCircle className="w-3.5 h-3.5 text-primary-300 fill-primary-300" />
-                          </span>
-                        )}
                       </p>
                       {testimonial.verified && (
                         <p className="text-xs text-green-400 flex items-center gap-1 mt-0.5">

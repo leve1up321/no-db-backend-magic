@@ -29,7 +29,7 @@ export default function Hero() {
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 sm:mb-6 leading-tight animate-slide-up">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 sm:mb-6 mt-6 sm:mt-0 leading-tight animate-slide-up">
               متجرك الموثوق<br className="sm:hidden" />{' '}
               <span className="block sm:inline mt-2 sm:mt-0">للمنتجات{' '}</span>
               <span className="bg-gradient-to-r from-primary-300 via-primary-200 to-primary-300 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]">

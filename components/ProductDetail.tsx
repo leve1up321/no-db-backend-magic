@@ -368,15 +368,10 @@ export default function ProductDetail({ product }: { product: Product }) {
                   
                   {/* User Info */}
                   <div className="pt-4 border-t border-primary-300/10 mt-auto">
-                    <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="mb-2">
                       <p className="text-sm sm:text-base font-bold text-white truncate">
                         {testimonial.name}
                       </p>
-                      {testimonial.verified && (
-                        <span className="inline-flex items-center justify-center w-5 h-5 bg-primary-300/20 border border-primary-300/40 rounded-full flex-shrink-0" title="موثق">
-                          <CheckCircle className="w-3.5 h-3.5 text-primary-300 fill-primary-300" />
-                        </span>
-                      )}
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       {testimonial.verified && (

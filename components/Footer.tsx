@@ -42,7 +42,7 @@ export default function Footer() {
                 href="https://wa.me/971503492848"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 sm:w-14 sm:h-14 bg-dark-300/80 rounded-xl flex items-center justify-center hover:bg-green-600 active:bg-green-700 hover:scale-110 active:scale-95 transition-all duration-300 touch-manipulation"
+                className="w-12 h-12 sm:w-14 sm:h-14 bg-[#25D366]/90 hover:bg-[#25D366] rounded-xl flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all duration-300 touch-manipulation shadow-lg shadow-green-500/20"
                 aria-label="واتساب"
               >
                 <FaWhatsapp className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -51,7 +51,7 @@ export default function Footer() {
                 href="https://www.instagram.com/lvlup3211/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 sm:w-14 sm:h-14 bg-dark-300/80 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 active:scale-95 hover:scale-110 transition-all duration-300 touch-manipulation"
+                className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#833AB4] via-[#E1306C] to-[#F56040] hover:from-[#9B5DE5] hover:via-[#F15A8A] hover:to-[#FF7858] rounded-xl flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all duration-300 touch-manipulation shadow-lg shadow-pink-500/20"
                 aria-label="إنستغرام"
               >
                 <FaInstagram className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -60,7 +60,7 @@ export default function Footer() {
                 href="https://www.tiktok.com/@lvlup321"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 sm:w-14 sm:h-14 bg-dark-300/80 rounded-xl flex items-center justify-center hover:bg-primary-300 hover:text-gray-900 active:scale-95 hover:scale-110 transition-all duration-300 touch-manipulation"
+                className="w-12 h-12 sm:w-14 sm:h-14 bg-black hover:bg-gray-900 border-2 border-[#25F4EE] rounded-xl flex items-center justify-center text-[#25F4EE] hover:text-white hover:bg-[#25F4EE] hover:scale-110 active:scale-95 transition-all duration-300 touch-manipulation shadow-lg shadow-cyan-400/20"
                 aria-label="تيك توك"
               >
                 <FaTiktok className="w-5 h-5 sm:w-6 sm:h-6" />

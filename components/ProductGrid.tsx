@@ -122,7 +122,7 @@ export default function ProductGrid() {
                   ))}
                 </div>
                 <span className="text-xs sm:text-sm text-gray-400">
-                  ({product.reviews})
+                  {product.rating.toFixed(1)}
                 </span>
               </div>
 
@@ -183,4 +183,3 @@ export default function ProductGrid() {
     </div>
   );
 }
-

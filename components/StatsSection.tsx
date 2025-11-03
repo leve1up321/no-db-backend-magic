@@ -17,7 +17,7 @@ export default function StatsSection() {
   const [stats, setStats] = useState<Stat[]>([
     {
       icon: ShoppingBag,
-      value: 950,
+      value: 150,
       suffix: '+',
       label: 'عدد المبيعات',
       color: 'text-primary-300',
@@ -26,7 +26,7 @@ export default function StatsSection() {
     },
     {
       icon: Users,
-      value: 5000,
+      value: 300,
       suffix: '+',
       label: 'عميل سعيد',
       color: 'text-accent-600',
@@ -138,4 +138,3 @@ export default function StatsSection() {
     </section>
   );
 }
-

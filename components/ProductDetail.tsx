@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { ShoppingCart, Heart, Star, Check, Users, Shield, Zap, CheckCircle, ShoppingBag } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { showToast } from '@/components/ToastContainer';
@@ -32,7 +31,6 @@ interface Product {
   category: string;
   image: string;
   rating: number;
-  reviews: number;
   buyers: number;
   inStock: boolean;
   featured: boolean;
@@ -41,7 +39,6 @@ interface Product {
 
 export default function ProductDetail({ product }: { product: Product }) {
   const { currency, addToCart, addToWishlist, wishlist } = useApp();
-  const [quantity, setQuantity] = useState(1);
 
   const getPrice = () => {
     switch (currency) {
@@ -94,14 +91,12 @@ export default function ProductDetail({ product }: { product: Product }) {
   const isInWishlist = wishlist.includes(product.id);
 
   const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      addToCart({
-        id: product.id,
-        name: product.name,
-        price: price,
-        image: product.image,
-      });
-    }
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: price,
+      image: product.image,
+    });
     showToast('تمت إضافة المنتج إلى السلة بنجاح! ✅', 'cart');
   };
 
@@ -113,7 +108,7 @@ export default function ProductDetail({ product }: { product: Product }) {
   };
 
   return (
-    <section className="py-12 bg-white dark:bg-gray-900 transition-colors duration-300">
+    <section className="pt-24 pb-12 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12">
           {/* Product Image */}
@@ -156,9 +151,6 @@ export default function ProductDetail({ product }: { product: Product }) {
                 <span className="text-gray-700 dark:text-gray-300 font-semibold">
                   {product.rating}
                 </span>
-                <span className="text-gray-500 dark:text-gray-400">
-                  ({product.reviews} تقييم)
-                </span>
               </div>
               <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                 <Users className="w-5 h-5" />
@@ -174,9 +166,9 @@ export default function ProductDetail({ product }: { product: Product }) {
             </div>
 
             {/* Description */}
-            <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+            <div className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed whitespace-pre-line">
               {product.description}
-            </p>
+            </div>
 
             {/* Features */}
             <div className="mb-8">
@@ -191,30 +183,6 @@ export default function ProductDetail({ product }: { product: Product }) {
                   </li>
                 ))}
               </ul>
-            </div>
-
-            {/* Quantity */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                الكمية:
-              </label>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                >
-                  -
-                </button>
-                <span className="text-xl font-semibold text-gray-900 dark:text-white w-12 text-center">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                >
-                  +
-                </button>
-              </div>
             </div>
 
             {/* Actions */}

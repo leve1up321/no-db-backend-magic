@@ -112,9 +112,9 @@ export default function ProductDetail({ product }: { product: Product }) {
     <section className="pt-24 pb-12 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Product Image */}
+          {/* Left Column: Image + Description */}
           <div className="animate-scale-in">
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 mb-6">
               <Image
                 src={product.image}
                 alt={product.name}
@@ -122,9 +122,14 @@ export default function ProductDetail({ product }: { product: Product }) {
                 className="object-cover"
               />
             </div>
+            
+            {/* Description under image */}
+            <div className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+              {product.description}
+            </div>
           </div>
 
-          {/* Product Info */}
+          {/* Right Column: Product Info */}
           <div className="animate-slide-up">
             <div className="mb-4">
               <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 rounded-full text-sm font-semibold">
@@ -164,11 +169,6 @@ export default function ProductDetail({ product }: { product: Product }) {
               <p className="text-4xl font-bold text-primary-600 dark:text-primary-400">
                 {price.toFixed(2)} {currencySymbol}
               </p>
-            </div>
-
-            {/* Description */}
-            <div className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed whitespace-pre-line">
-              {product.description}
             </div>
 
             {/* Features */}
@@ -252,16 +252,7 @@ export default function ProductDetail({ product }: { product: Product }) {
                   <p className="text-gray-300 mb-4 leading-relaxed">"{testimonial.text}"</p>
                   
                   {/* User info with verification */}
-                  <div className="flex items-start gap-3 pt-4 border-t border-primary-300/10">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-primary-300/30 flex-shrink-0">
-                      <Image
-                        src={testimonial.avatar}
-                        alt={testimonial.name}
-                        fill
-                        className="object-cover"
-                        loading="lazy"
-                      />
-                    </div>
+                  <div className="flex items-start gap-2 pt-4 border-t border-primary-300/10">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white flex items-center gap-2 truncate">
                         {testimonial.name}

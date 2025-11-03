@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, ShoppingCart, Heart, Sun, Moon, Globe, Home } from 'lucide-react';
+import { Menu, X, ShoppingCart, Heart, Globe, Home } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -10,7 +10,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { theme, toggleTheme, currency, setCurrency, cartCount, wishlist } = useApp();
+  const { currency, setCurrency, cartCount, wishlist } = useApp();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -133,17 +133,6 @@ export default function Navbar() {
 
             {/* Theme Toggle */}
             <button
-              onClick={toggleTheme}
-              className="p-2 sm:p-2.5 hover:bg-accent-600/10 rounded-xl transition-colors touch-manipulation"
-              aria-label="تبديل الوضع الليلي"
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5 text-accent-600" />
-              ) : (
-                <Moon className="w-5 h-5 text-accent-600" />
-              )}
-            </button>
-
             {/* Wishlist */}
             <Link
               href="/wishlist"
@@ -240,4 +229,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

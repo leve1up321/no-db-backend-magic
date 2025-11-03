@@ -98,16 +98,7 @@ export default function TestimonialsSection() {
                   </p>
 
                   {/* User Info */}
-                  <div className="flex items-center gap-3 pt-4 border-t border-primary-300/10 mt-auto">
-                    <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden ring-2 ring-primary-300/30 flex-shrink-0">
-                      <Image
-                        src={testimonial.avatar}
-                        alt={testimonial.name}
-                        fill
-                        className="object-cover"
-                        loading="lazy"
-                      />
-                    </div>
+                  <div className="flex items-center gap-2 pt-4 border-t border-primary-300/10 mt-auto">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm sm:text-base font-bold text-white flex items-center gap-2 truncate">
                         {testimonial.name}
@@ -144,4 +135,3 @@ export default function TestimonialsSection() {
     </section>
   );
 }
-

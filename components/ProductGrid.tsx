@@ -97,15 +97,10 @@ export default function ProductGrid() {
             <div className="p-4 sm:p-5 flex-1 flex flex-col">
               {/* Title */}
               <Link href={`/products/${product.id}`}>
-                <h3 className="text-base sm:text-lg font-bold text-white mb-2 line-clamp-2 hover:text-primary-300 transition-colors cursor-pointer">
+                <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4 line-clamp-2 hover:text-primary-300 transition-colors cursor-pointer">
                   {product.name}
                 </h3>
               </Link>
-
-              {/* Description */}
-              <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4 line-clamp-2 flex-1">
-                {product.description}
-              </p>
 
               {/* Rating & Reviews */}
               <div className="flex items-center gap-2 mb-3 sm:mb-4">

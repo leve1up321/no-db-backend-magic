@@ -117,7 +117,7 @@ export default function Navbar() {
                       className="fixed inset-0 z-40" 
                       onClick={() => setShowCurrencyMenu(false)}
                     />
-                    <div className="absolute left-0 mt-2 w-56 bg-dark-300 rounded-xl shadow-2xl border border-primary-300/20 py-2 z-50 max-h-80 overflow-y-auto">
+                    <div className="absolute left-0 mt-2 w-56 bg-dark-400 rounded-xl shadow-2xl border border-primary-300/30 py-2 z-50 max-h-80 overflow-y-auto">
                       {currencies.map((curr) => (
                         <button
                           key={curr.code}
@@ -325,4 +325,3 @@ export default function Navbar() {
     </>
   );
 }
-

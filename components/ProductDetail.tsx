@@ -225,23 +225,38 @@ export default function ProductDetail({ product }: { product: Product }) {
           </div>
         </div>
 
-        {/* Product Reviews */}
+        {/* Product Reviews - Mobile & Desktop Optimized */}
         {productTestimonials.length > 0 && (
-          <div className="mt-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8">
-              تقييمات المنتج
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mt-12 sm:mt-16">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                تقييمات المنتج
+              </h2>
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary-300/10 border border-primary-300/30 rounded-xl">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400" />
+                <span className="text-sm sm:text-base font-bold text-white">
+                  {(productTestimonials.reduce((acc, t) => acc + t.rating, 0) / productTestimonials.length).toFixed(1)}
+                </span>
+                <span className="text-xs sm:text-sm text-gray-400">
+                  ({productTestimonials.length} تقييم)
+                </span>
+              </div>
+            </div>
+
+            {/* Reviews Grid - Responsive */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {productTestimonials.map((testimonial) => (
                 <div
                   key={testimonial.id}
-                  className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-5 sm:p-6 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all"
+                  className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-5 sm:p-6 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 hover:shadow-xl hover:shadow-primary-300/10 transition-all duration-300 flex flex-col h-full"
                 >
+                  {/* Stars */}
                   <div className="flex items-center gap-1 mb-3">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 ${
+                        className={`w-4 h-4 sm:w-5 sm:h-5 ${
                           i < testimonial.rating
                             ? 'text-yellow-400 fill-yellow-400'
                             : 'text-gray-600'
@@ -249,24 +264,33 @@ export default function ProductDetail({ product }: { product: Product }) {
                       />
                     ))}
                   </div>
-                  <p className="text-gray-300 mb-4 leading-relaxed">"{testimonial.text}"</p>
+
+                  {/* Review Text */}
+                  <p className="text-sm sm:text-base text-gray-300 mb-4 leading-relaxed flex-grow">
+                    "{testimonial.text}"
+                  </p>
                   
-                  {/* User info with verification */}
-                  <div className="flex items-start gap-2 pt-4 border-t border-primary-300/10">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white flex items-center gap-2 truncate">
+                  {/* User Info */}
+                  <div className="pt-4 border-t border-primary-300/10 mt-auto">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <p className="text-sm sm:text-base font-bold text-white truncate">
                         {testimonial.name}
-                        {testimonial.verified && (
-                          <CheckCircle className="w-4 h-4 text-green-400 fill-green-400 flex-shrink-0" />
-                        )}
                       </p>
                       {testimonial.verified && (
-                        <p className="text-xs text-green-400 flex items-center gap-1 mt-0.5">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-300/20 border border-primary-300/40 rounded-full text-primary-300 text-xs font-bold flex-shrink-0">
+                          <CheckCircle className="w-3 h-3 fill-primary-300" />
+                          موثق
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      {testimonial.verified && (
+                        <span className="text-green-400 flex items-center gap-1">
                           <ShoppingBag className="w-3 h-3" />
                           قام بالشراء
-                        </p>
+                        </span>
                       )}
-                      <p className="text-xs text-gray-500 mt-1">{testimonial.timeAgo}</p>
+                      <span className="text-gray-500">{testimonial.timeAgo}</span>
                     </div>
                   </div>
                 </div>

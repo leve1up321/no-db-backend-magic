@@ -103,7 +103,10 @@ export default function TestimonialsSection() {
                       <p className="text-sm sm:text-base font-bold text-white flex items-center gap-2 truncate">
                         {testimonial.name}
                         {testimonial.verified && (
-                          <CheckCircle className="w-4 h-4 text-green-400 fill-green-400 flex-shrink-0" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-300/20 border border-primary-300/40 rounded-full text-primary-300 text-xs font-bold flex-shrink-0">
+                            <CheckCircle className="w-3 h-3 fill-primary-300" />
+                            موثق
+                          </span>
                         )}
                       </p>
                       {testimonial.verified && (

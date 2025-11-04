@@ -55,10 +55,11 @@ export async function POST(req) {
     console.log("💰 Converted amount (fils):", amountInFils);
     
     // 📦 بناء الطلب
-    // احسب expiry بالثواني وحوّله إلى string (ساعة واحدة من الآن)
-    const expiryInSeconds = (Math.floor(Date.now() / 1000) + 3600).toString();
-    console.log("⏰ Expiry timestamp (seconds, string):", expiryInSeconds);
-    console.log("⏰ Expiry date:", new Date(parseInt(expiryInSeconds) * 1000).toISOString());
+    // احسب expiry بالميلي ثانية (ساعة واحدة من الآن)
+    // Ziina تتوقع timestamp بالميلي ثانية كـ number
+    const expiryInMilliseconds = Date.now() + (3600 * 1000); // + ساعة واحدة
+    console.log("⏰ Expiry timestamp (milliseconds):", expiryInMilliseconds);
+    console.log("⏰ Expiry date:", new Date(expiryInMilliseconds).toISOString());
     
     // إنشاء رسالة توضح محتويات السلة
     const itemNames = cartItems.map(item => item.name).join(", ");
@@ -72,7 +73,7 @@ export async function POST(req) {
       cancel_url: `${appUrl}/cancel`,
       failure_url: `${appUrl}/cancel`,
       test: true,
-      expiry: expiryInSeconds,
+      expiry: expiryInMilliseconds,
       allow_tips: false,
     };
     
@@ -146,4 +147,3 @@ export async function POST(req) {
     );
   }
 }
-

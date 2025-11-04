@@ -13,9 +13,9 @@ export async function POST(req) {
     const apiKey = process.env.ZIINA_SECRET_KEY;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
     
-    console.log("🔑 Ziina API Key exists:", !!apiKey);
-    console.log("🔑 API Key prefix:", apiKey?.substring(0, 10) + "...");
-    console.log("🌐 App URL:", appUrl);
+    console.log("🛒 Cart Payment - API Key exists:", !!apiKey);
+    console.log("🛒 Cart Payment - API Key prefix:", apiKey?.substring(0, 10) + "...");
+    console.log("🛒 Cart Payment - App URL:", appUrl);
     
     if (!apiKey) {
       console.error("❌ ZIINA_SECRET_KEY is not set!");
@@ -33,11 +33,25 @@ export async function POST(req) {
       );
     }
     
-    // 🔢 التحقق من المبلغ وتحويله
-    const originalAmount = body.amount;
-    const amountInFils = convertAEDtoFils(originalAmount);
+    // 🛒 حساب المبلغ الكلي للسلة
+    const cartItems = body.cartItems || [];
+    const totalAmount = cartItems.reduce((total, item) => {
+      return total + (item.price * (item.quantity || 1));
+    }, 0);
     
-    console.log("💰 Original amount (AED):", originalAmount);
+    console.log("🛒 Cart items count:", cartItems.length);
+    console.log("🛒 Total amount (AED):", totalAmount);
+    
+    if (totalAmount <= 0) {
+      console.error("❌ Invalid total amount:", totalAmount);
+      return NextResponse.json(
+        { error: "Cart total must be greater than 0" },
+        { status: 400 }
+      );
+    }
+    
+    // 🔢 تحويل المبلغ إلى فلسات
+    const amountInFils = convertAEDtoFils(totalAmount);
     console.log("💰 Converted amount (fils):", amountInFils);
     
     // 📦 بناء الطلب
@@ -46,10 +60,14 @@ export async function POST(req) {
     console.log("⏰ Expiry timestamp (seconds, string):", expiryInSeconds);
     console.log("⏰ Expiry date:", new Date(parseInt(expiryInSeconds) * 1000).toISOString());
     
+    // إنشاء رسالة توضح محتويات السلة
+    const itemNames = cartItems.map(item => item.name).join(", ");
+    const message = `دفع مقابل ${cartItems.length} منتج: ${itemNames.substring(0, 100)}`;
+    
     const paymentData = {
       amount: amountInFils,
       currency_code: "AED",
-      message: body.message || `دفع مقابل ${body.productName || 'المنتج'}`,
+      message: message,
       success_url: `${appUrl}/success`,
       cancel_url: `${appUrl}/cancel`,
       failure_url: `${appUrl}/cancel`,
@@ -58,7 +76,7 @@ export async function POST(req) {
       allow_tips: false,
     };
     
-    console.log("📤 Sending payment data:", JSON.stringify(paymentData, null, 2));
+    console.log("📤 Sending cart payment data:", JSON.stringify(paymentData, null, 2));
 
     const response = await fetch("https://api-v2.ziina.com/api/payment_intent", {
       method: "POST",
@@ -107,16 +125,18 @@ export async function POST(req) {
       );
     }
 
-    console.log("✅ Payment intent created successfully!");
+    console.log("✅ Cart payment intent created successfully!");
     console.log("✅ Redirect URL:", data.redirect_url);
 
     return NextResponse.json({
       success: true,
       redirect_url: data.redirect_url,
       payment_intent_id: data.id || data.payment_intent_id,
+      total_amount: totalAmount,
+      items_count: cartItems.length,
     });
   } catch (error) {
-    console.error("💥 Payment Intent Error:");
+    console.error("💥 Cart Payment Intent Error:");
     console.error("💥 Error name:", error.name);
     console.error("💥 Error message:", error.message);
     console.error("💥 Error stack:", error.stack);
@@ -126,3 +146,4 @@ export async function POST(req) {
     );
   }
 }
+

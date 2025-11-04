@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, ShoppingCart, Heart, Globe, Home, Package, Mail } from 'lucide-react';
+import { Menu, X, ShoppingCart, Heart, Globe, Home, Package, Mail, Receipt } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -99,6 +99,12 @@ export default function Navbar() {
                 className="text-gray-300 hover:text-primary-300 transition-colors duration-200 font-semibold text-sm lg:text-base"
               >
                 تواصل معنا
+              </Link>
+              <Link 
+                href="/orders" 
+                className="text-gray-300 hover:text-primary-300 transition-colors duration-200 font-semibold text-sm lg:text-base"
+              >
+                طلباتي
               </Link>
 
               {/* Currency Selector Desktop */}
@@ -267,6 +273,15 @@ export default function Navbar() {
           >
             <Mail className="w-6 h-6 text-primary-300 group-hover:scale-110 transition-transform" />
             <span>تواصل معنا</span>
+          </Link>
+
+          <Link
+            href="/orders"
+            className="flex items-center gap-4 w-full px-5 py-4 text-base sm:text-lg text-gray-300 hover:text-white hover:bg-primary-300/10 active:bg-primary-300/20 rounded-xl transition-all duration-200 font-semibold touch-manipulation group"
+            onClick={handleLinkClick}
+          >
+            <Receipt className="w-6 h-6 text-primary-300 group-hover:scale-110 transition-transform" />
+            <span>طلباتي</span>
           </Link>
 
           <div className="my-4 h-px bg-gradient-to-r from-transparent via-primary-300/20 to-transparent" />

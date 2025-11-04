@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle, ArrowRight, Mail } from "lucide-react";
+import { CheckCircle, ArrowRight, Mail, Receipt } from "lucide-react";
 import { useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
 
@@ -59,6 +59,14 @@ export default function SuccessPage() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
+              href="/orders"
+              className="group bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
+            >
+              <Receipt className="w-5 h-5" />
+              <span>عرض طلباتي</span>
+            </Link>
+
+            <Link
               href="/"
               className="group bg-primary-300 hover:bg-primary-400 text-dark-400 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-primary-300/20"
             >
@@ -93,4 +101,3 @@ export default function SuccessPage() {
     </div>
   );
 }
-

@@ -13,6 +13,9 @@ import { findOrderById } from "@/lib/database";
  * - Token ينتهي بعد 30 دقيقة
  */
 
+// ✅ إجبار dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;

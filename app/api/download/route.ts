@@ -9,6 +9,9 @@ import { head } from "@vercel/blob";
  * يتحقق من صلاحية الطلب ويوجه للرابط
  */
 
+// ✅ إجبار dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     // استخدام req.nextUrl بدلاً من req.url

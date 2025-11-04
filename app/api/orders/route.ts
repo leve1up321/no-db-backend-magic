@@ -14,6 +14,10 @@ import {
  * GET /api/orders?paymentId=pi_xxx
  */
 
+// ✅ إجبار Next.js على معاملة هذا الـ route كـ dynamic
+// لأنه يستخدم search params
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     // استخدام req.nextUrl بدلاً من req.url لتجنب مشكلة Dynamic server usage

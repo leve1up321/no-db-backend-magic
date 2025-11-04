@@ -15,6 +15,9 @@ import { NextRequest, NextResponse } from "next/server";
  * يرسل إيميل باستخدام خدمة البريد (Resend, SendGrid, etc.)
  */
 
+// ✅ إجبار dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const { to, subject, html, orderId, downloadUrl } = await req.json();

@@ -122,6 +122,35 @@ export default function ProductDetail({ product }: { product: Product }) {
     }
   };
 
+  const handlePayment = async () => {
+    try {
+      showToast('جاري تحضير صفحة الدفع... ⏳', 'cart');
+      
+      const response = await fetch("/api/payment_intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          amount: price, 
+          currency: currency,
+          test: true // غيّر إلى false للدفع الحقيقي
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.redirect_url) {
+        // Redirect to Ziina payment page
+        window.location.href = data.redirect_url;
+      } else {
+        showToast('حدث خطأ في إنشاء عملية الدفع. حاول مرة أخرى.', 'cart');
+        console.error("Payment error:", data);
+      }
+    } catch (error) {
+      showToast('حدث خطأ في الاتصال. حاول مرة أخرى.', 'cart');
+      console.error("Payment error:", error);
+    }
+  };
+
   return (
     <section className="pt-20 sm:pt-24 pb-12 bg-dark-500 transition-colors duration-300">
       <div className="container-mobile">
@@ -198,26 +227,37 @@ export default function ProductDetail({ product }: { product: Product }) {
             </div>
 
             {/* CTA Buttons - Full Width Mobile */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <button
-                onClick={handleAddToCart}
-                className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-primary-300 to-accent-600 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-300/30 active:scale-95 transition-all duration-300 touch-manipulation"
-                style={{ fontSize: '16px' }}
-              >
-                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
-                اشتر الآن
-              </button>
-              <button
-                onClick={handleWishlist}
-                className={`p-4 sm:p-5 border-2 rounded-xl transition-all duration-300 touch-manipulation hover:scale-110 active:scale-95 ${
-                  isInWishlist
-                    ? 'bg-accent-600/20 border-accent-600 text-accent-600'
-                    : 'bg-dark-300/50 border-primary-300/30 text-gray-300 hover:border-accent-600 hover:text-accent-600'
-                }`}
-                aria-label="إضافة للأمنيات"
-              >
-                <Heart className={`w-6 h-6 ${isInWishlist ? 'fill-current' : ''}`} />
-              </button>
+            <div className="space-y-3">
+              {/* Buy Now / Direct Payment Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <button
+                  onClick={handlePayment}
+                  className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-green-500 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-green-500/30 active:scale-95 transition-all duration-300 touch-manipulation"
+                  style={{ fontSize: '16px' }}
+                >
+                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
+                  ادفع الآن ⚡
+                </button>
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-primary-300 to-accent-600 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-300/30 active:scale-95 transition-all duration-300 touch-manipulation"
+                  style={{ fontSize: '16px' }}
+                >
+                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+                  أضف للسلة
+                </button>
+                <button
+                  onClick={handleWishlist}
+                  className={`p-4 sm:p-5 border-2 rounded-xl transition-all duration-300 touch-manipulation hover:scale-110 active:scale-95 ${
+                    isInWishlist
+                      ? 'bg-accent-600/20 border-accent-600 text-accent-600'
+                      : 'bg-dark-300/50 border-primary-300/30 text-gray-300 hover:border-accent-600 hover:text-accent-600'
+                  }`}
+                  aria-label="إضافة للأمنيات"
+                >
+                  <Heart className={`w-6 h-6 ${isInWishlist ? 'fill-current' : ''}`} />
+                </button>
+              </div>
             </div>
 
             {/* Trust Badges */}

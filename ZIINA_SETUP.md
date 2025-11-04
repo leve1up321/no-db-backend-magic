@@ -22,7 +22,7 @@ cp .env.example .env.local
 2. افتح `.env.local` وأضف المفاتيح:
 ```env
 ZIINA_SECRET_KEY=sk_test_your_actual_secret_key_here
-NEXT_PUBLIC_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 #### ب) للإنتاج على Vercel:
@@ -34,7 +34,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 | Key | Value | Environment |
 |-----|-------|------------|
 | `ZIINA_SECRET_KEY` | `sk_live_your_key` | Production |
-| `NEXT_PUBLIC_BASE_URL` | `https://your-domain.vercel.app` | Production |
+| `NEXT_PUBLIC_APP_URL` | `https://your-domain.vercel.app` | Production |
 
 ⚠️ **مهم:** لا تشارك مفتاح Ziina السري مع أي شخص!
 
@@ -136,4 +136,3 @@ Ziina تدعم:
 ---
 
 **🎉 مبروك! نظام الدفع جاهز للاستخدام!**
-

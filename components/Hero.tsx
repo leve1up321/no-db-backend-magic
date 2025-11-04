@@ -22,8 +22,8 @@ export default function Hero() {
         <div className="max-w-4xl mx-auto">
           {/* Content */}
           <div className="text-center animate-fade-in">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-300/20 to-accent-600/20 backdrop-blur-sm text-primary-300 px-4 py-2 sm:px-6 sm:py-3 rounded-full mb-4 sm:mb-6 border border-primary-300/30 animate-scale-in">
+            {/* Badge - Hidden on Mobile */}
+            <div className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-primary-300/20 to-accent-600/20 backdrop-blur-sm text-primary-300 px-4 py-2 sm:px-6 sm:py-3 rounded-full mb-4 sm:mb-6 border border-primary-300/30 animate-scale-in">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="text-xs sm:text-sm font-bold">أفضل العروض الرقمية 2025</span>
             </div>

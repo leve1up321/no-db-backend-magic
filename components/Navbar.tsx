@@ -325,11 +325,11 @@ export default function Navbar() {
                 setCurrency(e.target.value as any);
                 setIsMobileMenuOpen(false);
               }}
-              className="w-full bg-dark-300/80 text-white text-base px-5 py-4 rounded-xl border-2 border-primary-300/20 focus:border-primary-300 focus:outline-none font-semibold touch-manipulation transition-all duration-200 hover:border-primary-300/40"
+              className="w-full bg-dark-300 text-white text-base px-5 py-4 rounded-xl border-2 border-primary-300/40 focus:border-primary-300 focus:outline-none font-semibold touch-manipulation transition-all duration-200 hover:border-primary-300/60 shadow-lg"
               style={{ fontSize: '16px' }} // Prevent zoom on iOS
             >
               {currencies.map((curr) => (
-                <option key={curr.code} value={curr.code} className="bg-dark-400 text-white">
+                <option key={curr.code} value={curr.code} className="bg-dark-300 text-white py-2">
                   {curr.name} ({curr.symbol})
                 </option>
               ))}

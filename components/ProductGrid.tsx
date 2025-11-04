@@ -156,6 +156,16 @@ export default function ProductGrid() {
               {/* Price & Actions */}
               <div className="flex items-center justify-between gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-primary-300/10">
                 <div className="flex-1">
+                  {/* Original Price (Crossed Out) */}
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm sm:text-base text-gray-500 line-through">
+                      {(amount * 2).toFixed(2)} {symbol}
+                    </span>
+                    <span className="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">
+                      خصم 50%
+                    </span>
+                  </div>
+                  {/* Current Price */}
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-xl sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-primary-300 to-primary-400 bg-clip-text text-transparent">
                       {amount.toFixed(2)}
@@ -195,14 +205,22 @@ export default function ProductGrid() {
                 </div>
               </div>
 
-              {/* Mobile CTA Button */}
-              <button
-                onClick={() => handleDirectPayment(product)}
-                className="w-full mt-3 sm:hidden bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 active:scale-95 touch-manipulation flex items-center justify-center gap-2"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                <span>استثمر الآن</span>
-              </button>
+              {/* Mobile CTA Buttons */}
+              <div className="flex gap-2 mt-3 sm:hidden">
+                <button
+                  onClick={() => handleDirectPayment(product)}
+                  className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 active:scale-95 touch-manipulation flex items-center justify-center gap-2"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>دفع مباشر</span>
+                </button>
+                <Link
+                  href={`/products/${product.id}`}
+                  className="px-4 py-3 bg-primary-300/20 hover:bg-primary-300/30 border border-primary-300/40 text-primary-300 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-95 touch-manipulation flex items-center justify-center"
+                >
+                  عرض التفاصيل
+                </Link>
+              </div>
             </div>
           </div>
         );

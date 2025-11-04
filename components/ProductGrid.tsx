@@ -11,24 +11,93 @@ export default function ProductGrid() {
   const { currency, addToCart, addToWishlist, wishlist } = useApp();
 
   const getPrice = (product: any) => {
+    let amount, originalAmount, symbol;
+    
     switch (currency) {
-      case 'AED': return { amount: product.priceAED, symbol: 'د.إ' };
-      case 'KWD': return { amount: product.priceKWD, symbol: 'د.ك' };
-      case 'QAR': return { amount: product.priceQAR, symbol: 'ر.ق' };
-      case 'BHD': return { amount: product.priceBHD, symbol: 'د.ب' };
-      case 'OMR': return { amount: product.priceOMR, symbol: 'ر.ع' };
-      case 'JOD': return { amount: product.priceJOD, symbol: 'د.أ' };
-      case 'EGP': return { amount: product.priceEGP, symbol: 'ج.م' };
-      case 'LBP': return { amount: product.priceLBP, symbol: 'ل.ل' };
-      case 'SYP': return { amount: product.priceSYP, symbol: 'ل.س' };
-      case 'IQD': return { amount: product.priceIQD, symbol: 'ع.د' };
-      case 'TND': return { amount: product.priceTND, symbol: 'د.ت' };
-      case 'MAD': return { amount: product.priceMAD, symbol: 'د.م' };
-      case 'DZD': return { amount: product.priceDZD, symbol: 'د.ج' };
-      case 'USD': return { amount: product.priceUSD, symbol: '$' };
-      case 'EUR': return { amount: product.priceEUR, symbol: '€' };
-      default: return { amount: product.price, symbol: 'ر.س' };
+      case 'AED': 
+        amount = product.priceAED;
+        originalAmount = product.originalPriceAED || product.priceAED * 2;
+        symbol = 'د.إ';
+        break;
+      case 'KWD': 
+        amount = product.priceKWD;
+        originalAmount = product.originalPriceKWD || product.priceKWD * 2;
+        symbol = 'د.ك';
+        break;
+      case 'QAR': 
+        amount = product.priceQAR;
+        originalAmount = product.originalPriceQAR || product.priceQAR * 2;
+        symbol = 'ر.ق';
+        break;
+      case 'BHD': 
+        amount = product.priceBHD;
+        originalAmount = product.originalPriceBHD || product.priceBHD * 2;
+        symbol = 'د.ب';
+        break;
+      case 'OMR': 
+        amount = product.priceOMR;
+        originalAmount = product.originalPriceOMR || product.priceOMR * 2;
+        symbol = 'ر.ع';
+        break;
+      case 'JOD': 
+        amount = product.priceJOD;
+        originalAmount = product.originalPriceJOD || product.priceJOD * 2;
+        symbol = 'د.أ';
+        break;
+      case 'EGP': 
+        amount = product.priceEGP;
+        originalAmount = product.originalPriceEGP || product.priceEGP * 2;
+        symbol = 'ج.م';
+        break;
+      case 'LBP': 
+        amount = product.priceLBP;
+        originalAmount = product.originalPriceLBP || product.priceLBP * 2;
+        symbol = 'ل.ل';
+        break;
+      case 'SYP': 
+        amount = product.priceSYP;
+        originalAmount = product.originalPriceSYP || product.priceSYP * 2;
+        symbol = 'ل.س';
+        break;
+      case 'IQD': 
+        amount = product.priceIQD;
+        originalAmount = product.originalPriceIQD || product.priceIQD * 2;
+        symbol = 'ع.د';
+        break;
+      case 'TND': 
+        amount = product.priceTND;
+        originalAmount = product.originalPriceTND || product.priceTND * 2;
+        symbol = 'د.ت';
+        break;
+      case 'MAD': 
+        amount = product.priceMAD;
+        originalAmount = product.originalPriceMAD || product.priceMAD * 2;
+        symbol = 'د.م';
+        break;
+      case 'DZD': 
+        amount = product.priceDZD;
+        originalAmount = product.originalPriceDZD || product.priceDZD * 2;
+        symbol = 'د.ج';
+        break;
+      case 'USD': 
+        amount = product.priceUSD;
+        originalAmount = product.originalPriceUSD || product.priceUSD * 2;
+        symbol = '$';
+        break;
+      case 'EUR': 
+        amount = product.priceEUR;
+        originalAmount = product.originalPriceEUR || product.priceEUR * 2;
+        symbol = '€';
+        break;
+      default: 
+        amount = product.price;
+        originalAmount = product.originalPrice || product.price * 2;
+        symbol = 'ر.س';
     }
+    
+    const discountPercentage = Math.round(((originalAmount - amount) / originalAmount) * 100);
+    
+    return { amount, originalAmount, symbol, discountPercentage };
   };
 
   const handleAddToCart = (product: any) => {
@@ -84,7 +153,7 @@ export default function ProductGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
       {products.map((product) => {
-        const { amount, symbol } = getPrice(product);
+        const { amount, originalAmount, symbol, discountPercentage } = getPrice(product);
         const isInWishlist = wishlist.includes(product.id);
         
         return (
@@ -159,10 +228,10 @@ export default function ProductGrid() {
                   {/* Original Price (Crossed Out) */}
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm sm:text-base text-gray-500 line-through">
-                      {(amount * 2).toFixed(2)} {symbol}
+                      {originalAmount.toFixed(2)} {symbol}
                     </span>
                     <span className="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">
-                      خصم 50%
+                      خصم {discountPercentage}%
                     </span>
                   </div>
                   {/* Current Price */}

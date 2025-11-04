@@ -158,6 +158,51 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Payment Methods */}
+        <div className="border-t border-primary-300/10 pt-8 pb-4">
+          <div className="text-center">
+            <h4 className="text-base sm:text-lg font-bold mb-4 text-primary-300">طرق الدفع المتاحة</h4>
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+              <div className="bg-white rounded-lg p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg"
+                  alt="Google Pay"
+                  width={60}
+                  height={25}
+                  className="h-5 sm:h-6 w-auto"
+                />
+              </div>
+              <div className="bg-white rounded-lg p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg"
+                  alt="Apple Pay"
+                  width={60}
+                  height={25}
+                  className="h-5 sm:h-6 w-auto"
+                />
+              </div>
+              <div className="bg-white rounded-lg p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
+                  alt="Visa"
+                  width={60}
+                  height={20}
+                  className="h-4 sm:h-5 w-auto"
+                />
+              </div>
+              <div className="bg-white rounded-lg p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                  alt="Mastercard"
+                  width={50}
+                  height={30}
+                  className="h-5 sm:h-6 w-auto"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Bottom Bar */}
         <div className="border-t border-primary-300/10 pt-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -176,4 +221,3 @@ export default function Footer() {
     </footer>
   );
 }
-

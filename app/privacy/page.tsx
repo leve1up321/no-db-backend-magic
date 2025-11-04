@@ -272,11 +272,6 @@ export default function PrivacyPage() {
                   </li>
                 </ul>
                 
-                <div className="mt-4 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    لممارسة أي من هذه الحقوق، يرجى التواصل معنا عبر: <a href="mailto:privacy@levelup.com" className="text-orange-600 dark:text-orange-400 hover:underline">privacy@levelup.com</a>
-                  </p>
-                </div>
               </div>
 
               {/* التحديثات */}
@@ -289,27 +284,6 @@ export default function PrivacyPage() {
                 </p>
               </div>
             </div>
-
-            {/* تواصل معنا */}
-            <div className="mt-12 p-8 bg-gradient-to-br from-primary-600 to-accent-600 rounded-xl text-center text-white">
-              <h2 className="text-2xl font-bold mb-4">
-                📧 هل لديك أسئلة حول سياسة الخصوصية؟
-              </h2>
-              <p className="text-lg mb-4">
-                لا تتردد في التواصل معنا
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a href="mailto:privacy@levelup.com" className="text-white hover:text-gray-200 underline">
-                  privacy@levelup.com
-                </a>
-                <span className="hidden sm:block">|</span>
-                <a href="https://wa.me/966501234567" className="text-white hover:text-gray-200 underline">
-                  +966 50 123 4567
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       <Footer />

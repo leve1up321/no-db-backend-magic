@@ -66,39 +66,40 @@ export default function SecureDownloadButton({
     }
   };
 
-  // 🟡 حالة: قيد الانتظار
+  // 🟡 حالة: قيد الانتظار أو فشل الدفع
   if (!isPaid) {
+    const isFailed = orderStatus === 'failed' || orderStatus === 'refunded';
+    
     return (
-      <div className="w-full p-6 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-800 rounded-xl">
+      <div className={`w-full p-6 border-2 rounded-xl ${
+        isFailed 
+          ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+          : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+      }`}>
         <div className="flex items-center gap-3 mb-3">
-          <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
-          <h3 className="text-lg font-bold text-yellow-900 dark:text-yellow-100">
-            في انتظار تأكيد الدفع...
+          {isFailed ? (
+            <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+          ) : (
+            <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+          )}
+          <h3 className={`text-lg font-bold ${
+            isFailed 
+              ? 'text-red-900 dark:text-red-100'
+              : 'text-yellow-900 dark:text-yellow-100'
+          }`}>
+            {isFailed ? 'فشلت عملية الدفع' : 'في انتظار تأكيد الدفع...'}
           </h3>
         </div>
-        <p className="text-sm text-yellow-700 dark:text-yellow-300">
-          سيتم إرسال رابط التحميل بعد اكتمال عملية الدفع بنجاح
+        <p className={`text-sm ${
+          isFailed
+            ? 'text-red-700 dark:text-red-300'
+            : 'text-yellow-700 dark:text-yellow-300'
+        }`}>
+          {isFailed 
+            ? 'عذراً، لم تكتمل عملية الدفع بنجاح. يرجى إعادة المحاولة.'
+            : 'سيتم إرسال رابط التحميل بعد اكتمال عملية الدفع بنجاح'
+          }
         </p>
-      </div>
-    );
-  }
-
-  // 🔴 حالة: فشل الدفع
-  if (orderStatus === 'failed') {
-    return (
-      <div className="w-full p-6 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
-        <div className="flex items-center gap-3 mb-3">
-          <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
-          <h3 className="text-lg font-bold text-red-900 dark:text-red-100">
-            فشلت عملية الدفع
-          </h3>
-        </div>
-        <p className="text-sm text-red-700 dark:text-red-300 mb-4">
-          عذراً، لم تكتمل عملية الدفع بنجاح
-        </p>
-        <button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors">
-          إعادة المحاولة
-        </button>
       </div>
     );
   }
@@ -214,4 +215,3 @@ export default function SecureDownloadButton({
     </div>
   );
 }
-

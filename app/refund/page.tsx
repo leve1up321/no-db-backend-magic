@@ -130,31 +130,6 @@ export default function RefundPage() {
               </div>
             </div>
 
-            {/* كيفية طلب الاستبدال */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border-r-4 border-primary-600 dark:border-primary-400 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                📞 كيفية طلب الاستبدال
-              </h2>
-              <p className="text-gray-700 dark:text-gray-300 mb-4">
-                إذا واجهت مشكلة حقيقية في المنتج، يمكنك التواصل معنا عبر:
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                  <span className="text-primary-600 dark:text-primary-400">📧</span>
-                  <span>البريد الإلكتروني: <a href="mailto:support@levelup.com" className="text-primary-600 dark:text-primary-400 hover:underline">support@levelup.com</a></span>
-                </li>
-                <li className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                  <span className="text-green-600 dark:text-green-400">💬</span>
-                  <span>واتساب: <a href="https://wa.me/966501234567" className="text-green-600 dark:text-green-400 hover:underline">+966 50 123 4567</a></span>
-                </li>
-              </ul>
-              <div className="mt-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  ⏱️ <strong>وقت الاستجابة:</strong> يتم مراجعة جميع الطلبات من قبل فريق الدعم الفني خلال 24 ساعة.
-                </p>
-              </div>
-            </div>
-
             {/* ملاحظة ختامية */}
             <div className="mt-12 p-8 bg-gradient-to-br from-primary-600 to-accent-600 rounded-xl text-center text-white">
               <p className="text-xl font-bold mb-4">
@@ -172,4 +147,3 @@ export default function RefundPage() {
     </main>
   );
 }
-

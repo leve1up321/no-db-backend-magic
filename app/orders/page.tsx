@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Package, Download, CheckCircle, XCircle, Clock, RefreshCw, Mail, CreditCard } from "lucide-react";
+import { Search, Package, Download, CheckCircle, XCircle, Clock, RefreshCw, Mail, CreditCard, Home } from "lucide-react";
+import Link from "next/link";
 
 interface OrderItem {
   id: string | number;
@@ -125,6 +126,17 @@ export default function OrdersPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       <div className="container mx-auto px-4 py-8">
+        {/* Back to Home Button */}
+        <div className="mb-6">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200"
+          >
+            <Home className="w-5 h-5" />
+            <span className="font-semibold">العودة للصفحة الرئيسية</span>
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full mb-4">
@@ -391,4 +403,3 @@ export default function OrdersPage() {
     </div>
   );
 }
-

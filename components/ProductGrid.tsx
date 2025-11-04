@@ -49,6 +49,38 @@ export default function ProductGrid() {
     }
   };
 
+  const handleDirectPayment = async (product: any) => {
+    try {
+      const { amount } = getPrice(product);
+      showToast('جاري تحضير صفحة الدفع... ⏳', 'cart');
+      
+      const response = await fetch("/api/payment_intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          amount: amount, 
+          currency: currency,
+          productName: product.name,
+          message: `دفع مقابل ${product.name}`,
+          test: true // غيّر إلى false للدفع الحقيقي
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.redirect_url) {
+        // Redirect to Ziina payment page
+        window.location.href = data.redirect_url;
+      } else {
+        showToast('حدث خطأ في إنشاء عملية الدفع. حاول مرة أخرى.', 'cart');
+        console.error("Payment error:", data);
+      }
+    } catch (error) {
+      showToast('حدث خطأ في الاتصال. حاول مرة أخرى.', 'cart');
+      console.error("Payment error:", error);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
       {products.map((product) => {
@@ -165,11 +197,11 @@ export default function ProductGrid() {
 
               {/* Mobile CTA Button */}
               <button
-                onClick={() => handleAddToCart(product)}
-                className="w-full mt-3 sm:hidden bg-gradient-to-r from-primary-300 to-primary-400 text-gray-900 py-3 rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-primary-300/30 transition-all duration-300 active:scale-95 touch-manipulation flex items-center justify-center gap-2"
+                onClick={() => handleDirectPayment(product)}
+                className="w-full mt-3 sm:hidden bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 active:scale-95 touch-manipulation flex items-center justify-center gap-2"
               >
                 <ShoppingCart className="w-4 h-4" />
-                <span>اشترِ الآن</span>
+                <span>استثمر الآن</span>
               </button>
             </div>
           </div>

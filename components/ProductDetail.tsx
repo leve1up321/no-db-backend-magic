@@ -238,7 +238,7 @@ export default function ProductDetail({ product }: { product: Product }) {
                   style={{ fontSize: '16px' }}
                 >
                   <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
-                  ادفع الآن ⚡
+                  استثمر الآن ⚡
                 </button>
                 <button
                   onClick={handleAddToCart}
@@ -247,17 +247,6 @@ export default function ProductDetail({ product }: { product: Product }) {
                 >
                   <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                   أضف للسلة
-                </button>
-                <button
-                  onClick={handleWishlist}
-                  className={`p-4 sm:p-5 border-2 rounded-xl transition-all duration-300 touch-manipulation hover:scale-110 active:scale-95 ${
-                    isInWishlist
-                      ? 'bg-accent-600/20 border-accent-600 text-accent-600'
-                      : 'bg-dark-300/50 border-primary-300/30 text-gray-300 hover:border-accent-600 hover:text-accent-600'
-                  }`}
-                  aria-label="إضافة للأمنيات"
-                >
-                  <Heart className={`w-6 h-6 ${isInWishlist ? 'fill-current' : ''}`} />
                 </button>
               </div>
             </div>

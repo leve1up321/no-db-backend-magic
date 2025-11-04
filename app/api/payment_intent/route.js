@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 
+// دالة تحويل الدراهم إلى فلسات
+function convertAEDtoFils(amountInAED) {
+  return Math.round(amountInAED * 100);
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -11,7 +16,7 @@ export async function POST(req) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        amount: body.amount,
+        amount: convertAEDtoFils(body.amount),
         currency: "AED",
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cancel`,
@@ -40,4 +45,3 @@ export async function POST(req) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
-

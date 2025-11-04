@@ -271,7 +271,6 @@ export default function PrivacyPage() {
                     <span>طلب نقل معلوماتك</span>
                   </li>
                 </ul>
-                
               </div>
 
               {/* التحديثات */}
@@ -284,6 +283,10 @@ export default function PrivacyPage() {
                 </p>
               </div>
             </div>
+
+
+          </div>
+        </div>
       </section>
 
       <Footer />

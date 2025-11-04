@@ -23,6 +23,7 @@ export interface Order {
     quantity: number;
   }>;
   downloadUrl?: string;
+  productDownloadUrl?: string; // رابط الملف الأصلي من Blob
   downloadExpiry?: number;
   createdAt: string;
   paidAt?: string;
@@ -165,4 +166,3 @@ export function getOrdersByEmail(email: string): Order[] {
   const orders = getAllOrders();
   return orders.filter(order => order.customerEmail === email);
 }
-

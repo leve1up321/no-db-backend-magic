@@ -1,4 +1,4 @@
-# 🔐 إعداد نظام الدفع عبر Ziina Payment Gateway
+# 🔐 إعداد نظام الدفع عبر Ziina Payment Gateway (API v2)
 
 ## 📋 الخطوات المطلوبة:
 
@@ -7,6 +7,8 @@
 1. سجّل دخول إلى لوحة تحكم Ziina: https://dashboard.ziina.com/
 2. انتقل إلى قسم **API Keys**
 3. انسخ **Secret Key** (يبدأ بـ `sk_test_` للتجربة أو `sk_live_` للإنتاج)
+
+**ملاحظة:** نحن نستخدم Ziina API v2 (`https://api-v2.ziina.com/api/payment_intent`)
 
 ---
 
@@ -66,28 +68,51 @@ npm run dev
 
 ---
 
-### 5️⃣ صفحات النجاح والإلغاء
+### 5️⃣ بارامترات Payment Intent (API v2)
+
+نظام الدفع يرسل البارامترات التالية إلى Ziina API v2:
+
+| البارامتر | الوصف | مثال |
+|----------|-------|------|
+| `amount` | المبلغ بالفلسات (يتم التحويل تلقائياً) | `10500` (يعني 105 درهم) |
+| `currency_code` | رمز العملة (3 أحرف) | `AED` |
+| `message` | رسالة الدفع | `دفع مقابل اسم المنتج` |
+| `success_url` | رابط النجاح | `https://yoursite.com/success` |
+| `cancel_url` | رابط الإلغاء | `https://yoursite.com/cancel` |
+| `failure_url` | رابط الفشل | `https://yoursite.com/cancel` |
+| `test` | وضع التجربة | `true` أو `false` |
+| `expiry` | انتهاء الصلاحية | `Date.now() + 3600000` (ساعة) |
+| `allow_tips` | السماح بالإكراميات | `false` |
+
+**ملاحظة مهمة:** 
+- نحن نستخدم دالة `convertAEDtoFils()` لتحويل المبلغ تلقائياً
+- 1 درهم = 100 فلس
+- Ziina تتطلب المبلغ بالفلسات دائماً
+
+---
+
+### 6️⃣ صفحات النجاح والإلغاء
 
 تم إنشاء صفحتين جاهزتين:
 
-- ✅ **صفحة النجاح:** `/payment/success`
+- ✅ **صفحة النجاح:** `/success`
   - تظهر عند إكمال الدفع بنجاح
   - تعرض رسالة تأكيد وتوجيهات للمستخدم
 
-- ❌ **صفحة الإلغاء:** `/payment/cancel`
-  - تظهر عند إلغاء المستخدم للدفع
+- ❌ **صفحة الإلغاء/الفشل:** `/cancel`
+  - تظهر عند إلغاء المستخدم للدفع أو فشله
   - تعرض خيارات للمحاولة مرة أخرى
 
 ---
 
-## 🔧 الملفات التي تم إنشاؤها:
+## 🔧 الملفات التي تم إنشاؤها/تحديثها:
 
 ```
 📁 المشروع
-├── 📄 app/api/payment_intent/route.ts        # API route للدفع
-├── 📄 app/payment/success/page.tsx           # صفحة النجاح
-├── 📄 app/payment/cancel/page.tsx            # صفحة الإلغاء
-├── 📄 components/ProductDetail.tsx           # تم إضافة زر الدفع
+├── 📄 app/api/payment_intent/route.js        # API route للدفع (JavaScript + API v2)
+├── 📄 app/success/page.tsx                   # صفحة النجاح
+├── 📄 app/cancel/page.tsx                    # صفحة الإلغاء/الفشل
+├── 📄 components/ProductDetail.tsx           # تم إضافة زر الدفع + اسم المنتج
 ├── 📄 .env.example                           # مثال للمتغيرات البيئية
 └── 📄 ZIINA_SETUP.md                         # هذا الملف
 ```

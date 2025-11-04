@@ -9,7 +9,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-    const response = await fetch("https://api.ziina.com/payment_intent", {
+    const response = await fetch("https://api-v2.ziina.com/api/payment_intent", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.ZIINA_SECRET_KEY}`,
@@ -17,10 +17,14 @@ export async function POST(req) {
       },
       body: JSON.stringify({
         amount: convertAEDtoFils(body.amount),
-        currency: "AED",
+        currency_code: "AED",
+        message: body.message || `دفع مقابل ${body.productName || 'المنتج'}`,
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cancel`,
+        failure_url: `${process.env.NEXT_PUBLIC_APP_URL}/cancel`,
         test: true,
+        expiry: Date.now() + 3600000, // انتهاء الصلاحية بعد ساعة
+        allow_tips: false,
       }),
     });
 

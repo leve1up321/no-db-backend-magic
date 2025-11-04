@@ -132,6 +132,8 @@ export default function ProductDetail({ product }: { product: Product }) {
         body: JSON.stringify({ 
           amount: price, 
           currency: currency,
+          productName: product.name,
+          message: `دفع مقابل ${product.name}`,
           test: true // غيّر إلى false للدفع الحقيقي
         }),
       });

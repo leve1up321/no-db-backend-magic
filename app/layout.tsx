@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/Toaster';
@@ -10,6 +10,18 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic'],
   display: 'swap',
 });
+
+// ✅ في Next.js 14+، viewport و themeColor يجب أن يكونوا في export منفصل
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#5AC8FA' },
+    { media: '(prefers-color-scheme: dark)', color: '#121212' },
+  ],
+};
 
 export const metadata: Metadata = {
   title: 'LevelUp Digital Store | متجر لفل اب الرقمي',
@@ -31,16 +43,6 @@ export const metadata: Metadata = {
     ],
   },
   manifest: '/site.webmanifest',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#5AC8FA' },
-    { media: '(prefers-color-scheme: dark)', color: '#121212' },
-  ],
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

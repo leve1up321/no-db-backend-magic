@@ -61,9 +61,13 @@ export async function POST(req) {
     console.log("⏰ Expiry timestamp (milliseconds, string):", expiry);
     console.log("⏰ Expiry date:", new Date(parseInt(expiry)).toISOString());
     
-    // إنشاء رسالة توضح محتويات السلة
-    const itemNames = cartItems.map(item => item.name).join(", ");
-    const message = `دفع مقابل ${cartItems.length} منتج: ${itemNames.substring(0, 100)}`;
+    // إنشاء رسالة قصيرة (Ziina لها حد أقصى لطول الرسالة)
+    const itemCount = cartItems.length;
+    const message = itemCount === 1 
+      ? `دفع لمنتج واحد` 
+      : `دفع لـ ${itemCount} منتجات`;
+    
+    console.log("📝 Payment message:", message);
     
     const paymentData = {
       amount: amountInFils,

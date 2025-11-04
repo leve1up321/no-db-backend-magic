@@ -3,18 +3,25 @@
 import Link from "next/link";
 import { CheckCircle, ArrowRight, Mail } from "lucide-react";
 import { useEffect } from "react";
+import { useApp } from "@/contexts/AppContext";
 
 export default function SuccessPage() {
+  const { clearCart } = useApp();
+
   useEffect(() => {
+    // 🎉 تفريغ السلة عند نجاح الدفع
+    console.log("Payment successful! Clearing cart...");
+    clearCart();
+    
     // يمكنك إضافة تتبع للتحليلات هنا
-    console.log("Payment successful!");
-  }, []);
+    console.log("Cart cleared successfully!");
+  }, [clearCart]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-400 via-dark-300 to-dark-400 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Success Card */}
-        <div className="bg-dark-300/80 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-primary-300/30 p-8 sm:p-12 text-center">
+        <div className="bg-dark-300/80 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-primary-300/30 p-8 sm:p-12 text-center animate-scale-in">
           {/* Success Icon */}
           <div className="flex justify-center mb-6">
             <div className="bg-green-500/20 rounded-full p-6 border-2 border-green-500/50 animate-bounce">

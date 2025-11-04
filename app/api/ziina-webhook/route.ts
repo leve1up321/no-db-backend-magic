@@ -3,6 +3,8 @@ import { verifyZiinaSignature } from "@/lib/signature";
 import { sendDiscordNotification } from "@/lib/discord";
 import { createOrder, updateOrderByPaymentId, findOrderByPaymentId } from "@/lib/database";
 import { uploadTextFile } from "@/lib/blob-storage";
+import { generateSecureDownloadUrl } from "@/lib/download-tokens";
+import productsData from "@/data/products.json";
 
 /**
  * 🎯 Ziina Webhook Handler - نسخة متقدمة ومتكاملة
@@ -119,7 +121,48 @@ export async function POST(req: NextRequest) {
         console.log("💾 Order updated in database:", order.id);
       }
 
-      // 2️⃣ رفع ملف إيصال على Vercel Blob
+      // 2️⃣ الحصول على رابط الملف من المنتج
+      let productDownloadUrl = '';
+      
+      if (items && items.length > 0) {
+        const productId = items[0].id || items[0].productId;
+        const product = productsData.find((p: any) => p.id === productId);
+        
+        if (product && product.downloadUrl) {
+          productDownloadUrl = product.downloadUrl;
+          console.log("📦 Product download URL found:", productDownloadUrl);
+        } else {
+          console.warn("⚠️ No download URL found for product:", productId);
+        }
+      }
+
+      // 3️⃣ توليد رابط تحميل آمن ومحمي
+      let secureDownloadUrl = '';
+      
+      if (productDownloadUrl && order && customerEmail) {
+        try {
+          secureDownloadUrl = await generateSecureDownloadUrl(
+            order.id,
+            paymentId,
+            productDownloadUrl,
+            customerEmail
+          );
+          
+          console.log("🔒 Secure download URL generated");
+          
+          // حفظ رابط التحميل الآمن في قاعدة البيانات
+          updateOrderByPaymentId(paymentId, {
+            downloadUrl: secureDownloadUrl,
+            productDownloadUrl: productDownloadUrl, // حفظ الرابط الأصلي أيضاً
+            downloadExpiry: Date.now() + (30 * 60 * 1000) // 30 دقيقة
+          });
+          
+        } catch (tokenError: any) {
+          console.error("❌ Error generating secure download URL:", tokenError.message);
+        }
+      }
+
+      // 4️⃣ رفع إيصال نصي (اختياري)
       try {
         const receiptContent = `
 ===========================================
@@ -139,6 +182,11 @@ ${customerEmail || 'غير محدد'}
 المنتجات:
 ${items.map(item => `  • ${item.name} (x${item.quantity}) - ${item.price} ${currency}`).join('\n')}
 
+رابط التحميل:
+${secureDownloadUrl || 'لم يتم توليد رابط'}
+
+ملاحظة: الرابط صالح لمدة 30 دقيقة ولاستخدام واحد فقط
+
 ===========================================
 شكراً لتعاملك معنا! 🎉
 ===========================================
@@ -151,17 +199,9 @@ ${items.map(item => `  • ${item.name} (x${item.quantity}) - ${item.price} ${cu
 
         console.log("📄 Receipt uploaded to Vercel Blob:", receiptResult.downloadUrl);
 
-        // حفظ رابط الإيصال في قاعدة البيانات
-        if (order) {
-          updateOrderByPaymentId(paymentId, {
-            downloadUrl: receiptResult.downloadUrl,
-            downloadExpiry: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 يوم
-          });
-        }
-
       } catch (blobError: any) {
-        console.error("❌ Error uploading to Vercel Blob:", blobError.message);
-        // نكمل العملية حتى لو فشل رفع الملف
+        console.error("❌ Error uploading receipt:", blobError.message);
+        // نكمل العملية حتى لو فشل رفع الإيصال
       }
 
       // 3️⃣ إرسال إشعار Discord
@@ -328,4 +368,3 @@ export async function GET() {
     timestamp: new Date().toISOString()
   });
 }
-

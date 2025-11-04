@@ -91,7 +91,8 @@ export async function POST(req: NextRequest) {
  * 📧 GET endpoint لاختبار إرسال إيميل تجريبي
  */
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
+  // استخدام req.nextUrl بدلاً من req.url
+  const searchParams = req.nextUrl.searchParams;
   const testEmail = searchParams.get("test");
 
   if (!testEmail) {
@@ -151,4 +152,3 @@ export async function GET(req: NextRequest) {
     }
   });
 }
-

@@ -16,7 +16,8 @@ import {
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    // استخدام req.nextUrl بدلاً من req.url لتجنب مشكلة Dynamic server usage
+    const searchParams = req.nextUrl.searchParams;
     
     const email = searchParams.get("email");
     const orderId = searchParams.get("orderId");
@@ -92,4 +93,3 @@ export async function GET(req: NextRequest) {
     }, { status: 500 });
   }
 }
-

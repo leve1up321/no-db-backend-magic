@@ -11,7 +11,8 @@ import { head } from "@vercel/blob";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    // استخدام req.nextUrl بدلاً من req.url
+    const searchParams = req.nextUrl.searchParams;
     const blobUrl = searchParams.get("url");
     const orderId = searchParams.get("orderId");
 
@@ -96,4 +97,3 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
   }
 }
-

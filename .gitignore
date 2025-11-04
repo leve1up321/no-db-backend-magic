@@ -33,3 +33,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# database (يمكن إزالة هذا السطر إذا أردت رفع orders.json على git)
+# /data/orders.json

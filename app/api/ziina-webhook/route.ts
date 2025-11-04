@@ -1,89 +1,232 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyZiinaSignature } from "@/lib/signature";
+import { sendDiscordNotification } from "@/lib/discord";
+import { createOrder, updateOrderByPaymentId, findOrderByPaymentId } from "@/lib/database";
+import { uploadTextFile } from "@/lib/blob-storage";
 
 /**
- * 🎯 Ziina Webhook Handler
+ * 🎯 Ziina Webhook Handler - نسخة متقدمة ومتكاملة
  * 
- * يستقبل إشعارات من Ziina عند تحديث حالة الدفع
+ * المميزات:
+ * ✅ التحقق من التوقيع (Signature Verification)
+ * ✅ إشعارات Discord
+ * ✅ حفظ الطلبات في قاعدة بيانات JSON
+ * ✅ رفع الملفات على Vercel Blob
+ * ✅ توليد روابط تحميل مؤقتة
  * 
  * الاستخدام:
  * 1. ارفع المشروع على Vercel
- * 2. اذهب لـ Ziina Dashboard
- * 3. أضف webhook URL: https://your-domain.vercel.app/api/ziina-webhook
- * 4. احفظ الـ webhook secret في متغيرات البيئة ZIINA_WEBHOOK_SECRET
+ * 2. أضف webhook URL في Ziina Dashboard: https://your-domain.vercel.app/api/ziina-webhook
+ * 3. أضف المتغيرات البيئية:
+ *    - ZIINA_WEBHOOK_SECRET
+ *    - DISCORD_WEBHOOK_URL
+ *    - BLOB_READ_WRITE_TOKEN (من Vercel)
  */
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+  
   try {
-    const body = await req.json();
+    // 📥 قراءة البيانات الخام
+    const rawBody = await req.text();
+    const body = JSON.parse(rawBody);
 
-    // 📝 تسجيل البيانات المستلمة
     console.log("📩 Webhook received from Ziina at:", new Date().toISOString());
     console.log("📦 Webhook payload:", JSON.stringify(body, null, 2));
 
-    // 🔐 التحقق من التوقيع (إذا كان لديك webhook secret)
+    // 🔐 التحقق من التوقيع
     const signature = req.headers.get("x-ziina-signature");
     const webhookSecret = process.env.ZIINA_WEBHOOK_SECRET;
 
     if (webhookSecret && signature) {
-      // TODO: يمكنك إضافة التحقق من التوقيع هنا
-      console.log("🔐 Webhook signature:", signature);
+      console.log("🔐 Verifying webhook signature...");
       
-      // مثال على التحقق (حسب توثيق Ziina):
-      // const crypto = require('crypto');
-      // const expectedSignature = crypto
-      //   .createHmac('sha256', webhookSecret)
-      //   .update(JSON.stringify(body))
-      //   .digest('hex');
-      // 
-      // if (signature !== expectedSignature) {
-      //   console.error("❌ Invalid webhook signature");
-      //   return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-      // }
+      const isValid = verifyZiinaSignature(rawBody, signature, webhookSecret);
+      
+      if (!isValid) {
+        console.error("❌ Invalid webhook signature!");
+        return NextResponse.json(
+          { error: "Invalid signature" }, 
+          { status: 401 }
+        );
+      }
+      
+      console.log("✅ Webhook signature verified successfully");
+    } else if (webhookSecret) {
+      console.warn("⚠️ Webhook secret configured but no signature provided");
+    } else {
+      console.warn("⚠️ Webhook signature verification disabled (no secret configured)");
     }
 
-    // 📊 معالجة أنواع الأحداث المختلفة
+    // 📊 استخراج البيانات الأساسية
     const eventType = body.event || body.type;
     const paymentStatus = body.status;
-    const paymentId = body.id || body.payment_intent_id;
-    const amount = body.amount;
-    const currency = body.currency_code;
+    const paymentId = body.id || body.payment_intent_id || body.paymentId;
+    const amount = body.amount || 0;
+    const currency = body.currency_code || body.currency || "AED";
+    const customerEmail = body.customer_email || body.email;
+    const customerName = body.customer_name || body.name;
 
     console.log(`🎯 Event: ${eventType}, Status: ${paymentStatus}, Payment ID: ${paymentId}`);
+
+    // 📋 استخراج معلومات المنتجات إذا كانت موجودة
+    let items: any[] = [];
+    if (body.metadata?.cartItems) {
+      try {
+        items = typeof body.metadata.cartItems === 'string' 
+          ? JSON.parse(body.metadata.cartItems)
+          : body.metadata.cartItems;
+      } catch (e) {
+        console.warn("⚠️ Could not parse cart items from metadata");
+      }
+    }
 
     // ✅ معالجة حالة نجاح الدفع
     if (paymentStatus === "succeeded" || paymentStatus === "completed") {
       console.log("✅ Payment succeeded!");
       console.log(`💰 Amount: ${amount} ${currency}`);
       
-      // 📧 هنا يمكنك:
-      // 1. إرسال بريد إلكتروني للعميل برابط التحميل
-      // 2. تحديث حالة الطلب في قاعدة البيانات
-      // 3. إرسال إشعار للإدمن
+      // 1️⃣ حفظ الطلب في قاعدة البيانات
+      let order = findOrderByPaymentId(paymentId);
       
-      // مثال: إرسال بريد إلكتروني
-      // await sendDownloadEmail({
-      //   email: body.customer_email,
-      //   orderId: paymentId,
-      //   amount: amount,
-      //   currency: currency
-      // });
+      if (!order) {
+        // إنشاء طلب جديد
+        order = createOrder({
+          id: `order_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+          paymentId: paymentId,
+          status: 'paid',
+          amount: amount,
+          currency: currency,
+          customerEmail: customerEmail,
+          customerName: customerName,
+          items: items,
+          createdAt: new Date().toISOString(),
+          paidAt: new Date().toISOString(),
+          metadata: {
+            event: eventType,
+            rawWebhookData: body
+          }
+        });
+        
+        console.log("💾 Order created in database:", order.id);
+      } else {
+        // تحديث طلب موجود
+        updateOrderByPaymentId(paymentId, {
+          status: 'paid',
+          paidAt: new Date().toISOString()
+        });
+        
+        console.log("💾 Order updated in database:", order.id);
+      }
 
-      // مثال: حفظ في قاعدة بيانات
-      // await db.orders.create({
-      //   data: {
-      //     paymentId: paymentId,
-      //     status: "paid",
-      //     amount: amount,
-      //     currency: currency,
-      //     paidAt: new Date(),
-      //   }
+      // 2️⃣ رفع ملف إيصال على Vercel Blob
+      try {
+        const receiptContent = `
+===========================================
+        إيصال دفع - LEVEL UP STORE
+===========================================
+
+رقم الدفعة: ${paymentId}
+رقم الطلب: ${order?.id}
+التاريخ: ${new Date().toISOString()}
+
+العميل:
+${customerName || 'غير محدد'}
+${customerEmail || 'غير محدد'}
+
+المبلغ المدفوع: ${amount} ${currency}
+
+المنتجات:
+${items.map(item => `  • ${item.name} (x${item.quantity}) - ${item.price} ${currency}`).join('\n')}
+
+===========================================
+شكراً لتعاملك معنا! 🎉
+===========================================
+        `.trim();
+
+        const receiptResult = await uploadTextFile(
+          `receipts/${paymentId}_receipt.txt`,
+          receiptContent
+        );
+
+        console.log("📄 Receipt uploaded to Vercel Blob:", receiptResult.downloadUrl);
+
+        // حفظ رابط الإيصال في قاعدة البيانات
+        if (order) {
+          updateOrderByPaymentId(paymentId, {
+            downloadUrl: receiptResult.downloadUrl,
+            downloadExpiry: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 يوم
+          });
+        }
+
+      } catch (blobError: any) {
+        console.error("❌ Error uploading to Vercel Blob:", blobError.message);
+        // نكمل العملية حتى لو فشل رفع الملف
+      }
+
+      // 3️⃣ إرسال إشعار Discord
+      try {
+        await sendDiscordNotification({
+          paymentId: paymentId,
+          amount: amount,
+          currency: currency,
+          status: 'succeeded',
+          customerEmail: customerEmail,
+          customerName: customerName,
+          items: items
+        });
+        
+        console.log("🔔 Discord notification sent");
+      } catch (discordError: any) {
+        console.error("❌ Error sending Discord notification:", discordError.message);
+        // نكمل العملية حتى لو فشل إرسال الإشعار
+      }
+
+      // 4️⃣ هنا يمكن إضافة:
+      // - إرسال بريد إلكتروني للعميل
+      // - توليد رابط تحميل للمنتج
+      // - إرسال إشعار SMS
+      // مثال:
+      // await sendDownloadEmail({
+      //   email: customerEmail,
+      //   orderId: order.id,
+      //   downloadUrl: order.downloadUrl
       // });
     }
 
     // ⏳ معالجة حالة الانتظار
     else if (paymentStatus === "pending") {
       console.log("⏳ Payment is pending...");
-      // يمكنك إرسال إشعار بأن الدفع قيد المعالجة
+      
+      // حفظ كطلب معلق
+      let order = findOrderByPaymentId(paymentId);
+      if (!order) {
+        createOrder({
+          id: `order_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+          paymentId: paymentId,
+          status: 'pending',
+          amount: amount,
+          currency: currency,
+          customerEmail: customerEmail,
+          customerName: customerName,
+          items: items,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      // إرسال إشعار Discord
+      try {
+        await sendDiscordNotification({
+          paymentId: paymentId,
+          amount: amount,
+          currency: currency,
+          status: 'pending',
+          customerEmail: customerEmail,
+          customerName: customerName
+        });
+      } catch (e) {
+        console.error("❌ Error sending Discord notification:", e);
+      }
     }
 
     // ❌ معالجة حالة فشل الدفع
@@ -91,21 +234,52 @@ export async function POST(req: NextRequest) {
       console.log("❌ Payment failed or cancelled");
       console.log(`📝 Reason: ${body.failure_reason || body.cancellation_reason || "Unknown"}`);
       
-      // يمكنك إرسال إشعار للعميل بفشل الدفع
-      // await sendFailureEmail({
-      //   email: body.customer_email,
-      //   reason: body.failure_reason
-      // });
+      // تحديث الطلب
+      updateOrderByPaymentId(paymentId, {
+        status: 'failed'
+      });
+
+      // إرسال إشعار Discord
+      try {
+        await sendDiscordNotification({
+          paymentId: paymentId,
+          amount: amount,
+          currency: currency,
+          status: 'failed',
+          customerEmail: customerEmail,
+          customerName: customerName
+        });
+      } catch (e) {
+        console.error("❌ Error sending Discord notification:", e);
+      }
     }
 
     // 🔄 معالجة حالة الاسترجاع
     else if (paymentStatus === "refunded") {
       console.log("🔄 Payment was refunded");
       
-      // يمكنك:
-      // 1. تحديث حالة الطلب
-      // 2. إرسال بريد تأكيد الاسترجاع
+      // تحديث الطلب
+      updateOrderByPaymentId(paymentId, {
+        status: 'refunded'
+      });
+
+      // إرسال إشعار Discord
+      try {
+        await sendDiscordNotification({
+          paymentId: paymentId,
+          amount: amount,
+          currency: currency,
+          status: 'refunded',
+          customerEmail: customerEmail,
+          customerName: customerName
+        });
+      } catch (e) {
+        console.error("❌ Error sending Discord notification:", e);
+      }
     }
+
+    const processingTime = Date.now() - startTime;
+    console.log(`⏱️ Webhook processed in ${processingTime}ms`);
 
     // ✅ الرد على Ziina بنجاح استلام الـ webhook
     return NextResponse.json({ 
@@ -113,7 +287,8 @@ export async function POST(req: NextRequest) {
       message: "Webhook processed successfully",
       event: eventType,
       status: paymentStatus,
-      payment_id: paymentId
+      payment_id: paymentId,
+      processing_time_ms: processingTime
     }, { status: 200 });
 
   } catch (error: any) {
@@ -133,11 +308,23 @@ export async function POST(req: NextRequest) {
 
 // 🔍 GET endpoint للتحقق من أن الـ webhook يعمل
 export async function GET() {
+  const config = {
+    signatureVerification: !!process.env.ZIINA_WEBHOOK_SECRET,
+    discordNotifications: !!process.env.DISCORD_WEBHOOK_URL,
+    blobStorage: !!process.env.BLOB_READ_WRITE_TOKEN,
+  };
+
   return NextResponse.json({ 
     status: "active",
     message: "Ziina webhook endpoint is ready",
     endpoint: "/api/ziina-webhook",
-    methods: ["POST"],
+    methods: ["POST", "GET"],
+    features: {
+      signatureVerification: config.signatureVerification ? "✅ Enabled" : "⚠️ Disabled",
+      discordNotifications: config.discordNotifications ? "✅ Enabled" : "⚠️ Disabled",
+      blobStorage: config.blobStorage ? "✅ Enabled" : "⚠️ Disabled",
+      database: "✅ Enabled (JSON)"
+    },
     timestamp: new Date().toISOString()
   });
 }

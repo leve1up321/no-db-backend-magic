@@ -41,11 +41,11 @@ export async function POST(req) {
     console.log("💰 Converted amount (fils):", amountInFils);
     
     // 📦 بناء الطلب
-    // احسب expiry بالميلي ثانية (ساعة واحدة من الآن)
-    // Ziina تتوقع timestamp بالميلي ثانية كـ number
-    const expiryInMilliseconds = Date.now() + (3600 * 1000); // + ساعة واحدة
-    console.log("⏰ Expiry timestamp (milliseconds):", expiryInMilliseconds);
-    console.log("⏰ Expiry date:", new Date(expiryInMilliseconds).toISOString());
+    // احسب expiry بالميلي ثانية (10 دقائق من الآن)
+    // Ziina تتوقع timestamp بالميلي ثانية كـ string
+    const expiry = (Date.now() + 10 * 60 * 1000).toString(); // بعد 10 دقائق من الآن
+    console.log("⏰ Expiry timestamp (milliseconds, string):", expiry);
+    console.log("⏰ Expiry date:", new Date(parseInt(expiry)).toISOString());
     
     const paymentData = {
       amount: amountInFils,
@@ -55,7 +55,7 @@ export async function POST(req) {
       cancel_url: `${appUrl}/cancel`,
       failure_url: `${appUrl}/cancel`,
       test: true,
-      expiry: expiryInMilliseconds,
+      expiry: expiry, // string بالميلي ثانية
       allow_tips: false,
     };
     

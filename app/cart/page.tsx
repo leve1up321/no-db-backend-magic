@@ -115,7 +115,8 @@ export default function CartPage() {
   return (
     <main className="min-h-screen">
       <Navbar />
-      <section className="py-12 bg-white dark:bg-gray-900 transition-colors duration-300">
+      {/* padding-top للتأكد من عدم تداخل الهيدر */}
+      <section className="pt-24 pb-12 bg-white dark:bg-gray-900 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8 animate-fade-in">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -285,4 +286,3 @@ export default function CartPage() {
     </main>
   );
 }
-

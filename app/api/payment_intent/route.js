@@ -41,6 +41,11 @@ export async function POST(req) {
     console.log("💰 Converted amount (fils):", amountInFils);
     
     // 📦 بناء الطلب
+    // تحويل expiry إلى ثوانٍ (seconds) وليس ميلي ثانية
+    const expiryInSeconds = Math.floor((Date.now() + 3600000) / 1000);
+    console.log("⏰ Expiry timestamp (seconds):", expiryInSeconds);
+    console.log("⏰ Expiry date:", new Date(expiryInSeconds * 1000).toISOString());
+    
     const paymentData = {
       amount: amountInFils,
       currency_code: "AED",
@@ -49,7 +54,7 @@ export async function POST(req) {
       cancel_url: `${appUrl}/cancel`,
       failure_url: `${appUrl}/cancel`,
       test: true,
-      expiry: Date.now() + 3600000,
+      expiry: expiryInSeconds,
       allow_tips: false,
     };
     

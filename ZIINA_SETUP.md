@@ -118,13 +118,15 @@ npm run dev
 | `cancel_url` | رابط الإلغاء | `https://yoursite.com/cancel` |
 | `failure_url` | رابط الفشل | `https://yoursite.com/cancel` |
 | `test` | وضع التجربة | `true` أو `false` |
-| `expiry` | انتهاء الصلاحية | `Date.now() + 3600000` (ساعة) |
+| `expiry` | انتهاء الصلاحية (بالثواني) | `Math.floor((Date.now() + 3600000) / 1000)` |
 | `allow_tips` | السماح بالإكراميات | `false` |
 
-**ملاحظة مهمة:** 
+**ملاحظات مهمة:** 
 - نحن نستخدم دالة `convertAEDtoFils()` لتحويل المبلغ تلقائياً
 - 1 درهم = 100 فلس
 - Ziina تتطلب المبلغ بالفلسات دائماً
+- `expiry` يجب أن يكون بالثواني (seconds)، ليس بالميلي ثانية
+- نستخدم `Math.floor((Date.now() + 3600000) / 1000)` لتحويله
 
 ---
 

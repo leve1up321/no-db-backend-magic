@@ -57,6 +57,40 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ### 4️⃣ التحقق من عمل النظام
 
+#### التشخيص والتصحيح:
+
+نظام الدفع يتضمن **تسجيل شامل (Console Logging)** لمساعدتك في التشخيص:
+
+**سترى في Console الخاص بـ Vercel أو Terminal:**
+
+```
+🔑 Ziina API Key exists: true
+🔑 API Key prefix: sk_test_ab...
+🌐 App URL: https://yoursite.com
+💰 Original amount (AED): 105
+💰 Converted amount (fils): 10500
+📤 Sending payment data: { ... }
+📥 Response status: 200
+📥 Response headers: { ... }
+📥 Response text (first 500 chars): ...
+✅ Parsed response data: { ... }
+✅ Payment intent created successfully!
+✅ Redirect URL: https://pay.ziina.com/...
+```
+
+**للتأكد من صحة الإعداد:**
+
+| # | الخطوة | كيفية التحقق |
+|---|--------|---------------|
+| 1 | المتغيرات البيئية موجودة | تحقق من رسالة `🔑 Ziina API Key exists: true` |
+| 2 | المفتاح صحيح | تحقق من `🔑 API Key prefix:` يبدأ بـ `sk_test_` أو `sk_live_` |
+| 3 | رابط الموقع صحيح | تحقق من `🌐 App URL:` يطابق موقعك |
+| 4 | تحويل المبلغ صحيح | قارن `💰 Original` و `💰 Converted` (×100) |
+| 5 | الرد يحتوي redirect_url | تحقق من وجود `✅ Redirect URL:` |
+| 6 | وضع التجربة نشط | تحقق من `"test": true` في البيانات المرسلة |
+
+**اختبار سريع:**
+
 1. شغّل المشروع محلياً:
 ```bash
 npm run dev
@@ -64,7 +98,10 @@ npm run dev
 
 2. افتح أي صفحة منتج
 3. اضغط على زر **"ادفع الآن ⚡"**
-4. يجب أن يتم توجيهك إلى صفحة الدفع في Ziina
+4. افتح Developer Console (`F12`) وتابع الرسائل
+5. يجب أن يتم توجيهك إلى صفحة الدفع في Ziina
+
+⚠️ **ملاحظة:** يمكنك حذف رسائل console.log بعد التأكد من عمل النظام
 
 ---
 
@@ -137,6 +174,57 @@ Ziina تدعم:
 - ✅ مفتاح API محفوظ في Backend فقط
 - ✅ لا يتم عرض المفتاح في Front-End
 - ✅ جميع الطلبات مشفرة عبر HTTPS
+
+---
+
+## 🔧 استكشاف الأخطاء (Troubleshooting)
+
+### المشكلة: "ZIINA_SECRET_KEY is not configured"
+
+**الحل:**
+1. تأكد من وجود ملف `.env.local` في جذر المشروع
+2. تأكد من أن الملف يحتوي على: `ZIINA_SECRET_KEY=sk_test_...`
+3. أعد تشغيل خادم التطوير: `npm run dev`
+
+### المشكلة: "No redirect URL received from Ziina"
+
+**الحل:**
+1. تحقق من صحة مفتاح API
+2. تحقق من أن المبلغ صحيح (أكثر من 0)
+3. راجع رسائل الخطأ في Console
+4. تأكد من صحة البارامترات المرسلة
+
+### المشكلة: "Payment creation failed"
+
+**الأسباب المحتملة:**
+- مفتاح API خاطئ أو منتهي
+- المبلغ أقل من الحد الأدنى
+- currency_code غير مدعوم
+- البارامترات المطلوبة ناقصة
+
+**الحل:**
+- راجع رسالة الخطأ المفصلة في Console
+- تحقق من `❌ Error details:` للحصول على المزيد من المعلومات
+
+### المشكلة: المبلغ غير صحيح في صفحة الدفع
+
+**الحل:**
+1. تحقق من المبلغ الأصلي: `💰 Original amount`
+2. تحقق من المبلغ المحول: `💰 Converted amount`
+3. تأكد من أن التحويل صحيح: `المبلغ × 100`
+4. مثال: 105 AED = 10,500 fils
+
+### المشكلة: redirect_url لا يعمل
+
+**الحل:**
+1. تحقق من وجود `redirect_url` في الرد: `✅ Redirect URL:`
+2. تحقق من كود JavaScript في ProductDetail.tsx:
+```javascript
+if (data.redirect_url) {
+  window.location.href = data.redirect_url;
+}
+```
+3. افتح Browser Console وابحث عن أخطاء JavaScript
 
 ---
 

@@ -24,14 +24,14 @@ export async function uploadFile(
   filename: string,
   content: Buffer | string | ReadableStream,
   options?: {
-    access?: 'public' | 'private';
+    access?: 'public';
     contentType?: string;
     addRandomSuffix?: boolean;
   }
 ): Promise<UploadResult> {
   try {
     const { url, pathname, downloadUrl } = await put(filename, content, {
-      access: options?.access || 'public',
+      access: 'public',
       contentType: options?.contentType,
       addRandomSuffix: options?.addRandomSuffix || false,
     });
@@ -89,15 +89,16 @@ export async function uploadJsonFile(
 }
 
 /**
- * رفع ملف خاص (private) - يتطلب signed URL للوصول
+ * رفع ملف عام - يمكن الوصول له مباشرة
+ * ملاحظة: Vercel Blob حالياً يدعم 'public' فقط
  */
-export async function uploadPrivateFile(
+export async function uploadPublicFile(
   filename: string,
   content: Buffer | string | ReadableStream,
   contentType?: string
 ): Promise<UploadResult> {
   return uploadFile(filename, content, {
-    access: 'private',
+    access: 'public',
     contentType,
   });
 }
@@ -187,4 +188,3 @@ export async function uploadCustomerAccessFile(
     contentType,
   });
 }
-

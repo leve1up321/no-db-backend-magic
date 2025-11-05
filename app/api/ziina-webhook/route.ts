@@ -126,10 +126,10 @@ export async function POST(req: NextRequest) {
       
       if (items && items.length > 0) {
         const productId = items[0].id || items[0].productId;
-        const product = productsData.find((p: any) => p.id === productId);
+        const product = productsData.find((p: any) => p.product_id === productId);
         
-        if (product && product.downloadUrl) {
-          productDownloadUrl = product.downloadUrl;
+        if (product && product.download_url) {
+          productDownloadUrl = product.download_url;
           console.log("📦 Product download URL found:", productDownloadUrl);
         } else {
           console.warn("⚠️ No download URL found for product:", productId);

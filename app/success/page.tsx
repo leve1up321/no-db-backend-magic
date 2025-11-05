@@ -35,10 +35,14 @@ function SuccessContent() {
 
   const orderId = searchParams.get("orderId");
   const paymentId = searchParams.get("paymentId");
+  const paymentIntent = searchParams.get("payment_intent"); // من Ziina redirect
 
   useEffect(() => {
     const fetchOrder = async () => {
-      if (!orderId && !paymentId) {
+      // البحث باستخدام أي من المعاملات المتاحة
+      const searchParam = orderId || paymentId || paymentIntent;
+      
+      if (!searchParam) {
         setError("معلومات الطلب غير متوفرة");
         setLoading(false);
         return;
@@ -46,7 +50,13 @@ function SuccessContent() {
 
       try {
         // جلب بيانات الطلب من API
-        const queryParam = orderId ? `orderId=${orderId}` : `paymentId=${paymentId}`;
+        const queryParam = orderId 
+          ? `orderId=${orderId}` 
+          : paymentId 
+            ? `paymentId=${paymentId}`
+            : `paymentId=${paymentIntent}`; // استخدام payment_intent كـ paymentId
+            
+        console.log("🔍 Fetching order with:", queryParam);
         const res = await fetch(`/api/orders?${queryParam}`);
         const data = await res.json();
 
@@ -64,7 +74,7 @@ function SuccessContent() {
     };
 
     fetchOrder();
-  }, [orderId, paymentId]);
+  }, [orderId, paymentId, paymentIntent]);
 
   // 🔄 حالة التحميل
   if (loading) {
@@ -286,4 +296,3 @@ export default function SuccessPage() {
     </Suspense>
   );
 }
-

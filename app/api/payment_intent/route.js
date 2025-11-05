@@ -51,7 +51,7 @@ export async function POST(req) {
       amount: amountInFils,
       currency_code: "AED",
       message: body.message || `دفع مقابل ${body.productName || 'المنتج'}`,
-      success_url: `${appUrl}/success`,
+      success_url: `${appUrl}/success?payment_intent={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/cancel`,
       failure_url: `${appUrl}/cancel`,
       test: true,

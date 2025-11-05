@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
+import { createOrder } from "@/lib/orders-store";
 
 // دالة تحويل الدراهم إلى فلسات
 function convertAEDtoFils(amountInAED) {
   return Math.round(amountInAED * 100);
+}
+
+// دالة توليد session ID فريد
+function generateSessionId() {
+  return `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 }
 
 export async function POST(req) {
@@ -69,16 +75,47 @@ export async function POST(req) {
     
     console.log("📝 Payment message:", message);
     
+    // 🆔 إنشاء session ID فريد
+    const sessionId = generateSessionId();
+    console.log("🆔 Generated session ID:", sessionId);
+    
+    // 📝 إنشاء طلب مؤقت في الذاكرة
+    const order = createOrder({
+      id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      sessionId: sessionId,
+      status: 'pending',
+      amount: totalAmount,
+      currency: 'AED',
+      items: cartItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity || 1,
+        price: item.price,
+        image: item.image
+      })),
+      createdAt: new Date().toISOString(),
+      metadata: {
+        cartItems: cartItems
+      }
+    });
+    
+    console.log("📝 Order created:", order.id);
+    
     const paymentData = {
       amount: amountInFils,
       currency_code: "AED",
       message: message,
-      success_url: `${appUrl}/success?payment_intent={CHECKOUT_SESSION_ID}`,
+      success_url: `${appUrl}/success?session_id=${sessionId}`,
       cancel_url: `${appUrl}/cancel`,
       failure_url: `${appUrl}/cancel`,
       test: true,
       expiry: expiry, // string بالميلي ثانية
       allow_tips: false,
+      metadata: {
+        sessionId: sessionId,
+        orderId: order.id,
+        cartItems: JSON.stringify(cartItems)
+      }
     };
     
     console.log("📤 Sending cart payment data:", JSON.stringify(paymentData, null, 2));

@@ -70,42 +70,42 @@ export default function ProductDetail({ product }?: { product?: Product }) {
 
   const getPrice = () => {
     switch (currency) {
-      case 'AED'?: return product.priceAED;
-      case 'KWD'?: return product.priceKWD;
-      case 'QAR'?: return product.priceQAR;
-      case 'BHD'?: return product.priceBHD;
-      case 'OMR'?: return product.priceOMR;
-      case 'JOD'?: return product.priceJOD;
-      case 'EGP'?: return product.priceEGP;
-      case 'LBP'?: return product.priceLBP;
-      case 'SYP'?: return product.priceSYP;
-      case 'IQD'?: return product.priceIQD;
-      case 'TND'?: return product.priceTND;
-      case 'MAD'?: return product.priceMAD;
-      case 'DZD'?: return product.priceDZD;
-      case 'USD'?: return product.priceUSD;
-      case 'EUR'?: return product.priceEUR;
+      case 'AED': return product.priceAED;
+      case 'KWD': return product.priceKWD;
+      case 'QAR': return product.priceQAR;
+      case 'BHD': return product.priceBHD;
+      case 'OMR': return product.priceOMR;
+      case 'JOD': return product.priceJOD;
+      case 'EGP': return product.priceEGP;
+      case 'LBP': return product.priceLBP;
+      case 'SYP': return product.priceSYP;
+      case 'IQD': return product.priceIQD;
+      case 'TND': return product.priceTND;
+      case 'MAD': return product.priceMAD;
+      case 'DZD': return product.priceDZD;
+      case 'USD': return product.priceUSD;
+      case 'EUR': return product.priceEUR;
       default?: return product.price;
     }
   };
 
   const getCurrencySymbol = () => {
     switch (currency) {
-      case 'AED'?: return 'د.إ';
-      case 'KWD'?: return 'د.ك';
-      case 'QAR'?: return 'ر.ق';
-      case 'BHD'?: return 'د.ب';
-      case 'OMR'?: return 'ر.ع';
-      case 'JOD'?: return 'د.أ';
-      case 'EGP'?: return 'ج.م';
-      case 'LBP'?: return 'ل.ل';
-      case 'SYP'?: return 'ل.س';
-      case 'IQD'?: return 'ع.د';
-      case 'TND'?: return 'د.ت';
-      case 'MAD'?: return 'د.م';
-      case 'DZD'?: return 'د.ج';
-      case 'USD'?: return '$';
-      case 'EUR'?: return '€';
+      case 'AED': return 'د.إ';
+      case 'KWD': return 'د.ك';
+      case 'QAR': return 'ر.ق';
+      case 'BHD': return 'د.ب';
+      case 'OMR': return 'ر.ع';
+      case 'JOD': return 'د.أ';
+      case 'EGP': return 'ج.م';
+      case 'LBP': return 'ل.ل';
+      case 'SYP': return 'ل.س';
+      case 'IQD': return 'ع.د';
+      case 'TND': return 'د.ت';
+      case 'MAD': return 'د.م';
+      case 'DZD': return 'د.ج';
+      case 'USD': return '$';
+      case 'EUR': return '€';
       default?: return 'ر.س';
     }
   };

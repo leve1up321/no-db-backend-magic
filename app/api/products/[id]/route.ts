@@ -5,7 +5,7 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const product = products.find((p) => p.id === parseInt(params.id));
+  const product = products.find((p) => p.product_id === parseInt(params.id));
   
   if (!product) {
     return NextResponse.json(
@@ -16,4 +16,3 @@ export async function GET(
   
   return NextResponse.json(product);
 }
-

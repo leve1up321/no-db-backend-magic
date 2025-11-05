@@ -8,32 +8,32 @@ import Image from 'next/image';
 import WhyBuySection from './WhyBuySection';
 
 interface ProductSection {
-  title: string;
-  items: string[];
+  title?: string;
+  items?: string[];
 }
 
 interface ProductSections {
-  features: ProductSection;
-  whatYouWillLearn: ProductSection;
-  requirement?: ProductSection;
-  whatYouWillGet: ProductSection;
+  features?: ProductSection;
+  whatYouWillLearn?: ProductSection;
+  requirements?: ProductSection;
+  whatYouWillGet?: ProductSection;
 }
 
 interface Product {
   // New schema fields
-  product_id: number;
-  product_name: string;
-  product_name_en: string;
-  product_image: string;
-  download_url: string;
-  filename: string;
-  file_size_mb: number;
-  tags: string[];
+  product_id?: number;
+  product_name?: string;
+  product_name_en?: string;
+  product_image?: string;
+  download_url?: string;
+  filename?: string;
+  file_size_mb?: number;
+  tags?: string[];
   active: boolean;
   
   // Legacy fields (for backward compatibility)
   
-  id: number;
+  id?: number;
   name?: string;
   nameEn?: string;
   shortDescription?: string;
@@ -65,7 +65,7 @@ interface Product {
   features?: string[];
 }
 
-export default function ProductDetail({ product }?: { product?: Product }) {
+export default function ProductDetail({ product }: { product?: Product }) {
   const { currency, addToCart, addToWishlist, wishlist } = useApp();
 
   const getPrice = () => {
@@ -167,9 +167,9 @@ export default function ProductDetail({ product }?: { product?: Product }) {
   };
 
   return (
-    <section className="pt-20 sm?:pt-24 pb-12 bg-dark-500 transition-colors duration-300">
+    <section className="pt-20 sm:pt-24 pb-12 bg-dark-500 transition-colors duration-300">
       <div className="container-mobile">
-        <div className="grid grid-cols-1 lg?:grid-cols-2 gap-8 lg?:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left Column?: Image */}
           <div className="animate-scale-in">
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-dark-400 shadow-2xl">
@@ -188,24 +188,24 @@ export default function ProductDetail({ product }?: { product?: Product }) {
             {/* Category Badge */}
             <div>
               <span className="inline-block px-4 py-2 bg-primary-300/20 border border-primary-300/40 text-primary-300 rounded-xl text-sm font-bold">
-                {product.category === 'ebooks' ? 'كتاب رقمي' ?: product.category}
+                {product.category === 'ebooks' ? 'كتاب رقمي' : product.category}
               </span>
             </div>
 
             {/* Product Title - Large & Prominent */}
-            <h1 className="text-3xl sm?:text-4xl lg?:text-5xl font-extrabold text-white leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
               {product.name}
             </h1>
 
             {/* Short Description - Simple & Clear */}
             {product.shortDescription && (
-              <p className="text-base sm?:text-lg text-gray-300 leading-relaxed" style={{ fontSize?: '16px' }}>
+              <p className="text-base sm:text-lg text-gray-300 leading-relaxed" style={{ fontSize: '16px' }}>
                 {product.shortDescription}
               </p>
             )}
 
             {/* Rating and Buyers */}
-            <div className="flex flex-wrap items-center gap-4 sm?:gap-6">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
               <div className="flex items-center gap-2">
                 {[...Array(5)].map((_, i) => (
                   <Star
@@ -213,7 +213,7 @@ export default function ProductDetail({ product }?: { product?: Product }) {
                     className={`w-5 h-5 ${
                       i < Math.floor(product.rating)
                         ? 'text-yellow-400 fill-yellow-400'
-                        ?: 'text-gray-600'
+                         : 'text-gray-600'
                     }`}
                   />
                 ))}
@@ -228,10 +228,10 @@ export default function ProductDetail({ product }?: { product?: Product }) {
             </div>
 
             {/* Price - Prominent */}
-            <div className="flex items-center gap-4 p-4 sm?:p-6 bg-dark-300/50 border border-primary-300/20 rounded-2xl">
+            <div className="flex items-center gap-4 p-4 sm:p-6 bg-dark-300/50 border border-primary-300/20 rounded-2xl">
               <div className="flex-1">
                 <p className="text-gray-400 text-sm mb-1">السعر</p>
-                <p className="text-3xl sm?:text-4xl font-extrabold bg-gradient-to-r from-primary-300 to-accent-600 bg-clip-text text-transparent">
+                <p className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-primary-300 to-accent-600 bg-clip-text text-transparent">
                   {price.toFixed(2)} {currencySymbol}
                 </p>
               </div>
@@ -244,39 +244,39 @@ export default function ProductDetail({ product }?: { product?: Product }) {
             {/* CTA Buttons - Full Width Mobile */}
             <div className="space-y-3">
               {/* Buy Now / Direct Payment Buttons */}
-              <div className="flex flex-col sm?:flex-row gap-3 sm?:gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   onClick={handlePayment}
-                  className="w-full sm?:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-green-500 text-white px-6 sm?:px-8 py-4 sm?:py-5 rounded-xl font-bold text-base sm?:text-lg hover?:shadow-2xl hover?:shadow-green-500/30 active?:scale-95 transition-all duration-300 touch-manipulation"
-                  style={{ fontSize?: '16px' }}
+                  className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-green-500 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-green-500/30 active:scale-95 transition-all duration-300 touch-manipulation"
+                  style={{ fontSize: '16px' }}
                 >
-                  <ShoppingBag className="w-5 h-5 sm?:w-6 sm?:h-6" />
+                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
                   استثمر الآن ⚡
                 </button>
                 <button
                   onClick={handleAddToCart}
-                  className="w-full sm?:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-primary-300 to-accent-600 text-white px-6 sm?:px-8 py-4 sm?:py-5 rounded-xl font-bold text-base sm?:text-lg hover?:shadow-2xl hover?:shadow-primary-300/30 active?:scale-95 transition-all duration-300 touch-manipulation"
-                  style={{ fontSize?: '16px' }}
+                  className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-primary-300 to-accent-600 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-300/30 active:scale-95 transition-all duration-300 touch-manipulation"
+                  style={{ fontSize: '16px' }}
                 >
-                  <ShoppingCart className="w-5 h-5 sm?:w-6 sm?:h-6" />
+                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                   أضف للسلة
                 </button>
               </div>
             </div>
 
             {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-3 sm?:gap-4 pt-4">
-              <div className="text-center p-3 sm?:p-4 bg-dark-300/30 rounded-xl border border-primary-300/10">
-                <Shield className="w-6 h-6 sm?:w-8 sm?:h-8 text-primary-300 mx-auto mb-2" />
-                <p className="text-xs sm?:text-sm text-gray-300 font-semibold">دفع آمن</p>
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-4">
+              <div className="text-center p-3 sm:p-4 bg-dark-300/30 rounded-xl border border-primary-300/10">
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-primary-300 mx-auto mb-2" />
+                <p className="text-xs sm:text-sm text-gray-300 font-semibold">دفع آمن</p>
               </div>
-              <div className="text-center p-3 sm?:p-4 bg-dark-300/30 rounded-xl border border-primary-300/10">
-                <Download className="w-6 h-6 sm?:w-8 sm?:h-8 text-primary-300 mx-auto mb-2" />
-                <p className="text-xs sm?:text-sm text-gray-300 font-semibold">تحميل فوري</p>
+              <div className="text-center p-3 sm:p-4 bg-dark-300/30 rounded-xl border border-primary-300/10">
+                <Download className="w-6 h-6 sm:w-8 sm:h-8 text-primary-300 mx-auto mb-2" />
+                <p className="text-xs sm:text-sm text-gray-300 font-semibold">تحميل فوري</p>
               </div>
-              <div className="text-center p-3 sm?:p-4 bg-dark-300/30 rounded-xl border border-primary-300/10">
-                <Check className="w-6 h-6 sm?:w-8 sm?:h-8 text-primary-300 mx-auto mb-2" />
-                <p className="text-xs sm?:text-sm text-gray-300 font-semibold">ضمان الجودة</p>
+              <div className="text-center p-3 sm:p-4 bg-dark-300/30 rounded-xl border border-primary-300/10">
+                <Check className="w-6 h-6 sm:w-8 sm:h-8 text-primary-300 mx-auto mb-2" />
+                <p className="text-xs sm:text-sm text-gray-300 font-semibold">ضمان الجودة</p>
               </div>
             </div>
           </div>
@@ -284,19 +284,19 @@ export default function ProductDetail({ product }?: { product?: Product }) {
 
         {/* Sectioned Details - Mobile First */}
         {product.sections && (
-          <div className="mt-12 sm?:mt-16">
-            <div className="grid grid-cols-1 md?:grid-cols-2 gap-6 sm?:gap-8">
+          <div className="mt-12 sm:mt-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
               {/* Features Section */}
               {product.sections.features && (
-                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm?:p-8 rounded-2xl border border-primary-300/10 hover?:border-primary-300/30 transition-all">
-                  <h2 className="text-xl sm?:text-2xl font-bold mb-4 sm?:mb-6" style={{ color?: '#6A0DAD' }}>
+                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#6A0DAD' }}>
                     {product.sections.features.title}
                   </h2>
-                  <ul className="space-y-3 sm?:space-y-4">
+                  <ul className="space-y-3 sm:space-y-4">
                     {product.sections.features.items.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
-                        <span className="text-base leading-relaxed" style={{ color?: '#EAEAEA', fontSize?: '16px' }}>
+                        <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
                           {item}
                         </span>
                       </li>
@@ -307,15 +307,15 @@ export default function ProductDetail({ product }?: { product?: Product }) {
 
               {/* What You Will Learn Section */}
               {product.sections.whatYouWillLearn && (
-                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm?:p-8 rounded-2xl border border-primary-300/10 hover?:border-primary-300/30 transition-all">
-                  <h2 className="text-xl sm?:text-2xl font-bold mb-4 sm?:mb-6" style={{ color?: '#6A0DAD' }}>
+                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#6A0DAD' }}>
                     {product.sections.whatYouWillLearn.title}
                   </h2>
-                  <ul className="space-y-3 sm?:space-y-4">
+                  <ul className="space-y-3 sm:space-y-4">
                     {product.sections.whatYouWillLearn.items.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
-                        <span className="text-base leading-relaxed" style={{ color?: '#EAEAEA', fontSize?: '16px' }}>
+                        <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
                           {item}
                         </span>
                       </li>
@@ -326,15 +326,15 @@ export default function ProductDetail({ product }?: { product?: Product }) {
 
               {/* Requirements Section */}
               {product.sections.requirements && (
-                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm?:p-8 rounded-2xl border border-primary-300/10 hover?:border-primary-300/30 transition-all">
-                  <h2 className="text-xl sm?:text-2xl font-bold mb-4 sm?:mb-6" style={{ color?: '#6A0DAD' }}>
+                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#6A0DAD' }}>
                     {product.sections.requirements.title}
                   </h2>
-                  <ul className="space-y-3 sm?:space-y-4">
+                  <ul className="space-y-3 sm:space-y-4">
                     {product.sections.requirements.items.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
-                        <span className="text-base leading-relaxed" style={{ color?: '#EAEAEA', fontSize?: '16px' }}>
+                        <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
                           {item}
                         </span>
                       </li>
@@ -345,8 +345,8 @@ export default function ProductDetail({ product }?: { product?: Product }) {
 
               {/* What You Will Get Section */}
               {product.sections.whatYouWillGet && (
-                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm?:p-8 rounded-2xl border border-primary-300/10 hover?:border-primary-300/30 transition-all">
-                  <h2 className="text-xl sm?:text-2xl font-bold mb-4 sm?:mb-6" style={{ color?: '#6A0DAD' }}>
+                <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 transition-all">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#6A0DAD' }}>
                     {product.sections.whatYouWillGet.title}
                   </h2>
                   <ul className="space-y-3 sm:space-y-4">
@@ -367,15 +367,15 @@ export default function ProductDetail({ product }?: { product?: Product }) {
 
         {/* Product Reviews - Mobile & Desktop Optimized */}
         {productTestimonials.length > 0 && (
-          <div className="mt-12 sm?:mt-16">
+          <div className="mt-12 sm:mt-16">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6 sm?:mb-8">
-              <h2 className="text-xl sm?:text-2xl md?:text-3xl font-bold text-white">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
                 تقييمات المنتج
               </h2>
-              <div className="flex items-center gap-2 px-3 sm?:px-4 py-2 bg-primary-300/10 border border-primary-300/30 rounded-xl">
-                <Star className="w-4 h-4 sm?:w-5 sm?:h-5 text-yellow-400 fill-yellow-400" />
-                <span className="text-sm sm?:text-base font-bold text-white">
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary-300/10 border border-primary-300/30 rounded-xl">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400" />
+                <span className="text-sm sm:text-base font-bold text-white">
                   {(productTestimonials.reduce((acc, t) => acc + t.rating, 0) / productTestimonials.length).toFixed(1)}
                 </span>
                 <span className="text-xs sm:text-sm text-gray-400">
@@ -389,7 +389,7 @@ export default function ProductDetail({ product }?: { product?: Product }) {
               {productTestimonials.map((testimonial) => (
                 <div
                   key={testimonial.id}
-                  className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-5 sm:p-6 rounded-2xl border border-primary-300/10 hover?:border-primary-300/30 hover?:shadow-xl hover?:shadow-primary-300/10 transition-all duration-300 flex flex-col h-full"
+                  className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-5 sm:p-6 rounded-2xl border border-primary-300/10 hover:border-primary-300/30 hover:shadow-xl hover:shadow-primary-300/10 transition-all duration-300 flex flex-col h-full"
                 >
                   {/* Stars */}
                   <div className="flex items-center gap-1 mb-3">
@@ -398,8 +398,8 @@ export default function ProductDetail({ product }?: { product?: Product }) {
                         key={i}
                         className={`w-4 h-4 sm:w-5 sm:h-5 ${
                           i < testimonial.rating
-                             'text-yellow-400 fill-yellow-400'
-                            : 'text-gray-600'
+                            ? 'text-yellow-400 fill-yellow-400'
+                             : 'text-gray-600'
                         }`}
                       />
                     ))}

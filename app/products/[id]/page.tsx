@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props) {
   }
 
   return {
-    title: `${product.name} | متجر لفل اب`,
+    title: `${product.product_name} | متجر لفل اب`,
     description: product.description,
   };
 }

@@ -106,7 +106,7 @@ export default function ProductDetail({ product }?: { product?: Product }) {
       case 'DZD': return 'د.ج';
       case 'USD': return '$';
       case 'EUR': return '€';
-      default?: return 'ر.س';
+      default: return 'ر.س';
     }
   };
 

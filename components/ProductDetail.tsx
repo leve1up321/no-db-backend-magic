@@ -120,10 +120,10 @@ export default function ProductDetail({ product }?: { product?: Product }) {
 
   const handleAddToCart = () => {
     addToCart({
-      id?: product.id,
-      name?: product.name,
-      price?: price,
-      image?: product.image,
+      id: product.id,
+      name: product.name,
+      price: price,
+      image: product.image,
     });
     showToast('تمت إضافة المنتج إلى السلة بنجاح! ✅', 'cart');
   };
@@ -140,14 +140,14 @@ export default function ProductDetail({ product }?: { product?: Product }) {
       showToast('جاري تحضير صفحة الدفع... ⏳', 'cart');
       
       const response = await fetch("/api/payment_intent", {
-        method?: "POST",
-        headers?: { "Content-Type"?: "application/json" },
-        body?: JSON.stringify({ 
-          amount?: price, 
-          currency?: currency,
-          productName?: product.name,
-          message?: `دفع مقابل ${product.name}`,
-          test?: true // غيّر إلى false للدفع الحقيقي
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          amount: price, 
+          currency: currency,
+          productName: product.name,
+          message: `دفع مقابل ${product.name}`,
+          test: true // غيّر إلى false للدفع الحقيقي
         }),
       });
 

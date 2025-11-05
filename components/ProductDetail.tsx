@@ -85,7 +85,7 @@ export default function ProductDetail({ product }?: { product?: Product }) {
       case 'DZD': return product.priceDZD;
       case 'USD': return product.priceUSD;
       case 'EUR': return product.priceEUR;
-      default?: return product.price;
+      default: return product.price;
     }
   };
 

@@ -112,7 +112,15 @@ export async function POST(req: NextRequest) {
       // استخراج بيانات المنتج
       const productName = firstItem.name || product?.name || "منتج رقمي";
       const downloadUrl = product?.downloadUrl || "";
-      const filename = product?.filename || `${productName}.pdf`;
+      // توليد اسم الملف من اسم المنتج أو من URL
+      let filename = `${productName}.pdf`;
+      if (downloadUrl) {
+        const urlParts = downloadUrl.split("/");
+        const lastPart = urlParts[urlParts.length - 1];
+        if (lastPart && lastPart.includes(".")) {
+          filename = decodeURIComponent(lastPart);
+        }
+      }
       
       console.log("📦 Product Info:");
       console.log(`  - Name: ${productName}`);

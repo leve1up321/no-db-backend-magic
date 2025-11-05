@@ -1,51 +1,15 @@
 /**
  * ════════════════════════════════════════════════════════════════════════════
- * 🎯 ZIINA WEBHOOK HANDLER - نظام دفع آمن ومتكامل
+ * 🔔 WEBHOOK API - استقبال إشعارات الدفع من Ziina
  * ════════════════════════════════════════════════════════════════════════════
  * 
- * الوظيفة الرئيسية:
- * استقبال إشعارات الدفع من Ziina وإنشاء سجلات آمنة مع tokens محدودة الصلاحية
- * 
- * التدفق:
- * 1. استقبال POST من Ziina webhook
- * 2. قراءة البيانات من payload.data (خاص ببنية Ziina)
- * 3. عند status === "completed":
- *    - إنشاء token وصول فريد (tok_xxxxx)
- *    - تحديد صلاحية 10 دقائق
- *    - حفظ السجل في Vercel Blob Storage
- * 4. طباعة console.log للتأكيد والتتبع
- * 5. إرجاع رابط الفاتورة المقترح
- * 
- * البيانات المحفوظة:
- * - payment_id: معرف الدفع الفريد
- * - product_id: معرف المنتج
- * - product_name: اسم المنتج
- * - product_image: صورة المنتج
- * - amount: المبلغ (بالدراهم أو العملة المحددة)
- * - currency: العملة (AED, SAR, USD...)
- * - message: ملاحظات الدفع
- * - download_url: رابط Blob الحقيقي (مخفي عن المستخدم)
- * - filename: اسم الملف للتحميل
- * - access_token: token الوصول المؤقت (tok_xxxxx)
- * - expires_at: وقت انتهاء الصلاحية (timestamp)
- * - created_at: تاريخ الإنشاء
- * - customer_email: بريد العميل
- * - customer_name: اسم العميل
- * - used: هل تم استخدام التوكن (للـ single-use)
- * 
- * إعدادات Ziina المطلوبة:
- * - Webhook URL: https://leve1up.vercel.app/api/webhook
- * - Success URL: https://leve1up.vercel.app/order-success?payment_id={PAYMENT_ID}
- *   (ملاحظة: نحن ننشئ access token في Webhook ونحفظه مع السجل)
- * 
- * Environment Variables المطلوبة:
- * - BLOB_READ_WRITE_TOKEN: للكتابة في Vercel Blob
- * - WHATSAPP_NUMBER: رقم الواتساب للدعم (اختياري)
- * 
- * خيارات مستقبلية:
- * - استبدال Blob بقاعدة بيانات (PostgreSQL, MongoDB)
- * - إضافة watermark ديناميكي على الملفات
- * - نظام إشعارات Email عند كل دفعة
+ * الوظيفة:
+ * - استقبال POST من بوابة الدفع (Ziina)
+ * - التحقق من status = "completed"
+ * - مطابقة المنتج الصحيح حسب product_id أو message
+ * - إنشاء token فريد (صالح 10 دقائق)
+ * - حفظ السجل في Vercel Blob
+ * - إرجاع redirect URL للعميل
  * 
  * ════════════════════════════════════════════════════════════════════════════
  */
@@ -53,59 +17,67 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { randomBytes } from "crypto";
-import productsData from "@/data/products-store.json";
+import products from "@/data/products.json";
 
 // ────────────────────────────────────────────────────────────────────────────
 // 🔧 دوال مساعدة
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * إنشاء access token آمن وفريد
- * Format: tok_<32 random hex chars>
+ * إنشاء token آمن فريد
  */
-function generateAccessToken(): string {
-  const randomPart = randomBytes(16).toString('hex');
+function generateSecureToken(): string {
+  const randomPart = randomBytes(16).toString('hex'); // 32 chars
   return `tok_${randomPart}`;
 }
 
 /**
- * حساب وقت انتهاء الصلاحية
- * @param minutes المدة بالدقائق (افتراضي: 10 دقائق)
- * @returns ISO timestamp
+ * توليد رقم طلب فريد
+ */
+function generateOrderNumber(): string {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+  return `ORD-${timestamp}-${random}`;
+}
+
+/**
+ * حساب وقت انتهاء الصلاحية (بالدقائق)
  */
 function getExpiryTimestamp(minutes: number = 10): string {
   return new Date(Date.now() + minutes * 60 * 1000).toISOString();
 }
 
 /**
- * البحث عن منتج حسب product_id أو message
- * @param productId معرف المنتج (إن وُجد)
- * @param message رسالة الدفع (للبحث بالاسم)
- * @returns بيانات المنتج أو null
+ * مطابقة المنتج حسب product_id أو message
  */
-function findProduct(productId?: number, message?: string): any {
-  // البحث بـ product_id أولاً
+function matchProduct(productId?: number, message?: string) {
+  // محاولة المطابقة بـ product_id أولاً
   if (productId) {
-    const product = productsData.find(p => p.product_id === productId);
+    const product = products.find(p => p.product_id === productId && p.active);
     if (product) return product;
   }
   
-  // البحث في الرسالة
+  // محاولة المطابقة بـ message
   if (message) {
-    for (const product of productsData) {
-      if (message.includes(product.product_name) || 
-          message.includes(product.product_name_en)) {
-        return product;
-      }
-    }
+    const messageLower = message.toLowerCase();
+    const product = products.find(p => {
+      const nameLower = p.product_name.toLowerCase();
+      const nameEnLower = p.product_name_en.toLowerCase();
+      return (nameLower.includes(messageLower) || 
+              messageLower.includes(nameLower) ||
+              nameEnLower.includes(messageLower) ||
+              messageLower.includes(nameEnLower)) && 
+             p.active;
+    });
+    if (product) return product;
   }
   
-  // افتراضي: أول منتج نشط
-  return productsData.find(p => p.active) || productsData[0];
+  // إذا لم يتم العثور، إرجاع المنتج الافتراضي (الأول)
+  return products.find(p => p.active) || products[0];
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// 🎯 معالج Webhook الرئيسي
+// 🎯 معالج POST الرئيسي
 // ────────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
@@ -118,118 +90,116 @@ export async function POST(req: NextRequest) {
     console.log("═".repeat(80));
     
     // ────────────────────────────────────────────────────────────────────────
-    // الخطوة 1: قراءة وتحليل البيانات
+    // الخطوة 1: قراءة البيانات من Ziina
     // ────────────────────────────────────────────────────────────────────────
     
     const body = await req.json();
-    console.log("📦 Raw payload:", JSON.stringify(body, null, 2));
+    const paymentData = body.data; // Ziina ترسل البيانات في body.data
     
-    // Ziina ترسل البيانات داخل payload.data
-    const data = body.data || body;
+    console.log("📋 Raw Webhook Data:");
+    console.log(JSON.stringify(body, null, 2));
     
-    const paymentId = data.id || body.id;
-    const paymentStatus = data.status || body.status;
-    const amountInFils = data.amount || body.amount || 0;
-    const currency = data.currency_code || data.currency || body.currency_code || "AED";
-    const customerEmail = data.customer_email || data.email || body.customer_email || "";
-    const customerName = data.customer_name || data.name || body.customer_name || "";
-    const message = data.message || body.message || "";
+    if (!paymentData) {
+      console.error("❌ Missing payment data in webhook");
+      return NextResponse.json({
+        success: false,
+        error: "Missing payment data"
+      }, { status: 400 });
+    }
     
-    // تحويل المبلغ من فلسات إلى وحدة العملة
-    const amount = amountInFils / 100;
+    // ────────────────────────────────────────────────────────────────────────
+    // الخطوة 2: التحقق من حالة الدفع
+    // ────────────────────────────────────────────────────────────────────────
+    
+    const {
+      id: paymentId,
+      status,
+      amount: amountInFils,
+      currency_code: currencyCode,
+      customer_email: customerEmail,
+      customer_name: customerName,
+      message,
+      metadata
+    } = paymentData;
     
     console.log("─".repeat(80));
     console.log("📊 PAYMENT DETAILS:");
     console.log(`  💳 Payment ID: ${paymentId}`);
-    console.log(`  📊 Status: ${paymentStatus}`);
-    console.log(`  💰 Amount: ${amountInFils} fils = ${amount} ${currency}`);
+    console.log(`  📊 Status: ${status}`);
+    console.log(`  💰 Amount: ${amountInFils} fils`);
+    console.log(`  💵 Currency: ${currencyCode}`);
     console.log(`  📧 Customer Email: ${customerEmail}`);
     console.log(`  👤 Customer Name: ${customerName}`);
     console.log(`  💬 Message: ${message}`);
-    console.log("─".repeat(80));
+    console.log(`  🏷️ Metadata:`, metadata);
     
-    // ────────────────────────────────────────────────────────────────────────
-    // الخطوة 2: التحقق من نجاح الدفع
-    // ────────────────────────────────────────────────────────────────────────
-    
-    const successStatuses = ["completed", "succeeded", "paid", "success"];
-    
-    if (!successStatuses.includes(paymentStatus?.toLowerCase())) {
-      console.log(`⚠️ Payment not completed (status: ${paymentStatus})`);
+    if (status !== "completed") {
+      console.log(`⚠️ Payment status is not completed: ${status}`);
       return NextResponse.json({
-        received: true,
-        status: paymentStatus,
-        message: "Webhook received but payment not completed"
-      });
+        success: false,
+        message: "Payment not completed yet"
+      }, { status: 200 });
     }
     
-    console.log("✅ PAYMENT SUCCESSFUL - Processing order...");
-    
     // ────────────────────────────────────────────────────────────────────────
-    // الخطوة 3: تحديد المنتج
+    // الخطوة 3: مطابقة المنتج
     // ────────────────────────────────────────────────────────────────────────
     
-    // محاولة استخراج product_id من metadata
-    const metadata = data.metadata || body.metadata || {};
-    const productIdFromMeta = metadata.product_id || metadata.productId;
-    
-    const product = findProduct(productIdFromMeta, message);
-    
-    if (!product) {
-      console.error("❌ No product found!");
-      throw new Error("Product not found");
-    }
+    const productId = metadata?.product_id ? parseInt(metadata.product_id) : undefined;
+    const matchedProduct = matchProduct(productId, message);
     
     console.log("─".repeat(80));
     console.log("📦 PRODUCT MATCHED:");
-    console.log(`  🆔 Product ID: ${product.product_id}`);
-    console.log(`  📝 Name: ${product.product_name}`);
-    console.log(`  🖼️ Image: ${product.product_image}`);
-    console.log(`  📥 Download URL: ${product.download_url}`);
-    console.log(`  📄 Filename: ${product.filename}`);
-    console.log("─".repeat(80));
+    console.log(`  🆔 Product ID: ${matchedProduct.product_id}`);
+    console.log(`  📝 Name: ${matchedProduct.product_name}`);
+    console.log(`  📥 Download URL: ${matchedProduct.download_url}`);
+    console.log(`  📄 Filename: ${matchedProduct.filename}`);
+    console.log(`  💰 Price: ${matchedProduct.price} ${matchedProduct.currency}`);
     
     // ────────────────────────────────────────────────────────────────────────
-    // الخطوة 4: إنشاء Access Token
+    // الخطوة 4: توليد Token ورقم الطلب
     // ────────────────────────────────────────────────────────────────────────
     
-    const accessToken = generateAccessToken();
+    const accessToken = generateSecureToken();
+    const orderNumber = generateOrderNumber();
     const expiresAt = getExpiryTimestamp(10); // 10 دقائق
     const createdAt = new Date().toISOString();
     
+    // تحويل المبلغ من fils إلى العملة الأساسية
+    const amount = amountInFils / 100;
+    
+    console.log("─".repeat(80));
     console.log("🔐 SECURITY TOKEN GENERATED:");
     console.log(`  🎫 Token: ${accessToken}`);
     console.log(`  ⏰ Expires: ${expiresAt}`);
     console.log(`  📅 Created: ${createdAt}`);
     console.log(`  ⏱️ Validity: 10 minutes`);
+    console.log(`  📦 Order Number: ${orderNumber}`);
     
     // ────────────────────────────────────────────────────────────────────────
-    // الخطوة 5: بناء سجل الطلب
+    // الخطوة 5: إنشاء سجل الدفع
     // ────────────────────────────────────────────────────────────────────────
     
-    const orderRecord = {
+    const paymentRecord = {
       // معلومات الدفع
       payment_id: paymentId,
-      order_number: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-      status: "completed",
+      order_number: orderNumber,
+      status: status,
       
       // معلومات المنتج
-      product_id: product.product_id,
-      product_name: product.product_name,
-      product_image: product.product_image,
+      product_id: matchedProduct.product_id,
+      product_name: matchedProduct.product_name,
+      product_image: matchedProduct.product_image,
       
       // معلومات المبلغ
       amount: amount,
-      currency: currency,
+      currency: currencyCode || matchedProduct.currency,
       amount_in_fils: amountInFils,
       
-      // رسالة/ملاحظات
-      message: message || `دفع مقابل ${product.product_name}`,
-      
-      // معلومات التحميل (مخفية عن المستخدم)
-      download_url: product.download_url,
-      filename: product.filename,
-      file_size_mb: product.file_size_mb,
+      // معلومات التحميل (محفوظة للسيرفر فقط)
+      download_url: matchedProduct.download_url,
+      filename: matchedProduct.filename,
+      file_size_mb: matchedProduct.file_size_mb,
       
       // معلومات الأمان
       access_token: accessToken,
@@ -241,103 +211,86 @@ export async function POST(req: NextRequest) {
       // معلومات العميل
       customer_email: customerEmail,
       customer_name: customerName,
+      message: message,
       
       // بيانات إضافية
-      webhook_data: data,
-      user_agent: req.headers.get('user-agent') || '',
-      ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+      webhook_data: paymentData,
+      ip_address: req.headers.get('x-forwarded-for') || 
+                  req.headers.get('x-real-ip') || 
+                  'unknown',
+      user_agent: req.headers.get('user-agent') || 'unknown'
     };
     
+    // ────────────────────────────────────────────────────────────────────────
+    // الخطوة 6: حفظ السجل في Vercel Blob (مزدوج)
+    // ────────────────────────────────────────────────────────────────────────
+    
     console.log("─".repeat(80));
-    console.log("💾 ORDER RECORD PREPARED:");
-    console.log(JSON.stringify(orderRecord, null, 2));
+    console.log("💾 SAVING TO VERCEL BLOB...");
+    
+    // حفظ حسب payment_id (للبحث بـ payment_id)
+    const paymentBlob = await put(
+      `payments/${paymentId}.json`,
+      JSON.stringify(paymentRecord, null, 2),
+      {
+        access: 'public',
+        contentType: 'application/json',
+      }
+    );
+    
+    console.log(`  ✅ Payment Blob saved: ${paymentBlob.url}`);
+    
+    // حفظ حسب token (للبحث بـ token)
+    const tokenBlob = await put(
+      `tokens/${accessToken}.json`,
+      JSON.stringify(paymentRecord, null, 2),
+      {
+        access: 'public',
+        contentType: 'application/json',
+      }
+    );
+    
+    console.log(`  ✅ Token Blob saved: ${tokenBlob.url}`);
+    
+    const duration = Date.now() - startTime;
+    
+    console.log("═".repeat(80));
+    console.log("✅ PAYMENT SAVED SUCCESSFULLY!");
+    console.log(`📁 Payment Blob: ${paymentBlob.url}`);
+    console.log(`📁 Token Blob: ${tokenBlob.url}`);
+    console.log(`✅ Payment saved and token: ${accessToken}`);
+    console.log(`💳 Payment ID: ${paymentId}`);
+    console.log(`📦 Order Number: ${orderNumber}`);
+    console.log(`💰 Amount: ${amount} ${currencyCode || matchedProduct.currency}`);
+    console.log(`⏱️ Processing time: ${duration}ms`);
     console.log("─".repeat(80));
     
     // ────────────────────────────────────────────────────────────────────────
-    // الخطوة 6: حفظ في Vercel Blob Storage
+    // الخطوة 7: إنشاء redirect URL
     // ────────────────────────────────────────────────────────────────────────
     
-    try {
-      // حفظ نسخة بـ payment_id (للبحث السريع)
-      const paymentBlob = await put(
-        `payments/${paymentId}.json`,
-        JSON.stringify(orderRecord, null, 2),
-        {
-          access: 'public',
-          contentType: 'application/json',
-        }
-      );
-      
-      // حفظ نسخة بـ access_token (للتحميل الآمن)
-      const tokenBlob = await put(
-        `tokens/${accessToken}.json`,
-        JSON.stringify(orderRecord, null, 2),
-        {
-          access: 'public',
-          contentType: 'application/json',
-        }
-      );
-      
-      const duration = Date.now() - startTime;
-      
-      console.log("═".repeat(80));
-      console.log("✅ PAYMENT SAVED SUCCESSFULLY!");
-      console.log("─".repeat(80));
-      console.log(`📁 Payment Blob: ${paymentBlob.url}`);
-      console.log(`📁 Token Blob: ${tokenBlob.url}`);
-      console.log(`✅ Payment saved and token: ${accessToken}`);
-      console.log(`💳 Payment ID: ${paymentId}`);
-      console.log(`📦 Order Number: ${orderRecord.order_number}`);
-      console.log(`💰 Amount: ${amount} ${currency}`);
-      console.log(`⏱️ Processing time: ${duration}ms`);
-      console.log("─".repeat(80));
-      console.log("🔗 SUGGESTED REDIRECT URL:");
-      console.log(`   https://leve1up.vercel.app/order-success?payment_id=${paymentId}&access=${accessToken}`);
-      console.log("═".repeat(80));
-      
-      // ────────────────────────────────────────────────────────────────────
-      // اقتراح: إرسال بريد إلكتروني للعميل
-      // ────────────────────────────────────────────────────────────────────
-      // if (customerEmail) {
-      //   await sendOrderConfirmationEmail({
-      //     to: customerEmail,
-      //     orderNumber: orderRecord.order_number,
-      //     productName: product.product_name,
-      //     amount: amount,
-      //     currency: currency,
-      //     downloadLink: `https://leve1up.vercel.app/order-success?payment_id=${paymentId}&access=${accessToken}`
-      //   });
-      // }
-      
-      return NextResponse.json({
-        success: true,
-        message: "Payment processed successfully",
-        payment_id: paymentId,
-        order_number: orderRecord.order_number,
-        access_token: accessToken,
-        expires_at: expiresAt,
-        redirect_url: `https://leve1up.vercel.app/order-success?payment_id=${paymentId}&access=${accessToken}`,
-        blob_urls: {
-          payment: paymentBlob.url,
-          token: tokenBlob.url
-        }
-      }, { status: 200 });
-      
-    } catch (blobError: any) {
-      console.error("═".repeat(80));
-      console.error("❌ BLOB STORAGE ERROR:");
-      console.error(blobError);
-      console.error("═".repeat(80));
-      
-      // حتى لو فشل الحفظ، نرد بنجاح للـ webhook
-      return NextResponse.json({
-        success: false,
-        message: "Payment processed but storage failed",
-        error: blobError.message,
-        payment_id: paymentId,
-        received: true
-      }, { status: 200 });
-    }
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://leve1up.vercel.app';
+    const redirectUrl = `${baseUrl}/order-success?payment_id=${paymentId}&access=${accessToken}`;
+    
+    console.log("🔗 SUGGESTED REDIRECT URL:");
+    console.log(`   ${redirectUrl}`);
+    console.log("═".repeat(80));
+    
+    // ────────────────────────────────────────────────────────────────────────
+    // الخطوة 8: إرجاع الاستجابة
+    // ────────────────────────────────────────────────────────────────────────
+    
+    return NextResponse.json({
+      success: true,
+      payment_id: paymentId,
+      order_number: orderNumber,
+      access_token: accessToken,
+      expires_at: expiresAt,
+      redirect_url: redirectUrl,
+      product_name: matchedProduct.product_name,
+      amount: amount,
+      currency: currencyCode || matchedProduct.currency
+    }, { status: 200 });
     
   } catch (error: any) {
     const duration = Date.now() - startTime;
@@ -350,40 +303,21 @@ export async function POST(req: NextRequest) {
     console.error("═".repeat(80));
     
     return NextResponse.json({
-      error: "Webhook processing failed",
-      message: error.message,
-      received: true
+      success: false,
+      error: "Failed to process payment",
+      details: error.message
     }, { status: 500 });
   }
 }
 
 /**
- * GET handler للاختبار
+ * معالج GET للاختبار
  */
 export async function GET() {
   return NextResponse.json({
-    service: "Ziina Webhook Handler",
-    status: "active",
-    version: "2.0",
+    message: "Webhook endpoint is active",
     timestamp: new Date().toISOString(),
-    endpoints: {
-      webhook: "POST /api/webhook",
-      record: "GET /api/record?payment_id=xxx or ?token=xxx",
-      download: "GET /api/download/[token]"
-    },
-    features: [
-      "Secure access tokens (tok_xxxxx)",
-      "10-minute token expiry",
-      "Dual Blob storage (payment_id + token)",
-      "Single-use token support",
-      "Comprehensive logging",
-      "Product matching by ID or message"
-    ],
-    setup: {
-      ziina_webhook_url: "https://leve1up.vercel.app/api/webhook",
-      ziina_success_url: "https://leve1up.vercel.app/order-success?payment_id={PAYMENT_ID}",
-      note: "Access token is generated automatically in webhook"
-    }
+    products_count: products.length
   });
 }
 

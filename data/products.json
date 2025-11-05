@@ -1,249 +1,48 @@
 [
   {
-    "id": 1,
-    "name": "15 فكرة مشروع رقمي مربح",
-    "nameEn": "15 Profitable Digital Project Ideas",
-    "shortDescription": "دليلك العملي لبدء مشروعك الرقمي من الصفر وبناء مصدر دخل حقيقي من الإنترنت بدون رأس مال كبير",
-    "description": "هل فكرت يومًا تبدأ مشروعك الرقمي، لكن ما عرفت من وين تبدأ؟ هذا الكتاب هو دليلك العملي لتبدأ من الصفر وتبني مصدر دخل حقيقي من الإنترنت.",
-    "sections": {
-      "features": {
-        "title": "✨ الميزات الرئيسية",
-        "items": [
-          "أكثر من 15 فكرة مشروع رقمي جاهزة للتنفيذ",
-          "شرح كامل لكل فكرة خطوة بخطوة",
-          "أدوات بسيطة لبدء مشروعك خلال يوم واحد",
-          "خطة عملية لتوسيع دخلك وتطوير عملك",
-          "أسرار النجاح في التسويق عبر السوشيال ميديا"
-        ]
-      },
-      "whatYouWillLearn": {
-        "title": "📚 ماذا ستتعلم",
-        "items": [
-          "كيف تختار الفكرة المناسبة لقدراتك ومهاراتك",
-          "أفكار مشاريع رقمية مجرّبة تحقق أرباحًا حقيقية",
-          "إنشاء قناة YouTube ناجحة",
-          "بيع المنتجات الرقمية (كتب، قوالب، كورسات)",
-          "التسويق بالعمولة والمتاجر الإلكترونية"
-        ]
-      },
-      "requirements": {
-        "title": "📋 المتطلبات",
-        "items": [
-          "لا يوجد متطلبات مسبقة",
-          "جهاز كمبيوتر أو هاتف ذكي",
-          "اتصال بالإنترنت",
-          "الرغبة في البدء والعمل"
-        ]
-      },
-      "whatYouWillGet": {
-        "title": "📦 ما ستحصل عليه",
-        "items": [
-          "كتاب رقمي بصيغة PDF تفاعلي",
-          "تحميل فوري بعد الدفع",
-          "تصميم عصري مريح للقراءة",
-          "دعم عبر الواتساب"
-        ]
-      }
-    },
-    "price": 57.00,
-    "priceAED": 55.50,
-    "priceKWD": 4.65,
-    "priceQAR": 55.20,
-    "priceBHD": 5.70,
-    "priceOMR": 5.85,
-    "priceJOD": 10.75,
-    "priceEGP": 470.00,
-    "priceLBP": 1362000,
-    "priceSYP": 38160,
-    "priceIQD": 19870,
-    "priceTND": 47.30,
-    "priceMAD": 152.00,
-    "priceDZD": 2040.00,
-    "priceUSD": 15.20,
-    "priceEUR": 14.20,
-    "currency": "SAR",
-    "category": "ebooks",
-    "image": "/images/products/15-project-ideas.png",
-    "rating": 4.8,
-    "buyers": 150,
-    "inStock": true,
-    "featured": true,
-    "features": [
-      "PDF تفاعلي",
-      "تحميل فوري",
-      "15+ فكرة مشروع",
-      "خطة عملية",
-      "تسليم فوري ⚡"
-    ],
-    "downloadUrl": "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/15%D9%81%D9%83%D8%B1%D8%A9%20%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20%D8%B1%D9%82%D9%85%D9%8A%20%D9%85%D8%B1%D8%A8%D8%AD%20%D9%8A%D9%85%D9%83%D9%86%D9%83%20%D8%A7%D9%84%D8%A8%D8%AF%D8%A1%20%D8%A8%D9%87%D8%A7%20%D9%85%D9%86%20%D8%A7%D9%84%D8%B5%D9%81%D8%B1.pdf"
+    "product_id": 1,
+    "product_name": "دورة تطوير تطبيقات الويب الكاملة",
+    "product_name_en": "Full Stack Web Development Course",
+    "product_image": "/images/products/web-dev-course.jpg",
+    "description": "دورة شاملة لتعلم تطوير الويب من الصفر حتى الاحتراف",
+    "price": 299.00,
+    "currency": "AED",
+    "download_url": "https://YOUR_BLOB_URL.public.blob.vercel-storage.com/products/web-dev-course.zip",
+    "filename": "web-dev-course.zip",
+    "file_size_mb": 1250,
+    "category": "courses",
+    "tags": ["web-development", "programming", "fullstack"],
+    "active": true
   },
   {
-    "id": 2,
-    "name": "الربح من المنتجات الرقمية",
-    "nameEn": "Profit from Digital Products",
-    "shortDescription": "الخطة الكاملة خطوة بخطوة لتبدأ مشروعك الرقمي الأول وتبني دخل حقيقي من الإنترنت",
-    "description": "تتعب بالشغل كل يوم… لكن دايم تسأل نفسك: ليش غيري يربح من الإنترنت وأنا لأ؟ هذا الكتاب بيعطيك الخطة الكاملة لتبدأ مشروعك الرقمي الأول.",
-    "sections": {
-      "features": {
-        "title": "✨ الميزات الرئيسية",
-        "items": [
-          "خطة كاملة لبناء دخل سلبي من الإنترنت",
-          "أساليب التسويق الحديثة عبر السوشيال ميديا",
-          "أسرار بناء دخل يجلب لك المال أثناء نومك",
-          "تصميم احترافي ولغة بسيطة",
-          "مبني على خبرة وتجارب حقيقية"
-        ]
-      },
-      "whatYouWillLearn": {
-        "title": "📚 ماذا ستتعلم",
-        "items": [
-          "ما هي المنتجات الرقمية ولماذا هي الأسرع للربح",
-          "أنواع المنتجات الأكثر مبيعًا",
-          "كيف تختار فكرة منتج تضمن لك المبيعات",
-          "الأدوات والمنصات للانطلاق فورًا",
-          "إنشاء متجرك الرقمي خلال يوم واحد"
-        ]
-      },
-      "requirements": {
-        "title": "📋 المتطلبات",
-        "items": [
-          "لا يوجد متطلبات مسبقة",
-          "جهاز كمبيوتر أو هاتف ذكي",
-          "اتصال بالإنترنت",
-          "20 دقيقة لقراءة الكتاب"
-        ]
-      },
-      "whatYouWillGet": {
-        "title": "📦 ما ستحصل عليه",
-        "items": [
-          "كتاب PDF بـ 10 صفحات مركزة",
-          "تحميل فوري بعد الدفع",
-          "مدة القراءة 20 دقيقة",
-          "خطة جاهزة مدروسة للتطبيق"
-        ]
-      }
-    },
-    "price": 49.00,
-    "priceAED": 47.50,
-    "priceKWD": 3.98,
-    "priceQAR": 47.25,
-    "priceBHD": 4.88,
-    "priceOMR": 5.00,
-    "priceJOD": 9.20,
-    "priceEGP": 402.00,
-    "priceLBP": 1167000,
-    "priceSYP": 32640,
-    "priceIQD": 17010,
-    "priceTND": 40.50,
-    "priceMAD": 130.00,
-    "priceDZD": 1750.00,
-    "priceUSD": 13.00,
-    "priceEUR": 12.20,
-    "currency": "SAR",
+    "product_id": 2,
+    "product_name": "كتاب إلكتروني: أسرار التسويق الرقمي",
+    "product_name_en": "E-Book: Digital Marketing Secrets",
+    "product_image": "/images/products/digital-marketing-ebook.jpg",
+    "description": "دليلك الشامل لإتقان التسويق الرقمي وزيادة المبيعات",
+    "price": 149.00,
+    "currency": "AED",
+    "download_url": "https://YOUR_BLOB_URL.public.blob.vercel-storage.com/products/digital-marketing-secrets.pdf",
+    "filename": "digital-marketing-secrets.pdf",
+    "file_size_mb": 45,
     "category": "ebooks",
-    "image": "/images/products/digital-products-guide.png",
-    "rating": 4.9,
-    "buyers": 120,
-    "inStock": true,
-    "featured": true,
-    "features": [
-      "PDF تفاعلي",
-      "تحميل فوري",
-      "10 صفحات",
-      "مدة القراءة 20 دقيقة",
-      "تسليم فوري ⚡"
-    ],
-    "downloadUrl": "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D9%8A%D9%81%20%D8%AA%D8%B1%D8%A8%D8%AD%20%D8%A7%D9%84%D9%85%D8%A7%D9%84%20%D9%85%D9%86%20%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9%20%D8%AF%D9%84%D9%8A%D9%84%D9%83%20%D8%A7%D9%84%D9%83%D8%A7%D9%85%D9%84%20%281%29.pdf"
+    "tags": ["marketing", "digital", "business"],
+    "active": true
   },
   {
-    "id": 3,
-    "name": "الدليل التمهيدي للربح من المنتجات الرقمية",
-    "nameEn": "Introductory Guide to Profit from Digital Products",
-    "shortDescription": "مقدمة بسيطة لفهم الخطوات الأساسية لبناء منتج رقمي ناجح يبيع حتى وأنت نايم",
-    "description": "هل فكرت يومًا ليش غيرك يربح من الإنترنت بسهولة بينما أنت ما زلت محتار من أين تبدأ؟ هذا الدليل التمهيدي بيساعدك تفهم الخطوات الأساسية.",
-    "sections": {
-      "features": {
-        "title": "✨ الميزات الرئيسية",
-        "items": [
-          "مقدمة بسيطة وسهلة الفهم",
-          "دليل سريع للبدء",
-          "خطوات أساسية واضحة",
-          "سعر رمزي لتجربة المحتوى"
-        ]
-      },
-      "whatYouWillLearn": {
-        "title": "📚 ماذا ستتعلم",
-        "items": [
-          "كيف تختار فكرة منتج رقمي مربحة",
-          "الأساسيات لبناء متجرك أو صفحتك",
-          "كيف تسوّق صح بدون ضياع وقتك",
-          "أول خطوة في طريق الربح من الإنترنت"
-        ]
-      },
-      "requirements": {
-        "title": "📋 المتطلبات",
-        "items": [
-          "لا يوجد متطلبات مسبقة",
-          "جهاز كمبيوتر أو هاتف ذكي",
-          "اتصال بالإنترنت"
-        ]
-      },
-      "whatYouWillGet": {
-        "title": "📦 ما ستحصل عليه",
-        "items": [
-          "كتاب PDF تمهيدي",
-          "تحميل فوري بعد الدفع",
-          "دليل سريع للبدء",
-          "سعر رمزي 4 ريال فقط"
-        ]
-      }
-    },
-    "price": 4.00,
-    "originalPrice": 50.00,
-    "priceAED": 3.90,
-    "originalPriceAED": 48.75,
-    "priceKWD": 0.33,
-    "originalPriceKWD": 4.13,
-    "priceQAR": 3.85,
-    "originalPriceQAR": 48.13,
-    "priceBHD": 0.40,
-    "originalPriceBHD": 5.00,
-    "priceOMR": 0.41,
-    "originalPriceOMR": 5.13,
-    "priceJOD": 0.75,
-    "originalPriceJOD": 9.38,
-    "priceEGP": 33.00,
-    "originalPriceEGP": 412.50,
-    "priceLBP": 95400,
-    "originalPriceLBP": 1192500,
-    "priceSYP": 2670,
-    "originalPriceSYP": 33375,
-    "priceIQD": 1390,
-    "originalPriceIQD": 17375,
-    "priceTND": 3.30,
-    "originalPriceTND": 41.25,
-    "priceMAD": 10.60,
-    "originalPriceMAD": 132.50,
-    "priceDZD": 143.00,
-    "originalPriceDZD": 1787.50,
-    "priceUSD": 1.07,
-    "originalPriceUSD": 13.38,
-    "priceEUR": 1.00,
-    "originalPriceEUR": 12.50,
-    "currency": "SAR",
-    "category": "ebooks",
-    "image": "/images/products/introductory-guide.png",
-    "rating": 4.7,
-    "buyers": 80,
-    "inStock": true,
-    "featured": false,
-    "features": [
-      "PDF تفاعلي",
-      "تحميل فوري",
-      "مقدمة تمهيدية",
-      "دليل سريع",
-      "تسليم فوري ⚡"
-    ],
-    "downloadUrl": "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D8%AA%D8%A7%D8%A8%20%D9%81%D9%87%D9%85%20%D9%88%D8%A7%D8%B6%D8%AD%20%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9.pdf"
+    "product_id": 3,
+    "product_name": "مجموعة قوالب التصميم الاحترافية",
+    "product_name_en": "Professional Design Templates Bundle",
+    "product_image": "/images/products/design-templates.jpg",
+    "description": "أكثر من 500 قالب تصميم احترافي جاهز للاستخدام",
+    "price": 199.00,
+    "currency": "AED",
+    "download_url": "https://YOUR_BLOB_URL.public.blob.vercel-storage.com/products/design-templates-bundle.zip",
+    "filename": "design-templates-bundle.zip",
+    "file_size_mb": 850,
+    "category": "templates",
+    "tags": ["design", "templates", "graphics"],
+    "active": true
   }
 ]
+

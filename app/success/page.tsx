@@ -17,8 +17,7 @@ interface OrderItem {
 
 interface OrderData {
   id: string;
-  sessionId?: string;
-  paymentId?: string;
+  paymentId: string;
   status: string;
   amount: number;
   currency: string;
@@ -37,52 +36,43 @@ function SuccessContent() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  const sessionId = searchParams.get("session_id");
+  const paymentIntent = searchParams.get("payment_intent");
 
   useEffect(() => {
-    if (!sessionId) {
-      setError("معلومات الجلسة غير متوفرة");
+    if (!paymentIntent) {
+      setError("معلومات الدفع غير متوفرة");
+      setLoading(false);
+      return;
+    }
+
+    // تحقق إذا كان payment_intent هو template variable (لم يتم استبداله)
+    if (paymentIntent === "{CHECKOUT_SESSION_ID}") {
+      setError("معلومات الدفع غير صحيحة. يرجى الانتظار قليلاً ثم تحديث الصفحة.");
       setLoading(false);
       return;
     }
 
     const fetchOrder = async () => {
       try {
-        console.log(`🔍 Fetching order for session: ${sessionId}`);
+        console.log(`🔍 Fetching order for payment_intent: ${paymentIntent}`);
         
-        const res = await fetch(`/api/orders/${sessionId}`);
+        const res = await fetch(`/api/orders/${paymentIntent}`);
         const data = await res.json();
 
         console.log("📥 Response:", data);
 
         if (data.success && data.order) {
-          // التحقق من حالة الطلب
-          if (data.order.status === 'pending') {
-            // الطلب ما زال قيد الانتظار، نحاول مرة أخرى بعد ثانية
-            if (retryCount < 10) {
-              console.log(`⏳ Order still pending, retry ${retryCount + 1}/10...`);
-              setTimeout(() => {
-                setRetryCount(prev => prev + 1);
-              }, 1000);
-              return;
-            } else {
-              setError("الطلب قيد المعالجة، يرجى تحديث الصفحة بعد قليل");
-              setLoading(false);
-              return;
-            }
-          }
-          
           setOrderData(data.order);
           setLoading(false);
         } else {
-          // إذا لم يُعثر على الطلب، نحاول مرة أخرى
-          if (retryCount < 10) {
-            console.log(`⏳ Order not found yet, retry ${retryCount + 1}/10...`);
+          // إذا لم يُعثر على الطلب، نحاول مرة أخرى (webhook قد يتأخر)
+          if (retryCount < 15) {
+            console.log(`⏳ Order not found yet, retry ${retryCount + 1}/15...`);
             setTimeout(() => {
               setRetryCount(prev => prev + 1);
-            }, 1000);
+            }, 2000); // محاولة كل ثانيتين
           } else {
-            setError(data.message || "لم يتم العثور على الطلب");
+            setError(data.message || "لم يتم العثور على الطلب. يرجى تحديث الصفحة أو التواصل مع الدعم.");
             setLoading(false);
           }
         }
@@ -90,10 +80,10 @@ function SuccessContent() {
         console.error("Error fetching order:", err);
         
         // محاولة أخرى في حالة الخطأ
-        if (retryCount < 10) {
+        if (retryCount < 15) {
           setTimeout(() => {
             setRetryCount(prev => prev + 1);
-          }, 1000);
+          }, 2000);
         } else {
           setError("حدث خطأ أثناء جلب بيانات الطلب");
           setLoading(false);
@@ -102,7 +92,7 @@ function SuccessContent() {
     };
 
     fetchOrder();
-  }, [sessionId, retryCount]);
+  }, [paymentIntent, retryCount]);
 
   // 🔄 حالة التحميل
   if (loading) {
@@ -119,14 +109,27 @@ function SuccessContent() {
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
                   جاري التحقق من الدفع...
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-4">
                   يرجى الانتظار بينما نقوم بتأكيد عملية الدفع
                 </p>
                 {retryCount > 0 && (
-                  <p className="text-sm text-gray-500 mt-4">
-                    محاولة {retryCount} من 10...
-                  </p>
+                  <div className="mt-4">
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(retryCount / 15) * 100}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      محاولة {retryCount} من 15...
+                    </p>
+                  </div>
                 )}
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-gray-700">
+                    💡 تتم معالجة عملية الدفع. قد يستغرق الأمر بضع ثوانٍ...
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -177,8 +180,14 @@ function SuccessContent() {
                 </div>
 
                 <div className="mt-8 p-4 bg-yellow-50 rounded-lg">
-                  <p className="text-sm text-gray-700">
-                    💡 إذا كنت قد أتممت عملية الدفع بنجاح، يرجى الانتظار بضع ثوانٍ ثم تحديث الصفحة.
+                  <p className="text-sm text-gray-700 mb-2">
+                    💡 <strong>نصيحة:</strong>
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    إذا كنت قد أتممت عملية الدفع بنجاح، يرجى الانتظار 30 ثانية ثم اضغط على "تحديث الصفحة" أعلاه.
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    إذا استمرت المشكلة، يرجى التواصل معنا مع إرفاق رقم الدفع.
                   </p>
                 </div>
               </div>
@@ -200,7 +209,7 @@ function SuccessContent() {
             {/* رسالة النجاح */}
             <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 text-center">
               <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center animate-bounce">
                   <CheckCircle className="w-12 h-12 text-green-600" />
                 </div>
               </div>
@@ -252,7 +261,7 @@ function SuccessContent() {
                 <div className="flex justify-between py-3 border-b">
                   <span className="text-gray-600">المبلغ المدفوع:</span>
                   <span className="text-2xl font-bold text-green-600">
-                    {orderData.amount} {orderData.currency}
+                    {orderData.amount.toFixed(2)} {orderData.currency}
                   </span>
                 </div>
 
@@ -266,7 +275,13 @@ function SuccessContent() {
                 <div className="flex justify-between py-3">
                   <span className="text-gray-600">تاريخ الدفع:</span>
                   <span className="text-gray-800">
-                    {new Date(orderData.paidAt || orderData.createdAt).toLocaleString('ar-SA')}
+                    {new Date(orderData.paidAt || orderData.createdAt).toLocaleString('ar-SA', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </span>
                 </div>
               </div>
@@ -302,13 +317,13 @@ function SuccessContent() {
 
             {/* زر التحميل */}
             {orderData.downloadUrl && (
-              <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-xl p-8 text-white text-center">
+              <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-xl p-8 text-white text-center mb-8">
                 <Download className="w-12 h-12 mx-auto mb-4" />
                 <h3 className="text-2xl font-bold mb-4">
                   منتجك جاهز للتحميل!
                 </h3>
                 <p className="mb-6 text-green-50">
-                  انقر على الزر أدناه لتحميل منتجك
+                  انقر على الزر أدناه لتحميل منتجك مباشرة
                 </p>
                 <a
                   href={orderData.downloadUrl}
@@ -319,11 +334,14 @@ function SuccessContent() {
                   <Download size={24} />
                   تحميل المنتج الآن
                 </a>
+                <p className="mt-4 text-sm text-green-100">
+                  💾 الملف متاح للتحميل الفوري من Vercel Blob Storage
+                </p>
               </div>
             )}
 
             {/* أزرار الإجراءات */}
-            <div className="mt-8 flex gap-4 justify-center flex-wrap">
+            <div className="flex gap-4 justify-center flex-wrap">
               <Link 
                 href="/"
                 className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"

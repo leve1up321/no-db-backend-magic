@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { 
-  findOrderBySessionId, 
-  updateOrderBySessionId 
+  createOrder,
+  findOrderByPaymentId 
 } from "@/lib/orders-store";
 import productsData from "@/data/products.json";
 
 /**
  * 🎯 Ziina Webhook Handler
  * 
- * يستقبل إشعارات الدفع من Ziina ويحدّث حالة الطلب
+ * يستقبل إشعارات الدفع من Ziina ويحفظ الطلب في الذاكرة
  */
 
 export async function POST(req: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     console.log("📦 Webhook payload:", JSON.stringify(body, null, 2));
     
-    // استخراج البيانات الأساسية
+    // استخراج البيانات الأساسية من Ziina
     const paymentId = body.id || body.payment_intent_id;
     const paymentStatus = body.status;
     const amount = body.amount || 0;
@@ -31,42 +31,43 @@ export async function POST(req: NextRequest) {
     console.log(`💳 Payment ID: ${paymentId}`);
     console.log(`📊 Status: ${paymentStatus}`);
     console.log(`💰 Amount: ${amount} ${currency}`);
-    
-    // استخراج sessionId من metadata
-    const sessionId = body.metadata?.sessionId;
-    console.log(`🆔 Session ID from metadata: ${sessionId}`);
+    console.log(`📧 Email: ${customerEmail}`);
     
     // معالجة حالة نجاح الدفع
     if (paymentStatus === "succeeded" || paymentStatus === "completed" || paymentStatus === "paid") {
       console.log("✅ Payment succeeded!");
       
-      if (!sessionId) {
-        console.error("❌ No session ID in metadata!");
+      // تحقق إذا كان الطلب موجود مسبقاً
+      let existingOrder = findOrderByPaymentId(paymentId);
+      
+      if (existingOrder) {
+        console.log("⚠️ Order already exists:", existingOrder.id);
         return NextResponse.json({
-          error: "No session ID provided",
+          success: true,
+          message: "Order already processed",
+          orderId: existingOrder.id,
           received: true
-        }, { status: 400 });
+        });
       }
       
-      // البحث عن الطلب بالـ session ID
-      let order = findOrderBySessionId(sessionId);
-      
-      if (!order) {
-        console.error(`❌ Order not found for session: ${sessionId}`);
-        return NextResponse.json({
-          error: "Order not found",
-          sessionId: sessionId,
-          received: true
-        }, { status: 404 });
+      // استخراج معلومات السلة من metadata
+      let cartItems: any[] = [];
+      if (body.metadata?.cartItems) {
+        try {
+          cartItems = typeof body.metadata.cartItems === 'string' 
+            ? JSON.parse(body.metadata.cartItems)
+            : body.metadata.cartItems;
+          console.log("📦 Cart items:", cartItems);
+        } catch (e) {
+          console.warn("⚠️ Could not parse cart items from metadata");
+        }
       }
       
-      console.log(`📦 Found order: ${order.id}`);
-      
-      // الحصول على رابط التحميل من المنتج
+      // الحصول على رابط التحميل من المنتج الأول
       let downloadUrl = '';
       
-      if (order.items && order.items.length > 0) {
-        const productId = order.items[0].id;
+      if (cartItems && cartItems.length > 0) {
+        const productId = cartItems[0].id;
         const product = productsData.find((p: any) => p.id === productId);
         
         if (product && product.downloadUrl) {
@@ -77,32 +78,40 @@ export async function POST(req: NextRequest) {
         }
       }
       
-      // تحديث الطلب
-      const updatedOrder = updateOrderBySessionId(sessionId, {
+      // إنشاء الطلب الجديد
+      const order = createOrder({
+        id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         paymentId: paymentId,
         status: 'paid',
+        amount: amount / 100, // تحويل من فلسات إلى دراهم
+        currency: currency,
         customerEmail: customerEmail,
         customerName: customerName,
         downloadUrl: downloadUrl,
+        items: cartItems.map((item: any) => ({
+          id: item.id,
+          name: item.name || item.productName,
+          quantity: item.quantity || 1,
+          price: item.price,
+          image: item.image
+        })),
+        createdAt: new Date().toISOString(),
         paidAt: new Date().toISOString(),
         metadata: {
-          ...order.metadata,
           webhookData: body
         }
       });
       
-      if (updatedOrder) {
-        console.log("✅ Order updated successfully!");
-        console.log(`📝 Order ID: ${updatedOrder.id}`);
-        console.log(`💳 Payment ID: ${updatedOrder.paymentId}`);
-        console.log(`📧 Customer: ${updatedOrder.customerEmail}`);
-        console.log(`📥 Download URL: ${updatedOrder.downloadUrl}`);
-      }
+      console.log("✅ Order created successfully!");
+      console.log(`📝 Order ID: ${order.id}`);
+      console.log(`💳 Payment ID: ${order.paymentId}`);
+      console.log(`📧 Customer: ${order.customerEmail}`);
+      console.log(`📥 Download URL: ${order.downloadUrl}`);
       
       return NextResponse.json({
         success: true,
         message: "Payment processed successfully",
-        orderId: updatedOrder?.id,
+        orderId: order.id,
         received: true
       });
     }
@@ -111,12 +120,19 @@ export async function POST(req: NextRequest) {
     if (paymentStatus === "failed" || paymentStatus === "cancelled") {
       console.log("❌ Payment failed or cancelled");
       
-      if (sessionId) {
-        updateOrderBySessionId(sessionId, {
-          status: 'failed',
-          paymentId: paymentId
-        });
-      }
+      // يمكن إنشاء طلب بحالة failed
+      const order = createOrder({
+        id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        paymentId: paymentId,
+        status: 'failed',
+        amount: amount / 100,
+        currency: currency,
+        customerEmail: customerEmail,
+        items: [],
+        createdAt: new Date().toISOString()
+      });
+      
+      console.log(`📝 Failed order created: ${order.id}`);
     }
     
     // رد عام لجميع الحالات الأخرى

@@ -19,23 +19,35 @@ export async function POST(req: NextRequest) {
     
     // قراءة البيانات
     const body = await req.json();
-    console.log("📦 Webhook payload:", JSON.stringify(body, null, 2));
+    console.log("📦 Full Webhook payload:", JSON.stringify(body, null, 2));
+    
+    // ⚠️ CRITICAL: Ziina ترسل البيانات في body.data وليس body مباشرة!
+    const data = body.data || body; // fallback إذا كانت البيانات مباشرة
+    
+    console.log("📦 Extracted data:", JSON.stringify(data, null, 2));
     
     // استخراج البيانات الأساسية من Ziina
-    const paymentId = body.id || body.payment_intent_id;
-    const paymentStatus = body.status;
-    const amount = body.amount || 0;
-    const currency = body.currency_code || body.currency || "AED";
-    const customerEmail = body.customer_email || body.email;
-    const customerName = body.customer_name || body.name;
+    const paymentId = data.id || body.id;
+    const paymentStatus = data.status || body.status;
+    const amount = data.amount || body.amount || 0;
+    const currency = data.currency_code || data.currency || body.currency_code || body.currency || "AED";
+    const customerEmail = data.customer_email || data.email || body.customer_email || body.email;
+    const customerName = data.customer_name || data.name || body.customer_name || body.name;
+    const message = data.message || body.message || "";
     
+    console.log("=" .repeat(60));
+    console.log("📊 Extracted Payment Info:");
     console.log(`💳 Payment ID: ${paymentId}`);
     console.log(`📊 Status: ${paymentStatus}`);
-    console.log(`💰 Amount: ${amount} ${currency}`);
+    console.log(`💰 Amount: ${amount} fils (${amount / 100} ${currency})`);
     console.log(`📧 Email: ${customerEmail}`);
+    console.log(`👤 Name: ${customerName}`);
+    console.log(`💬 Message: ${message}`);
+    console.log("=".repeat(60));
     
     // استخراج tracking token من metadata
-    const trackingToken = body.metadata?.trackingToken;
+    const metadata = data.metadata || body.metadata || {};
+    const trackingToken = metadata.trackingToken;
     console.log(`🎫 Tracking Token: ${trackingToken}`);
     
     // معالجة حالة نجاح الدفع
@@ -46,8 +58,8 @@ export async function POST(req: NextRequest) {
         console.error("❌ No tracking token in metadata!");
         
         // إنشاء طلب جديد بدون tracking token (fallback)
-        const cartItems = body.metadata?.cartItems 
-          ? JSON.parse(body.metadata.cartItems) 
+        const cartItems = metadata.cartItems 
+          ? (typeof metadata.cartItems === 'string' ? JSON.parse(metadata.cartItems) : metadata.cartItems)
           : [];
         
         let downloadUrl = '';
@@ -60,7 +72,7 @@ export async function POST(req: NextRequest) {
           id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
           paymentId: paymentId,
           status: 'paid',
-          amount: amount / 100,
+          amount: amount / 100, // تحويل من فلسات إلى دراهم
           currency: currency,
           customerEmail: customerEmail,
           customerName: customerName,
@@ -73,15 +85,22 @@ export async function POST(req: NextRequest) {
             image: item.image
           })),
           createdAt: new Date().toISOString(),
-          paidAt: new Date().toISOString()
+          paidAt: new Date().toISOString(),
+          metadata: {
+            message: message,
+            webhookData: data
+          }
         });
         
         console.log("⚠️ Created order without tracking token:", newOrder.id);
+        console.log(`✅ Payment saved: ${paymentId}`);
+        console.log(`📥 Download URL: ${newOrder.downloadUrl}`);
         
         return NextResponse.json({
           success: true,
           message: "Payment processed (no tracking token)",
           orderId: newOrder.id,
+          paymentId: paymentId,
           received: true
         });
       }
@@ -93,8 +112,8 @@ export async function POST(req: NextRequest) {
         console.error(`❌ Order not found for tracking token: ${trackingToken}`);
         
         // إنشاء طلب جديد كـ fallback
-        const cartItems = body.metadata?.cartItems 
-          ? JSON.parse(body.metadata.cartItems) 
+        const cartItems = metadata.cartItems 
+          ? (typeof metadata.cartItems === 'string' ? JSON.parse(metadata.cartItems) : metadata.cartItems)
           : [];
         
         let downloadUrl = '';
@@ -121,10 +140,17 @@ export async function POST(req: NextRequest) {
             image: item.image
           })),
           createdAt: new Date().toISOString(),
-          paidAt: new Date().toISOString()
+          paidAt: new Date().toISOString(),
+          metadata: {
+            message: message,
+            webhookData: data
+          }
         });
         
         console.log("⚠️ Created new order:", order.id);
+        console.log(`✅ Payment saved: ${paymentId}`);
+        console.log(`📥 Download URL: ${order.downloadUrl}`);
+        
       } else {
         console.log(`📦 Found existing order: ${order.id}`);
         
@@ -154,7 +180,8 @@ export async function POST(req: NextRequest) {
           paidAt: new Date().toISOString(),
           metadata: {
             ...order.metadata,
-            webhookData: body
+            message: message,
+            webhookData: data
           }
         });
         
@@ -162,19 +189,30 @@ export async function POST(req: NextRequest) {
           order = updatedOrder;
           console.log("✅ Order updated successfully!");
         }
+        
+        console.log(`✅ Payment saved: ${paymentId}`);
       }
       
-      console.log(`📝 Final Order ID: ${order.id}`);
-      console.log(`💳 Payment ID: ${order.paymentId}`);
-      console.log(`🎫 Tracking Token: ${trackingToken}`);
-      console.log(`📧 Customer: ${order.customerEmail}`);
-      console.log(`📥 Download URL: ${order.downloadUrl}`);
+      console.log("=".repeat(60));
+      console.log("📝 Final Order Summary:");
+      console.log(`   Order ID: ${order.id}`);
+      console.log(`   Payment ID: ${order.paymentId}`);
+      console.log(`   Tracking Token: ${trackingToken}`);
+      console.log(`   Status: ${order.status}`);
+      console.log(`   Amount: ${order.amount} ${order.currency}`);
+      console.log(`   Customer: ${order.customerEmail}`);
+      console.log(`   Download URL: ${order.downloadUrl}`);
+      console.log("=".repeat(60));
       
       return NextResponse.json({
         success: true,
         message: "Payment processed successfully",
         orderId: order.id,
+        paymentId: paymentId,
         trackingToken: trackingToken,
+        amount: order.amount,
+        currency: order.currency,
+        downloadUrl: order.downloadUrl,
         received: true
       });
     }
@@ -196,14 +234,17 @@ export async function POST(req: NextRequest) {
     }
     
     // رد عام لجميع الحالات الأخرى
+    console.log(`⚠️ Unhandled payment status: ${paymentStatus}`);
     return NextResponse.json({
       received: true,
-      status: paymentStatus
+      status: paymentStatus,
+      message: "Webhook received but not processed"
     });
     
   } catch (error: any) {
     console.error("💥 Webhook error:");
     console.error(error);
+    console.error("Stack trace:", error.stack);
     
     return NextResponse.json({
       error: "Webhook processing failed",
@@ -218,7 +259,8 @@ export async function GET() {
   return NextResponse.json({
     message: "Ziina Webhook Endpoint",
     status: "active",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    info: "This endpoint receives payment notifications from Ziina"
   });
 }
 

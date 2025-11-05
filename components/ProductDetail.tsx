@@ -8,32 +8,32 @@ import Image from 'next/image';
 import WhyBuySection from './WhyBuySection';
 
 interface ProductSection {
-  title?: string;
-  items?: string[];
+  title: string;
+  items: string[];
 }
 
 interface ProductSections {
-  features?: ProductSection;
-  whatYouWillLearn?: ProductSection;
-  requirements?: ProductSection;
-  whatYouWillGet?: ProductSection;
+  features: ProductSection;
+  whatYouWillLearn: ProductSection;
+  requirement?: ProductSection;
+  whatYouWillGet: ProductSection;
 }
 
 interface Product {
   // New schema fields
-  product_id?: number;
-  product_name?: string;
-  product_name_en?: string;
-  product_image?: string;
-  download_url?: string;
-  filename?: string;
-  file_size_mb?: number;
-  tags?: string[];
-  active?: boolean;
+  product_id: number;
+  product_name: string;
+  product_name_en: string;
+  product_image: string;
+  download_url: string;
+  filename: string;
+  file_size_mb: number;
+  tags: string[];
+  active: boolean;
   
   // Legacy fields (for backward compatibility)
   
-  id?: number;
+  id: number;
   name?: string;
   nameEn?: string;
   shortDescription?: string;
@@ -349,11 +349,11 @@ export default function ProductDetail({ product }?: { product?: Product }) {
                   <h2 className="text-xl sm?:text-2xl font-bold mb-4 sm?:mb-6" style={{ color?: '#6A0DAD' }}>
                     {product.sections.whatYouWillGet.title}
                   </h2>
-                  <ul className="space-y-3 sm?:space-y-4">
+                  <ul className="space-y-3 sm:space-y-4">
                     {product.sections.whatYouWillGet.items.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
-                        <span className="text-base leading-relaxed" style={{ color?: '#EAEAEA', fontSize?: '16px' }}>
+                        <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
                           {item}
                         </span>
                       </li>
@@ -378,42 +378,42 @@ export default function ProductDetail({ product }?: { product?: Product }) {
                 <span className="text-sm sm?:text-base font-bold text-white">
                   {(productTestimonials.reduce((acc, t) => acc + t.rating, 0) / productTestimonials.length).toFixed(1)}
                 </span>
-                <span className="text-xs sm?:text-sm text-gray-400">
+                <span className="text-xs sm:text-sm text-gray-400">
                   ({productTestimonials.length} تقييم)
                 </span>
               </div>
             </div>
 
             {/* Reviews Grid - Responsive */}
-            <div className="grid grid-cols-1 sm?:grid-cols-2 lg?:grid-cols-3 gap-4 sm?:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {productTestimonials.map((testimonial) => (
                 <div
                   key={testimonial.id}
-                  className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-5 sm?:p-6 rounded-2xl border border-primary-300/10 hover?:border-primary-300/30 hover?:shadow-xl hover?:shadow-primary-300/10 transition-all duration-300 flex flex-col h-full"
+                  className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-5 sm:p-6 rounded-2xl border border-primary-300/10 hover?:border-primary-300/30 hover?:shadow-xl hover?:shadow-primary-300/10 transition-all duration-300 flex flex-col h-full"
                 >
                   {/* Stars */}
                   <div className="flex items-center gap-1 mb-3">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 sm?:w-5 sm?:h-5 ${
+                        className={`w-4 h-4 sm:w-5 sm:h-5 ${
                           i < testimonial.rating
-                            ? 'text-yellow-400 fill-yellow-400'
-                            ?: 'text-gray-600'
+                             'text-yellow-400 fill-yellow-400'
+                            : 'text-gray-600'
                         }`}
                       />
                     ))}
                   </div>
 
                   {/* Review Text */}
-                  <p className="text-sm sm?:text-base text-gray-300 mb-4 leading-relaxed flex-grow">
+                  <p className="text-sm sm:text-base text-gray-300 mb-4 leading-relaxed flex-grow">
                     "{testimonial.text}"
                   </p>
                   
                   {/* User Info */}
                   <div className="pt-4 border-t border-primary-300/10 mt-auto">
                     <div className="mb-2">
-                      <p className="text-sm sm?:text-base font-bold text-white truncate">
+                      <p className="text-sm sm:text-base font-bold text-white truncate">
                         {testimonial.name}
                       </p>
                     </div>

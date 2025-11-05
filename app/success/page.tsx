@@ -1,96 +1,66 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { CheckCircle, Download, Package, Receipt, Home, ShoppingBag, Loader2 } from "lucide-react";
+import { CheckCircle, Download, Package, Receipt, Home, ShoppingBag, Loader2, AlertCircle } from "lucide-react";
 
-interface OrderItem {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  image?: string;
-}
+/**
+ * 🎯 صفحة Success - تعرض آخر دفع مكتمل من Blob Storage
+ * 
+ * لا تعتمد على tokens أو معرفات في URL
+ * تجلب آخر دفع مكتمل مباشرة من Blob
+ */
 
-interface OrderData {
-  id: string;
-  sessionId?: string;
-  paymentId?: string;
-  status: string;
+interface PaymentData {
+  payment_id: string;
+  message: string;
   amount: number;
   currency: string;
-  customerEmail?: string;
-  customerName?: string;
-  downloadUrl?: string;
-  items: OrderItem[];
-  createdAt: string;
-  paidAt?: string;
+  status: string;
+  download_url: string;
+  customer_email?: string;
+  customer_name?: string;
+  created_at: string;
+  cart_items?: any[];
 }
 
 function SuccessContent() {
-  const searchParams = useSearchParams();
-  const [orderData, setOrderData] = useState<OrderData | null>(null);
+  const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  // قراءة tracking token من URL
-  const token = searchParams.get("token");
-
   useEffect(() => {
-    if (!token) {
-      setError("معلومات الجلسة غير متوفرة");
-      setLoading(false);
-      return;
-    }
-
-    const fetchOrder = async () => {
+    const fetchLatestPayment = async () => {
       try {
-        console.log(`🔍 Fetching order for token: ${token}`);
+        console.log(`🔍 Fetching latest payment (attempt ${retryCount + 1}/20)...`);
         
-        // البحث باستخدام tracking token
-        const res = await fetch(`/api/orders/${token}`);
+        // جلب آخر دفع من API
+        const res = await fetch('/api/payments/latest');
         const data = await res.json();
 
         console.log("📥 Response:", data);
 
-        if (data.success && data.order) {
-          // التحقق من حالة الطلب
-          if (data.order.status === 'pending') {
-            // الطلب ما زال قيد الانتظار (webhook لم يصل بعد)
-            if (retryCount < 20) {
-              console.log(`⏳ Order still pending, retry ${retryCount + 1}/20...`);
-              setTimeout(() => {
-                setRetryCount(prev => prev + 1);
-              }, 2000); // محاولة كل ثانيتين
-              return;
-            } else {
-              setError("الطلب قيد المعالجة. يرجى تحديث الصفحة بعد قليل.");
-              setLoading(false);
-              return;
-            }
-          }
-          
-          // الطلب مكتمل
-          setOrderData(data.order);
+        if (data.success && data.payment) {
+          setPaymentData(data.payment);
           setLoading(false);
+          console.log("✅ Payment data loaded successfully!");
         } else {
-          // إذا لم يُعثر على الطلب، نحاول مرة أخرى
+          // إذا لم يُعثر على دفع، نحاول مرة أخرى (webhook قد يتأخر)
           if (retryCount < 20) {
-            console.log(`⏳ Order not found yet, retry ${retryCount + 1}/20...`);
+            console.log(`⏳ No payment found yet, retry ${retryCount + 1}/20...`);
             setTimeout(() => {
               setRetryCount(prev => prev + 1);
-            }, 2000);
+            }, 2000); // محاولة كل ثانيتين
           } else {
-            setError(data.message || "لم يتم العثور على الطلب. يرجى تحديث الصفحة أو التواصل مع الدعم.");
+            setError(data.message || "لم يتم العثور على عملية دفع مكتملة. يرجى تحديث الصفحة أو التواصل مع الدعم.");
             setLoading(false);
           }
         }
       } catch (err: any) {
-        console.error("Error fetching order:", err);
+        console.error("Error fetching payment:", err);
         
         // محاولة أخرى في حالة الخطأ
         if (retryCount < 20) {
@@ -98,14 +68,14 @@ function SuccessContent() {
             setRetryCount(prev => prev + 1);
           }, 2000);
         } else {
-          setError("حدث خطأ أثناء جلب بيانات الطلب");
+          setError("حدث خطأ أثناء جلب بيانات الدفع");
           setLoading(false);
         }
       }
     };
 
-    fetchOrder();
-  }, [token, retryCount]);
+    fetchLatestPayment();
+  }, [retryCount]);
 
   // 🔄 حالة التحميل
   if (loading) {
@@ -153,7 +123,7 @@ function SuccessContent() {
   }
 
   // ❌ حالة الخطأ
-  if (error || !orderData) {
+  if (error || !paymentData) {
     return (
       <>
         <Navbar />
@@ -163,7 +133,7 @@ function SuccessContent() {
               <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                    <span className="text-3xl">❌</span>
+                    <AlertCircle className="w-10 h-10 text-red-600" />
                   </div>
                 </div>
                 
@@ -172,7 +142,7 @@ function SuccessContent() {
                 </h1>
                 
                 <p className="text-gray-600 mb-8">
-                  {error || "معلومات الطلب غير متوفرة"}
+                  {error || "معلومات الدفع غير متوفرة"}
                 </p>
 
                 <div className="flex gap-4 justify-center flex-wrap">
@@ -228,67 +198,67 @@ function SuccessContent() {
               </div>
               
               <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                🎉 تم الدفع بنجاح!
+                ✅ تم الدفع بنجاح! 🎉
               </h1>
               
               <p className="text-xl text-gray-600 mb-6">
                 شكراً لك! تمت عملية الشراء بنجاح
               </p>
 
-              {orderData.customerEmail && (
+              {paymentData.customer_email && (
                 <p className="text-gray-500">
                   تم إرسال تفاصيل الطلب إلى:{" "}
                   <span className="font-semibold text-gray-700">
-                    {orderData.customerEmail}
+                    {paymentData.customer_email}
                   </span>
                 </p>
               )}
             </div>
 
-            {/* تفاصيل الطلب */}
+            {/* تفاصيل الدفع */}
             <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
               <div className="flex items-center gap-3 mb-6 pb-4 border-b">
                 <Receipt className="w-6 h-6 text-green-600" />
                 <h2 className="text-2xl font-bold text-gray-800">
-                  تفاصيل الطلب
+                  تفاصيل الدفع
                 </h2>
               </div>
 
               <div className="space-y-4">
                 <div className="flex justify-between py-3 border-b">
-                  <span className="text-gray-600">رقم الطلب:</span>
+                  <span className="text-gray-600">معرف الدفع:</span>
                   <span className="font-mono text-sm text-gray-800">
-                    {orderData.id}
+                    {paymentData.payment_id}
                   </span>
                 </div>
-
-                {orderData.paymentId && (
-                  <div className="flex justify-between py-3 border-b">
-                    <span className="text-gray-600">معرف الدفع:</span>
-                    <span className="font-mono text-sm text-gray-800">
-                      {orderData.paymentId}
-                    </span>
-                  </div>
-                )}
 
                 <div className="flex justify-between py-3 border-b">
                   <span className="text-gray-600">المبلغ المدفوع:</span>
                   <span className="text-2xl font-bold text-green-600">
-                    {orderData.amount.toFixed(2)} {orderData.currency}
+                    {paymentData.amount.toFixed(2)} {paymentData.currency}
                   </span>
                 </div>
 
                 <div className="flex justify-between py-3 border-b">
                   <span className="text-gray-600">الحالة:</span>
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                    ✅ مدفوع
+                    ✅ مكتمل
                   </span>
                 </div>
+
+                {paymentData.message && (
+                  <div className="flex justify-between py-3 border-b">
+                    <span className="text-gray-600">الوصف:</span>
+                    <span className="text-gray-800 text-right">
+                      {paymentData.message}
+                    </span>
+                  </div>
+                )}
 
                 <div className="flex justify-between py-3">
                   <span className="text-gray-600">تاريخ الدفع:</span>
                   <span className="text-gray-800">
-                    {new Date(orderData.paidAt || orderData.createdAt).toLocaleString('ar-SA', {
+                    {new Date(paymentData.created_at).toLocaleString('ar-SA', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -301,7 +271,7 @@ function SuccessContent() {
             </div>
 
             {/* المنتجات */}
-            {orderData.items && orderData.items.length > 0 && (
+            {paymentData.cart_items && paymentData.cart_items.length > 0 && (
               <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b">
                   <Package className="w-6 h-6 text-green-600" />
@@ -311,16 +281,16 @@ function SuccessContent() {
                 </div>
 
                 <div className="space-y-4">
-                  {orderData.items.map((item, index) => (
+                  {paymentData.cart_items.map((item: any, index: number) => (
                     <div key={index} className="flex justify-between items-center py-3 border-b last:border-0">
                       <div>
-                        <p className="font-semibold text-gray-800">{item.name}</p>
+                        <p className="font-semibold text-gray-800">{item.name || item.productName}</p>
                         <p className="text-sm text-gray-500">
-                          الكمية: {item.quantity}
+                          الكمية: {item.quantity || 1}
                         </p>
                       </div>
                       <p className="text-lg font-bold text-gray-800">
-                        {item.price} {orderData.currency}
+                        {item.price} {paymentData.currency}
                       </p>
                     </div>
                   ))}
@@ -329,7 +299,7 @@ function SuccessContent() {
             )}
 
             {/* زر التحميل */}
-            {orderData.downloadUrl && (
+            {paymentData.download_url && (
               <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-xl p-8 text-white text-center mb-8">
                 <Download className="w-12 h-12 mx-auto mb-4" />
                 <h3 className="text-2xl font-bold mb-4">
@@ -339,7 +309,7 @@ function SuccessContent() {
                   انقر على الزر أدناه لتحميل منتجك مباشرة
                 </p>
                 <a
-                  href={orderData.downloadUrl}
+                  href={paymentData.download_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   download

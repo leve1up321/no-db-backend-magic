@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { 
-  createOrder,
-  findOrderByPaymentId 
+  findOrderBySessionId,
+  updateOrderBySessionId,
+  createOrder 
 } from "@/lib/orders-store";
 import productsData from "@/data/products.json";
 
 /**
  * 🎯 Ziina Webhook Handler
  * 
- * يستقبل إشعارات الدفع من Ziina ويحفظ الطلب في الذاكرة
+ * يستقبل إشعارات الدفع من Ziina ويربط tracking token بـ payment_intent
  */
 
 export async function POST(req: NextRequest) {
@@ -33,78 +34,139 @@ export async function POST(req: NextRequest) {
     console.log(`💰 Amount: ${amount} ${currency}`);
     console.log(`📧 Email: ${customerEmail}`);
     
+    // استخراج tracking token من metadata
+    const trackingToken = body.metadata?.trackingToken;
+    console.log(`🎫 Tracking Token: ${trackingToken}`);
+    
     // معالجة حالة نجاح الدفع
     if (paymentStatus === "succeeded" || paymentStatus === "completed" || paymentStatus === "paid") {
       console.log("✅ Payment succeeded!");
       
-      // تحقق إذا كان الطلب موجود مسبقاً
-      let existingOrder = findOrderByPaymentId(paymentId);
-      
-      if (existingOrder) {
-        console.log("⚠️ Order already exists:", existingOrder.id);
+      if (!trackingToken) {
+        console.error("❌ No tracking token in metadata!");
+        
+        // إنشاء طلب جديد بدون tracking token (fallback)
+        const cartItems = body.metadata?.cartItems 
+          ? JSON.parse(body.metadata.cartItems) 
+          : [];
+        
+        let downloadUrl = '';
+        if (cartItems.length > 0) {
+          const product = productsData.find((p: any) => p.id === cartItems[0].id);
+          if (product) downloadUrl = product.downloadUrl || '';
+        }
+        
+        const newOrder = createOrder({
+          id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          paymentId: paymentId,
+          status: 'paid',
+          amount: amount / 100,
+          currency: currency,
+          customerEmail: customerEmail,
+          customerName: customerName,
+          downloadUrl: downloadUrl,
+          items: cartItems.map((item: any) => ({
+            id: item.id,
+            name: item.name || item.productName,
+            quantity: item.quantity || 1,
+            price: item.price,
+            image: item.image
+          })),
+          createdAt: new Date().toISOString(),
+          paidAt: new Date().toISOString()
+        });
+        
+        console.log("⚠️ Created order without tracking token:", newOrder.id);
+        
         return NextResponse.json({
           success: true,
-          message: "Order already processed",
-          orderId: existingOrder.id,
+          message: "Payment processed (no tracking token)",
+          orderId: newOrder.id,
           received: true
         });
       }
       
-      // استخراج معلومات السلة من metadata
-      let cartItems: any[] = [];
-      if (body.metadata?.cartItems) {
-        try {
-          cartItems = typeof body.metadata.cartItems === 'string' 
-            ? JSON.parse(body.metadata.cartItems)
-            : body.metadata.cartItems;
-          console.log("📦 Cart items:", cartItems);
-        } catch (e) {
-          console.warn("⚠️ Could not parse cart items from metadata");
-        }
-      }
+      // البحث عن الطلب المؤقت بـ tracking token
+      let order = findOrderBySessionId(trackingToken);
       
-      // الحصول على رابط التحميل من المنتج الأول
-      let downloadUrl = '';
-      
-      if (cartItems && cartItems.length > 0) {
-        const productId = cartItems[0].id;
-        const product = productsData.find((p: any) => p.id === productId);
+      if (!order) {
+        console.error(`❌ Order not found for tracking token: ${trackingToken}`);
         
-        if (product && product.downloadUrl) {
-          downloadUrl = product.downloadUrl;
-          console.log(`📥 Download URL found: ${downloadUrl}`);
-        } else {
-          console.warn(`⚠️ No download URL for product: ${productId}`);
+        // إنشاء طلب جديد كـ fallback
+        const cartItems = body.metadata?.cartItems 
+          ? JSON.parse(body.metadata.cartItems) 
+          : [];
+        
+        let downloadUrl = '';
+        if (cartItems.length > 0) {
+          const product = productsData.find((p: any) => p.id === cartItems[0].id);
+          if (product) downloadUrl = product.downloadUrl || '';
+        }
+        
+        order = createOrder({
+          id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          sessionId: trackingToken,
+          paymentId: paymentId,
+          status: 'paid',
+          amount: amount / 100,
+          currency: currency,
+          customerEmail: customerEmail,
+          customerName: customerName,
+          downloadUrl: downloadUrl,
+          items: cartItems.map((item: any) => ({
+            id: item.id,
+            name: item.name || item.productName,
+            quantity: item.quantity || 1,
+            price: item.price,
+            image: item.image
+          })),
+          createdAt: new Date().toISOString(),
+          paidAt: new Date().toISOString()
+        });
+        
+        console.log("⚠️ Created new order:", order.id);
+      } else {
+        console.log(`📦 Found existing order: ${order.id}`);
+        
+        // الحصول على رابط التحميل من المنتج الأول
+        let downloadUrl = '';
+        
+        if (order.items && order.items.length > 0) {
+          const productId = order.items[0].id;
+          const product = productsData.find((p: any) => p.id === productId);
+          
+          if (product && product.downloadUrl) {
+            downloadUrl = product.downloadUrl;
+            console.log(`📥 Download URL found: ${downloadUrl}`);
+          } else {
+            console.warn(`⚠️ No download URL for product: ${productId}`);
+          }
+        }
+        
+        // تحديث الطلب المؤقت مع بيانات الدفع الفعلية
+        const updatedOrder = updateOrderBySessionId(trackingToken, {
+          paymentId: paymentId,
+          status: 'paid',
+          amount: amount / 100, // تحويل من فلسات
+          customerEmail: customerEmail,
+          customerName: customerName,
+          downloadUrl: downloadUrl,
+          paidAt: new Date().toISOString(),
+          metadata: {
+            ...order.metadata,
+            webhookData: body
+          }
+        });
+        
+        if (updatedOrder) {
+          order = updatedOrder;
+          console.log("✅ Order updated successfully!");
         }
       }
       
-      // إنشاء الطلب الجديد
-      const order = createOrder({
-        id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        paymentId: paymentId,
-        status: 'paid',
-        amount: amount / 100, // تحويل من فلسات إلى دراهم
-        currency: currency,
-        customerEmail: customerEmail,
-        customerName: customerName,
-        downloadUrl: downloadUrl,
-        items: cartItems.map((item: any) => ({
-          id: item.id,
-          name: item.name || item.productName,
-          quantity: item.quantity || 1,
-          price: item.price,
-          image: item.image
-        })),
-        createdAt: new Date().toISOString(),
-        paidAt: new Date().toISOString(),
-        metadata: {
-          webhookData: body
-        }
-      });
-      
-      console.log("✅ Order created successfully!");
-      console.log(`📝 Order ID: ${order.id}`);
+      console.log(`📝 Final Order ID: ${order.id}`);
       console.log(`💳 Payment ID: ${order.paymentId}`);
+      console.log(`🎫 Tracking Token: ${trackingToken}`);
       console.log(`📧 Customer: ${order.customerEmail}`);
       console.log(`📥 Download URL: ${order.downloadUrl}`);
       
@@ -112,6 +174,7 @@ export async function POST(req: NextRequest) {
         success: true,
         message: "Payment processed successfully",
         orderId: order.id,
+        trackingToken: trackingToken,
         received: true
       });
     }
@@ -120,19 +183,16 @@ export async function POST(req: NextRequest) {
     if (paymentStatus === "failed" || paymentStatus === "cancelled") {
       console.log("❌ Payment failed or cancelled");
       
-      // يمكن إنشاء طلب بحالة failed
-      const order = createOrder({
-        id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        paymentId: paymentId,
-        status: 'failed',
-        amount: amount / 100,
-        currency: currency,
-        customerEmail: customerEmail,
-        items: [],
-        createdAt: new Date().toISOString()
-      });
-      
-      console.log(`📝 Failed order created: ${order.id}`);
+      if (trackingToken) {
+        const order = findOrderBySessionId(trackingToken);
+        if (order) {
+          updateOrderBySessionId(trackingToken, {
+            status: 'failed',
+            paymentId: paymentId
+          });
+          console.log(`📝 Order marked as failed: ${order.id}`);
+        }
+      }
     }
     
     // رد عام لجميع الحالات الأخرى

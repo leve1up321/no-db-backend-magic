@@ -75,17 +75,45 @@ export async function POST(req) {
     
     console.log("📝 Payment message:", message);
     
+    // 🎫 إنشاء tracking token فريد
+    const trackingToken = `track_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+    console.log("🎫 Generated tracking token:", trackingToken);
+    
+    // 📝 حفظ الطلب المؤقت مع tracking token
+    const tempOrder = createOrder({
+      id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      sessionId: trackingToken, // نستخدم sessionId لحفظ tracking token
+      status: 'pending',
+      amount: totalAmount,
+      currency: 'AED',
+      items: cartItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity || 1,
+        price: item.price,
+        image: item.image
+      })),
+      createdAt: new Date().toISOString(),
+      metadata: {
+        cartItems: cartItems,
+        trackingToken: trackingToken
+      }
+    });
+    
+    console.log("📝 Temporary order created:", tempOrder.id, "with token:", trackingToken);
+    
     const paymentData = {
       amount: amountInFils,
       currency_code: "AED",
       message: message,
-      success_url: `${appUrl}/success?payment_intent={CHECKOUT_SESSION_ID}`,
+      success_url: `${appUrl}/success?token=${trackingToken}`, // ✨ نستخدم token بدل payment_intent
       cancel_url: `${appUrl}/cancel`,
       failure_url: `${appUrl}/cancel`,
       test: true,
       expiry: expiry, // string بالميلي ثانية
       allow_tips: false,
       metadata: {
+        trackingToken: trackingToken, // ✨ مهم جداً للربط في webhook
         cartItems: JSON.stringify(cartItems)
       }
     };

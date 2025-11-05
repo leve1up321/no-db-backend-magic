@@ -17,7 +17,8 @@ interface OrderItem {
 
 interface OrderData {
   id: string;
-  paymentId: string;
+  sessionId?: string;
+  paymentId?: string;
   status: string;
   amount: number;
   currency: string;
@@ -36,41 +37,53 @@ function SuccessContent() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  const paymentIntent = searchParams.get("payment_intent");
+  // قراءة tracking token من URL
+  const token = searchParams.get("token");
 
   useEffect(() => {
-    if (!paymentIntent) {
-      setError("معلومات الدفع غير متوفرة");
-      setLoading(false);
-      return;
-    }
-
-    // تحقق إذا كان payment_intent هو template variable (لم يتم استبداله)
-    if (paymentIntent === "{CHECKOUT_SESSION_ID}") {
-      setError("معلومات الدفع غير صحيحة. يرجى الانتظار قليلاً ثم تحديث الصفحة.");
+    if (!token) {
+      setError("معلومات الجلسة غير متوفرة");
       setLoading(false);
       return;
     }
 
     const fetchOrder = async () => {
       try {
-        console.log(`🔍 Fetching order for payment_intent: ${paymentIntent}`);
+        console.log(`🔍 Fetching order for token: ${token}`);
         
-        const res = await fetch(`/api/orders/${paymentIntent}`);
+        // البحث باستخدام tracking token
+        const res = await fetch(`/api/orders/${token}`);
         const data = await res.json();
 
         console.log("📥 Response:", data);
 
         if (data.success && data.order) {
+          // التحقق من حالة الطلب
+          if (data.order.status === 'pending') {
+            // الطلب ما زال قيد الانتظار (webhook لم يصل بعد)
+            if (retryCount < 20) {
+              console.log(`⏳ Order still pending, retry ${retryCount + 1}/20...`);
+              setTimeout(() => {
+                setRetryCount(prev => prev + 1);
+              }, 2000); // محاولة كل ثانيتين
+              return;
+            } else {
+              setError("الطلب قيد المعالجة. يرجى تحديث الصفحة بعد قليل.");
+              setLoading(false);
+              return;
+            }
+          }
+          
+          // الطلب مكتمل
           setOrderData(data.order);
           setLoading(false);
         } else {
-          // إذا لم يُعثر على الطلب، نحاول مرة أخرى (webhook قد يتأخر)
-          if (retryCount < 15) {
-            console.log(`⏳ Order not found yet, retry ${retryCount + 1}/15...`);
+          // إذا لم يُعثر على الطلب، نحاول مرة أخرى
+          if (retryCount < 20) {
+            console.log(`⏳ Order not found yet, retry ${retryCount + 1}/20...`);
             setTimeout(() => {
               setRetryCount(prev => prev + 1);
-            }, 2000); // محاولة كل ثانيتين
+            }, 2000);
           } else {
             setError(data.message || "لم يتم العثور على الطلب. يرجى تحديث الصفحة أو التواصل مع الدعم.");
             setLoading(false);
@@ -80,7 +93,7 @@ function SuccessContent() {
         console.error("Error fetching order:", err);
         
         // محاولة أخرى في حالة الخطأ
-        if (retryCount < 15) {
+        if (retryCount < 20) {
           setTimeout(() => {
             setRetryCount(prev => prev + 1);
           }, 2000);
@@ -92,7 +105,7 @@ function SuccessContent() {
     };
 
     fetchOrder();
-  }, [paymentIntent, retryCount]);
+  }, [token, retryCount]);
 
   // 🔄 حالة التحميل
   if (loading) {
@@ -117,17 +130,17 @@ function SuccessContent() {
                     <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                       <div 
                         className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(retryCount / 15) * 100}%` }}
+                        style={{ width: `${(retryCount / 20) * 100}%` }}
                       ></div>
                     </div>
                     <p className="text-sm text-gray-500">
-                      محاولة {retryCount} من 15...
+                      محاولة {retryCount} من 20...
                     </p>
                   </div>
                 )}
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-gray-700">
-                    💡 تتم معالجة عملية الدفع. قد يستغرق الأمر بضع ثوانٍ...
+                    💡 تتم معالجة عملية الدفع. قد يستغرق الأمر حتى 40 ثانية...
                   </p>
                 </div>
               </div>
@@ -184,10 +197,10 @@ function SuccessContent() {
                     💡 <strong>نصيحة:</strong>
                   </p>
                   <p className="text-sm text-gray-600">
-                    إذا كنت قد أتممت عملية الدفع بنجاح، يرجى الانتظار 30 ثانية ثم اضغط على "تحديث الصفحة" أعلاه.
+                    إذا كنت قد أتممت عملية الدفع بنجاح، يرجى الانتظار 30-40 ثانية ثم اضغط على "تحديث الصفحة".
                   </p>
                   <p className="text-sm text-gray-600 mt-2">
-                    إذا استمرت المشكلة، يرجى التواصل معنا مع إرفاق رقم الدفع.
+                    إذا استمرت المشكلة، يرجى التواصل معنا عبر الواتساب.
                   </p>
                 </div>
               </div>
@@ -329,6 +342,7 @@ function SuccessContent() {
                   href={orderData.downloadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  download
                   className="inline-flex items-center gap-3 bg-white text-green-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-50 transition-all transform hover:scale-105 shadow-lg"
                 >
                   <Download size={24} />

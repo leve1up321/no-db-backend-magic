@@ -1,5 +1,26 @@
 "use client";
 
+/**
+ * 🎯 صفحة فاتورة الطلب مع Token-Based Authentication
+ * 
+ * الوظائف:
+ * 1. قراءة payment_id أو token من URL query params
+ * 2. جلب السجل من /api/record
+ * 3. التحقق من صلاحية التوكن
+ * 4. عرض فاتورة كاملة مع:
+ *    - صورة المنتج
+ *    - اسم المنتج
+ *    - رقم الطلب
+ *    - المبلغ المدفوع
+ *    - زر تحميل آمن عبر /api/download/[token]
+ * 5. معالجة الأخطاء (توكن منتهي، غير موجود، إلخ)
+ * 6. رسالة WhatsApp للدعم
+ * 
+ * الاستخدام:
+ * - /order-success?payment_id=xxx
+ * - /order-success?token=xxx
+ */
+
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -8,109 +29,104 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { 
   CheckCircle, Download, Package, Receipt, Home, 
-  ShoppingBag, Loader2, AlertCircle, MessageCircle 
+  ShoppingBag, Loader2, AlertCircle, MessageCircle,
+  Clock, Shield
 } from "lucide-react";
 
-/**
- * 🎯 صفحة فاتورة الطلب - ديناميكية لجميع المنتجات
- * 
- * تقرأ payment_id من URL وتعرض فاتورة كاملة
- */
-
-interface OrderItem {
-  product_id: number;
-  product_name: string;
-  product_image: string;
-  quantity: number;
-  price: number;
-  download_url: string;
-  notes: string;
-}
-
-interface OrderData {
+interface RecordData {
   payment_id: string;
-  order_number: string;
-  status: string;
-  customer: {
-    name: string;
-    email: string;
-  };
-  payment: {
-    amount: number;
-    currency: string;
-    method: string;
-    message: string;
-    paid_at: string;
-  };
-  items: OrderItem[];
-  totals: {
-    subtotal: number;
-    tax: number;
-    total: number;
-  };
+  message: string;
+  amount: number;
+  currency: string;
+  customer_email: string;
+  customer_name: string;
+  product_name: string;
+  download_url: string;
+  filename: string;
+  token: string;
+  expires_at: string;
+  used: boolean;
   created_at: string;
 }
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const paymentId = searchParams.get('payment_id');
+  const accessToken = searchParams.get('token');
   
-  const [orderData, setOrderData] = useState<OrderData | null>(null);
+  const [recordData, setRecordData] = useState<RecordData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isExpired, setIsExpired] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    if (!paymentId) {
-      setError("لم يتم تحديد معرف الدفع");
+    // التحقق من وجود معرف
+    if (!paymentId && !accessToken) {
+      setError("لم يتم تحديد معرف الطلب");
       setLoading(false);
       return;
     }
 
-    const fetchOrder = async () => {
+    const fetchRecord = async () => {
       try {
-        console.log(`🔍 Fetching order for payment_id: ${paymentId} (attempt ${retryCount + 1}/20)`);
+        console.log(`🔍 Fetching record (attempt ${retryCount + 1}/20)...`);
         
-        const res = await fetch(`/api/orders/${paymentId}`, {
+        // بناء URL
+        const identifier = accessToken ? `token=${accessToken}` : `payment_id=${paymentId}`;
+        const apiUrl = `/api/record?${identifier}`;
+        
+        console.log(`📡 API URL: ${apiUrl}`);
+        
+        const res = await fetch(apiUrl, {
           cache: 'no-store'
         });
         
         const data = await res.json();
+        
+        console.log("📥 API Response:", data);
 
-        if (data.success && data.order) {
-          setOrderData(data.order);
+        if (data.success && data.record) {
+          setRecordData(data.record);
+          setIsExpired(data.is_expired);
           setLoading(false);
-          console.log("✅ Order loaded successfully!");
+          console.log("✅ Record loaded successfully!");
+          console.log(`🎫 Token: ${data.record.token}`);
+          console.log(`⏰ Expires: ${data.record.expires_at}`);
+          console.log(`🔓 Expired: ${data.is_expired ? 'Yes' : 'No'}`);
         } else {
-          // Retry logic - webhook قد يتأخر
+          // Retry logic - قد يتأخر webhook
           if (retryCount < 20) {
-            console.log(`⏳ Order not found yet, retry ${retryCount + 1}/20...`);
+            console.log(`⏳ Record not found yet, retry ${retryCount + 1}/20...`);
             setTimeout(() => {
               setRetryCount(prev => prev + 1);
             }, 2000);
           } else {
-            setError("لم يتم العثور على الطلب. يرجى التواصل مع الدعم.");
+            setError(data.message || "لم يتم العثور على السجل");
             setLoading(false);
           }
         }
       } catch (err: any) {
-        console.error("Error:", err);
+        console.error("❌ Fetch error:", err);
         
         if (retryCount < 20) {
           setTimeout(() => {
             setRetryCount(prev => prev + 1);
           }, 2000);
         } else {
-          setError("حدث خطأ أثناء جلب بيانات الطلب");
+          setError("حدث خطأ أثناء جلب البيانات");
           setLoading(false);
         }
       }
     };
 
-    fetchOrder();
-  }, [paymentId, retryCount]);
+    fetchRecord();
+  }, [paymentId, accessToken, retryCount]);
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 🔄 حالة التحميل
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  
   if (loading) {
     return (
       <>
@@ -150,8 +166,11 @@ function OrderSuccessContent() {
     );
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // ❌ حالة الخطأ
-  if (error || !orderData) {
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  
+  if (error || !recordData) {
     return (
       <>
         <Navbar />
@@ -192,6 +211,15 @@ function OrderSuccessContent() {
                     تواصل عبر واتساب
                   </a>
                 </div>
+
+                <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                    💡 <strong>نصيحة:</strong>
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    إذا كنت قد أتممت عملية الدفع، يرجى الانتظار 30-40 ثانية ثم تحديث الصفحة.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -201,7 +229,13 @@ function OrderSuccessContent() {
     );
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // ✅ حالة النجاح - عرض الفاتورة
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  
+  // رابط التحميل الآمن
+  const downloadLink = `/api/download/${recordData.token}`;
+  
   return (
     <>
       <Navbar />
@@ -227,15 +261,41 @@ function OrderSuccessContent() {
 
               <div className="inline-block bg-green-100 dark:bg-green-900 px-6 py-3 rounded-lg">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  رقم الطلب
+                  معرف الدفع
                 </p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400 font-mono">
-                  {orderData.order_number}
+                <p className="text-lg font-bold text-green-600 dark:text-green-400 font-mono">
+                  {recordData.payment_id}
                 </p>
               </div>
             </div>
 
-            {/* تفاصيل العميل والدفع */}
+            {/* تحذير انتهاء الصلاحية */}
+            {isExpired && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6 mb-8">
+                <div className="flex items-start gap-4">
+                  <Clock className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-bold text-red-800 dark:text-red-300 mb-2">
+                      ⚠️ انتهت صلاحية رابط التحميل
+                    </h3>
+                    <p className="text-red-700 dark:text-red-400 mb-3">
+                      انتهت صلاحية رابط التحميل الآمن. للحصول على رابط جديد، يرجى التواصل معنا عبر واتساب.
+                    </p>
+                    <a
+                      href={`https://wa.me/966XXXXXXXXX?text=مرحباً، أحتاج رابط تحميل جديد للطلب: ${recordData.payment_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-[#25D366] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#20bd5a] transition-colors text-sm"
+                    >
+                      <MessageCircle size={18} />
+                      طلب رابط جديد عبر واتساب
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* معلومات الدفع */}
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               {/* معلومات العميل */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
@@ -247,13 +307,13 @@ function OrderSuccessContent() {
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">الاسم</p>
                     <p className="font-semibold text-gray-800 dark:text-white">
-                      {orderData.customer.name}
+                      {recordData.customer_name}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">البريد الإلكتروني</p>
                     <p className="font-semibold text-gray-800 dark:text-white break-all">
-                      {orderData.customer.email}
+                      {recordData.customer_email}
                     </p>
                   </div>
                 </div>
@@ -267,15 +327,15 @@ function OrderSuccessContent() {
                 </h2>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">طريقة الدفع</p>
-                    <p className="font-semibold text-gray-800 dark:text-white">
-                      {orderData.payment.method}
+                    <p className="text-sm text-gray-500 dark:text-gray-400">المبلغ</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {recordData.amount.toFixed(2)} {recordData.currency}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">تاريخ الدفع</p>
                     <p className="font-semibold text-gray-800 dark:text-white">
-                      {new Date(orderData.payment.paid_at).toLocaleString('ar-SA', {
+                      {new Date(recordData.created_at).toLocaleString('ar-SA', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
@@ -284,116 +344,50 @@ function OrderSuccessContent() {
                       })}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">معرف الدفع</p>
-                    <p className="font-mono text-xs text-gray-600 dark:text-gray-400 break-all">
-                      {orderData.payment_id}
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* المنتجات */}
+            {/* المنتج وزر التحميل */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
                 <Package className="w-7 h-7 text-green-600" />
-                المنتجات المشتراة
+                المنتج المشترى
               </h2>
 
-              <div className="space-y-6">
-                {orderData.items.map((item, index) => (
-                  <div key={index} className="border-b dark:border-gray-700 pb-6 last:border-0 last:pb-0">
-                    <div className="flex gap-6 items-start">
-                      {/* صورة المنتج */}
-                      <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
-                        <Image
-                          src={item.product_image}
-                          alt={item.product_name}
-                          fill
-                          className="object-cover"
-                          sizes="128px"
-                        />
-                      </div>
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                  {recordData.product_name}
+                </h3>
+                
+                {recordData.message && (
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    {recordData.message}
+                  </p>
+                )}
 
-                      {/* تفاصيل المنتج */}
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
-                          {item.product_name}
-                        </h3>
-                        
-                        {item.notes && (
-                          <p className="text-gray-600 dark:text-gray-400 mb-3">
-                            {item.notes}
-                          </p>
-                        )}
-
-                        <div className="flex items-center gap-4 mb-4">
-                          <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">السعر</p>
-                            <p className="text-lg font-bold text-gray-800 dark:text-white">
-                              {item.price.toFixed(2)} {orderData.payment.currency}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">الكمية</p>
-                            <p className="text-lg font-bold text-gray-800 dark:text-white">
-                              {item.quantity}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">الإجمالي</p>
-                            <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                              {(item.price * item.quantity).toFixed(2)} {orderData.payment.currency}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* زر التحميل */}
-                        {item.download_url && (
-                          <a
-                            href={item.download_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                            className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-all transform hover:scale-105"
-                          >
-                            <Download size={20} />
-                            تحميل المنتج
-                          </a>
-                        )}
-                      </div>
-                    </div>
+                {/* زر التحميل الآمن */}
+                {!isExpired && (
+                  <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-8 text-white mb-6">
+                    <Shield className="w-12 h-12 mx-auto mb-4" />
+                    <h4 className="text-2xl font-bold mb-4">
+                      منتجك جاهز للتحميل!
+                    </h4>
+                    <p className="mb-6 text-green-50">
+                      رابط التحميل الآمن صالح لمدة 10 دقائق
+                    </p>
+                    <a
+                      href={downloadLink}
+                      className="inline-flex items-center gap-3 bg-white text-green-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-50 transition-all transform hover:scale-105 shadow-lg"
+                    >
+                      <Download size={24} />
+                      تحميل {recordData.filename}
+                    </a>
+                    <p className="mt-4 text-sm text-green-100">
+                      🔒 تحميل آمن ومشفر
+                    </p>
                   </div>
-                ))}
-              </div>
-
-              {/* المجاميع */}
-              <div className="mt-8 pt-6 border-t dark:border-gray-700">
-                <div className="space-y-3">
-                  <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                    <span>الإجمالي الفرعي:</span>
-                    <span className="font-semibold">
-                      {orderData.totals.subtotal.toFixed(2)} {orderData.payment.currency}
-                    </span>
-                  </div>
-                  
-                  {orderData.totals.tax > 0 && (
-                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                      <span>الضريبة:</span>
-                      <span className="font-semibold">
-                        {orderData.totals.tax.toFixed(2)} {orderData.payment.currency}
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-between text-xl font-bold text-gray-800 dark:text-white pt-3 border-t dark:border-gray-700">
-                    <span>المجموع الكلي:</span>
-                    <span className="text-green-600 dark:text-green-400">
-                      {orderData.totals.total.toFixed(2)} {orderData.payment.currency}
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -407,7 +401,7 @@ function OrderSuccessContent() {
                 نحن هنا لمساعدتك! تواصل معنا عبر واتساب وسنرد عليك في أقرب وقت ممكن
               </p>
               <a
-                href="https://wa.me/966XXXXXXXXX?text=مرحباً، لدي استفسار بخصوص الطلب رقم: "
+                href={`https://wa.me/966XXXXXXXXX?text=مرحباً، لدي استفسار بخصوص الطلب: ${recordData.payment_id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 bg-white text-blue-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 shadow-lg"

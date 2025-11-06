@@ -15,7 +15,7 @@ export default function WishlistPage() {
   const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    const filteredProducts = products.filter(p => wishlist.includes(p.id));
+    const filteredProducts = products.filter(p => wishlist.includes(p.product_id));
     setWishlistProducts(filteredProducts);
   }, [wishlist]);
 
@@ -64,10 +64,10 @@ export default function WishlistPage() {
   const handleAddToCart = (product: any) => {
     const price = getPrice(product);
     addToCart({
-      id: product.id,
-      name: product.name,
+      id: product.product_id,
+      name: product.product_name,
       price: price,
-      image: product.image,
+      image: product.product_image,
     });
     showToast('تمت إضافة المنتج إلى السلة بنجاح! ✅', 'cart');
   };
@@ -123,14 +123,14 @@ export default function WishlistPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {wishlistProducts.map((product) => (
               <div
-                key={product.id}
+                key={product.product_id}
                 className="bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 animate-scale-in group"
               >
                 {/* Product Image */}
                 <div className="relative h-48 overflow-hidden">
                   <Image
-                    src={product.image}
-                    alt={product.name}
+                    src={product.product_image}
+                    alt={product.product_name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
                   />
@@ -140,7 +140,7 @@ export default function WishlistPage() {
                     </span>
                   )}
                   <button
-                    onClick={() => handleRemoveFromWishlist(product.id)}
+                    onClick={() => handleRemoveFromWishlist(product.product_id)}
                     className="absolute top-3 right-3 p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition group/btn"
                   >
                     <Heart className="w-5 h-5 text-red-600 fill-red-600" />
@@ -149,9 +149,9 @@ export default function WishlistPage() {
 
                 {/* Product Info */}
                 <div className="p-6">
-                  <Link href={`/products/${product.id}`}>
+                  <Link href={`/products/${product.product_id}`}>
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 hover:text-primary-600 dark:hover:text-primary-400 transition">
-                      {product.name}
+                      {product.product_name}
                     </h3>
                   </Link>
                   <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">

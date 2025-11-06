@@ -8,7 +8,7 @@
     "price": 0.00,
     "originalPrice": 30.00,
     "currency": "SAR",
-    "download_url": "https://drive.google.com/file/d/1GDrd-MJGl4vMW-fxiJt0QRwQS-mpjCC3/view?usp=sharing",
+    "download_url": "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D8%AA%D8%A7%D8%A8%20%D9%81%D9%87%D9%85%20%D9%88%D8%A7%D8%B6%D8%AD%20%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9.pdf",
     "filename": "introductory-guide.pdf",
     "file_size_mb": 5,
     "category": "ebooks",
@@ -51,9 +51,8 @@
     "category": "ebooks",
     "tags": ["أفكار-مشاريع", "ريادة-أعمال", "مشاريع-رقمية", "يوتيوب", "تيك-توك"],
     "active": true,
-    "rating": 5.0,
+    "rating": 4.7,
     "buyers": "تم الشراء أكثر من 200 مرة",
     "featured": true
   }
 ]
-

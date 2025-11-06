@@ -1,238 +1,232 @@
-/**
- * ✅ ORDER SUCCESS PAGE - صفحة الفاتورة الرقمية
- * 
- * الاستخدام:
- * /order-success?payment_id=315c4e0d-399b-4953-9d3e-6b3433aea458
- * 
- * يعرض الفاتورة مباشرة مع زر التحميل الآمن
- */
-
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, Download, Shield, Loader2, Package, CreditCard } from 'lucide-react';
+import { Download, Mail, CheckCircle, Clock, Package, MessageCircle } from 'lucide-react';
+import Image from 'next/image';
 
-interface OrderRecord {
-  payment_id: string;
-  order_number: string;
-  product_name: string;
-  product_image: string;
-  amount: number;
-  currency: string;
-  filename: string;
-  file_size_mb: number;
-  access_token: string;
-  customer_name?: string;
-  customer_email?: string;
-}
-
-function OrderSuccessContent() {
+export default function OrderSuccessPage() {
   const searchParams = useSearchParams();
-  const paymentId = searchParams.get('payment_id');
-  
-  const [loading, setLoading] = useState(true);
-  const [recordData, setRecordData] = useState<OrderRecord | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+
+  const orderId = searchParams.get('orderId');
+  const token = searchParams.get('token');
+  const productId = searchParams.get('productId');
+  const productName = searchParams.get('productName') || 'منتجك الرقمي';
+  const productImage = searchParams.get('productImage') || '/images/default-product.jpg';
+  const price = searchParams.get('price') || '0';
+  const email = searchParams.get('email') || '';
+
+  // Calculate expiry time (30 minutes from now)
+  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes in seconds
+
   useEffect(() => {
-    if (!paymentId) {
-      setError('Missing payment_id in URL');
-      setLoading(false);
-      return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleDownload = async () => {
+    if (!token) return;
+
+    setIsDownloading(true);
+    try {
+      // Download the file
+      window.location.href = `/api/download/${token}`;
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('حدث خطأ أثناء التحميل. يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsDownloading(false);
     }
-    
-    const fetchRecord = async () => {
-      try {
-        console.log(`🔍 Fetching order: ${paymentId}`);
-        
-        const response = await fetch(`/api/record?payment_id=${paymentId}`);
-        const data = await response.json();
-        
-        console.log('📊 Response:', data);
-        
-        if (data.success && data.record) {
-          setRecordData(data.record);
-          setError(null);
-          console.log('✅ Order loaded successfully');
-        } else {
-          setError(data.message || 'Order not found');
-          console.error('❌ Order not found');
-        }
-      } catch (err: any) {
-        console.error('❌ Fetch error:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  };
+
+  const handleSendEmail = async () => {
+    if (!token || !email) return;
+
+    setIsSendingEmail(true);
+    try {
+      const response = await fetch('/api/send-download-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          token,
+          productName,
+          orderId,
+        }),
+      });
+
+      if (response.ok) {
+        setEmailSent(true);
+      } else {
+        alert('حدث خطأ أثناء إرسال البريد.');
       }
-    };
-    
-    fetchRecord();
-  }, [paymentId]);
-  
-  if (loading) {
+    } catch (error) {
+      console.error('Email error:', error);
+      alert('حدث خطأ أثناء إرسال البريد.');
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  if (!orderId || !token) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-dark-500 flex items-center justify-center p-4">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-900 font-semibold text-lg">جاري التحميل...</p>
-          <p className="text-gray-500 text-sm mt-2">يتم جلب بيانات طلبك</p>
+          <h1 className="text-2xl font-bold text-white mb-4">طلب غير موجود</h1>
+          <p className="text-gray-400">رابط غير صحيح أو منتهي الصلاحية</p>
         </div>
       </div>
     );
   }
-  
-  if (error || !recordData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
-          <div className="text-red-500 text-5xl mb-4">❌</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">خطأ في تحميل الطلب</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          
-          <div className="bg-blue-50 rounded-lg p-4 mb-6 text-right">
-            <p className="text-sm text-blue-800">
-              <strong>💡 نصيحة:</strong> تأكد من صحة payment_id في الرابط
-            </p>
-          </div>
-          
-          <a 
-            href="/"
-            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            العودة للرئيسية
-          </a>
-        </div>
-      </div>
-    );
-  }
-  
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          
-          {/* Success Header */}
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-8 text-center">
-            <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 animate-bounce">
-              <CheckCircle2 className="w-12 h-12 text-green-600" />
-            </div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              تم الدفع بنجاح! 🎉
-            </h1>
-            <p className="text-green-100">شكراً لشرائك من متجرنا</p>
+    <div className="min-h-screen bg-dark-500 pt-24 pb-12">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Success Header */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+            <CheckCircle className="w-12 h-12 text-green-400" />
           </div>
-          
-          {/* Order Details */}
-          <div className="p-8">
-            
-            {/* Product Name */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {recordData.product_name}
-              </h2>
-              <div className="flex items-center gap-2 text-gray-500">
-                <Package className="w-4 h-4" />
-                <span className="text-sm">منتج رقمي</span>
-              </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+            تم إنشاء طلبك بنجاح! 🎉
+          </h1>
+          <p className="text-gray-400 text-lg">
+            شكراً لثقتك بنا. يمكنك الآن تحميل منتجك الرقمي
+          </p>
+        </div>
+
+        {/* Order Details Card */}
+        <div className="bg-dark-400 rounded-2xl border border-primary-300/20 p-6 sm:p-8 mb-6">
+          <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-700">
+            <Package className="w-5 h-5 text-primary-300" />
+            <h2 className="text-xl font-bold text-white">تفاصيل الطلب</h2>
+          </div>
+
+          {/* Product Info */}
+          <div className="flex gap-4 mb-6">
+            <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden flex-shrink-0">
+              <Image
+                src={productImage}
+                alt={productName}
+                fill
+                className="object-cover"
+              />
             </div>
-            
-            {/* Order Info Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-sm text-gray-500 mb-1">رقم الطلب</p>
-                <p className="font-mono text-sm font-semibold text-gray-900">
-                  {recordData.order_number}
+            <div className="flex-1">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+                {productName}
+              </h3>
+              <div className="space-y-1 text-sm sm:text-base">
+                <p className="text-gray-400">
+                  <span className="text-gray-500">رقم الطلب:</span>{' '}
+                  <span className="text-primary-300 font-mono">{orderId}</span>
                 </p>
-              </div>
-              
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <CreditCard className="w-4 h-4 text-gray-500" />
-                  <p className="text-sm text-gray-500">المبلغ المدفوع</p>
-                </div>
-                <p className="text-2xl font-bold text-green-600">
-                  {recordData.amount.toFixed(2)} {recordData.currency}
+                <p className="text-gray-400">
+                  <span className="text-gray-500">السعر:</span>{' '}
+                  <span className={`font-bold ${price === '0' ? 'text-green-400' : 'text-white'}`}>
+                    {price === '0' ? 'مجاني! 🎉' : `${price} ريال`}
+                  </span>
                 </p>
-              </div>
-            </div>
-            
-            {/* Payment ID */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-8">
-              <p className="text-sm text-gray-500 mb-1">معرف الدفع</p>
-              <p className="font-mono text-xs break-all text-gray-700">
-                {recordData.payment_id}
-              </p>
-            </div>
-            
-            {/* Divider */}
-            <div className="border-t border-gray-200 my-8"></div>
-            
-            {/* Download Section */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
-              <div className="flex items-start gap-4">
-                <div className="bg-blue-100 rounded-full p-3 flex-shrink-0">
-                  <Shield className="w-8 h-8 text-blue-600" />
-                </div>
-                
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    منتجك جاهز للتحميل! 📥
-                  </h3>
-                  
-                  <p className="text-gray-600 mb-4">
-                    اضغط الزر أدناه لتحميل منتجك بأمان
+                {email && (
+                  <p className="text-gray-400">
+                    <span className="text-gray-500">البريد:</span>{' '}
+                    <span className="text-white">{email}</span>
                   </p>
-                  
-                  <a
-                    href={`/api/download/${recordData.access_token}`}
-                    className="inline-flex items-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                  >
-                    <Download className="w-6 h-6" />
-                    تحميل {recordData.filename}
-                  </a>
-                  
-                  <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
-                    <Shield className="w-4 h-4" />
-                    <span>🔒 تحميل آمن ومشفر • حجم الملف: {recordData.file_size_mb} MB</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Customer Info */}
-            {recordData.customer_name && (
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-500 mb-2">معلومات العميل</p>
-                <p className="font-semibold text-gray-900">
-                  {recordData.customer_name}
-                </p>
-                {recordData.customer_email && (
-                  <p className="text-sm text-gray-600 mt-1">{recordData.customer_email}</p>
                 )}
               </div>
-            )}
+            </div>
           </div>
+
+          {/* Timer Warning */}
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-yellow-400 font-semibold mb-1">
+                  ⏰ رابط التحميل صالح لمدة محدودة
+                </p>
+                <p className="text-sm text-gray-400">
+                  الوقت المتبقي: <span className="font-mono text-yellow-400 font-bold">{formatTime(timeLeft)}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Download Button */}
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading || timeLeft === 0}
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
+          >
+            <Download className="w-5 h-5" />
+            {isDownloading ? 'جاري التحميل...' : timeLeft === 0 ? 'انتهت صلاحية الرابط' : 'تحميل المنتج الآن 📥'}
+          </button>
+
+          {/* Send Email Button */}
+          {email && !emailSent && (
+            <button
+              onClick={handleSendEmail}
+              disabled={isSendingEmail || timeLeft === 0}
+              className="w-full bg-dark-300 border border-primary-300/20 text-white font-bold py-4 rounded-xl hover:border-primary-300/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <Mail className="w-5 h-5" />
+              {isSendingEmail ? 'جاري الإرسال...' : 'أرسل لي رابط التحميل على الإيميل 📧'}
+            </button>
+          )}
+
+          {emailSent && (
+            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <p className="text-green-400 font-semibold">
+                تم إرسال رابط التحميل إلى بريدك الإلكتروني ✅
+              </p>
+            </div>
+          )}
         </div>
-        
-        {/* Footer */}
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>شكراً لثقتك بنا ❤️</p>
-          <p className="mt-2">لأي استفسار، نحن هنا لمساعدتك على مدار الساعة</p>
+
+        {/* Support Section */}
+        <div className="bg-dark-400 rounded-2xl border border-primary-300/20 p-6 text-center">
+          <MessageCircle className="w-10 h-10 text-primary-300 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-white mb-2">
+            هل واجهت مشكلة في التحميل؟
+          </h3>
+          <p className="text-gray-400 mb-4">
+            تواصل معنا مباشرة عبر واتساب وسنساعدك فوراً
+          </p>
+          <a
+            href="https://wa.me/966XXXXXXXXX"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all"
+          >
+            <MessageCircle className="w-5 h-5" />
+            تواصل عبر واتساب
+          </a>
+        </div>
+
+        {/* Back to Home */}
+        <div className="text-center mt-8">
+          <a
+            href="/"
+            className="text-primary-300 hover:text-primary-400 font-semibold transition-colors"
+          >
+            ← العودة إلى الصفحة الرئيسية
+          </a>
         </div>
       </div>
     </div>
   );
 }
 
-export default function OrderSuccessPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
-      </div>
-    }>
-      <OrderSuccessContent />
-    </Suspense>
-  );
-}

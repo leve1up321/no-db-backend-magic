@@ -22,22 +22,44 @@ export default function FreeProductModal({ isOpen, onClose, productName, downloa
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Create free order
+      const response = await fetch('/api/create-free-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          phone,
+          productId: 1, // Free product ID
+          productName,
+          downloadUrl: downloadUrl || '',
+        }),
+      });
 
-    // Here you would normally send the data to your backend
-    console.log('Free product request:', { email, phone, productName });
+      if (!response.ok) {
+        throw new Error('Failed to create order');
+      }
 
-    setSubmitted(true);
-    setIsSubmitting(false);
+      const data = await response.json();
 
-    // Auto close after 3 seconds
-    setTimeout(() => {
-      onClose();
-      setSubmitted(false);
-      setEmail('');
-      setPhone('');
-    }, 3000);
+      // Redirect to order success page
+      const params = new URLSearchParams({
+        orderId: data.orderId,
+        token: data.token,
+        productId: '1',
+        productName,
+        productImage: '/images/product1.jpg',
+        price: '0',
+        email,
+      });
+
+      window.location.href = `/order-success?${params.toString()}`;
+
+    } catch (error) {
+      console.error('Error creating order:', error);
+      alert('حدث خطأ. يرجى المحاولة مرة أخرى.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -148,4 +170,3 @@ export default function FreeProductModal({ isOpen, onClose, productName, downloa
     </div>
   );
 }
-

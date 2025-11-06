@@ -298,14 +298,17 @@ export default function ProductDetail({ product }: { product?: Product }) {
             <div className="space-y-3">
               {/* Buy Now / Direct Payment Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <button
-                  onClick={handlePayment}
-                  className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-green-500 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-green-500/30 active:scale-95 transition-all duration-300 touch-manipulation"
-                  style={{ fontSize: '16px' }}
-                >
-                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
-                  استثمر الآن ⚡
-                </button>
+                {/* Hide "Buy Now" button for free products */}
+                {!(price === 0 && (product as any).isFree) && (
+                  <button
+                    onClick={handlePayment}
+                    className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-green-500 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-green-500/30 active:scale-95 transition-all duration-300 touch-manipulation"
+                    style={{ fontSize: '16px' }}
+                  >
+                    <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
+                    استثمر الآن ⚡
+                  </button>
+                )}
                 <button
                   onClick={handleAddToCart}
                   className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-primary-300 to-accent-600 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-300/30 active:scale-95 transition-all duration-300 touch-manipulation"

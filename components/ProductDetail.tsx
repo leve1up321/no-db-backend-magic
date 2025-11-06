@@ -92,25 +92,30 @@ export default function ProductDetail({ product }: { product?: Product }) {
   // Helper function to get unified product image
   const getProductImage = () => product.image ?? product.product_image ?? '/placeholder.jpg';
 
+  // Currency exchange rates (SAR as base currency)
+  const exchangeRates: Record<string, number> = {
+    'SAR': 1,
+    'AED': 0.98,      // 1 SAR = 0.98 AED
+    'KWD': 0.082,     // 1 SAR = 0.082 KWD
+    'QAR': 0.97,      // 1 SAR = 0.97 QAR
+    'BHD': 0.10,      // 1 SAR = 0.10 BHD
+    'OMR': 0.10,      // 1 SAR = 0.10 OMR
+    'JOD': 0.19,      // 1 SAR = 0.19 JOD
+    'EGP': 13.12,     // 1 SAR = 13.12 EGP
+    'LBP': 23850,     // 1 SAR = 23,850 LBP
+    'SYP': 3360,      // 1 SAR = 3,360 SYP
+    'IQD': 349,       // 1 SAR = 349 IQD
+    'TND': 0.83,      // 1 SAR = 0.83 TND
+    'MAD': 2.66,      // 1 SAR = 2.66 MAD
+    'DZD': 35.70,     // 1 SAR = 35.70 DZD
+    'USD': 0.27,      // 1 SAR = 0.27 USD
+    'EUR': 0.25,      // 1 SAR = 0.25 EUR
+  };
+
   const getPrice = () => {
-    switch (currency) {
-      case 'AED': return product.priceAED ?? product.price ?? 0;
-      case 'KWD': return product.priceKWD ?? product.price ?? 0;
-      case 'QAR': return product.priceQAR ?? product.price ?? 0;
-      case 'BHD': return product.priceBHD ?? product.price ?? 0;
-      case 'OMR': return product.priceOMR ?? product.price ?? 0;
-      case 'JOD': return product.priceJOD ?? product.price ?? 0;
-      case 'EGP': return product.priceEGP ?? product.price ?? 0;
-      case 'LBP': return product.priceLBP ?? product.price ?? 0;
-      case 'SYP': return product.priceSYP ?? product.price ?? 0;
-      case 'IQD': return product.priceIQD ?? product.price ?? 0;
-      case 'TND': return product.priceTND ?? product.price ?? 0;
-      case 'MAD': return product.priceMAD ?? product.price ?? 0;
-      case 'DZD': return product.priceDZD ?? product.price ?? 0;
-      case 'USD': return product.priceUSD ?? product.price ?? 0;
-      case 'EUR': return product.priceEUR ?? product.price ?? 0;
-      default: return product.price ?? 0;
-    }
+    const basePrice = product.price ?? 0;
+    const rate = exchangeRates[currency] || 1;
+    return basePrice * rate;
   };
 
   const getCurrencySymbol = () => {
@@ -271,7 +276,7 @@ export default function ProductDetail({ product }: { product?: Product }) {
                 {(product as any).originalPrice && price === 0 ? (
                   <div className="flex flex-col gap-1">
                     <p className="text-lg sm:text-xl text-gray-500 line-through">
-                      {(product as any).originalPrice.toFixed(2)} {currencySymbol}
+                      {((product as any).originalPrice * (exchangeRates[currency] || 1)).toFixed(2)} {currencySymbol}
                     </p>
                     <div className="flex items-center gap-2">
                       <p className="text-3xl sm:text-4xl font-extrabold text-green-400">

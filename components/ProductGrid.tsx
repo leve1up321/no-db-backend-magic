@@ -19,92 +19,59 @@ export default function ProductGrid() {
   // Helper function to get unified product image
   const getProductImage = (product: any) => product.image ?? product.product_image ?? '/placeholder.jpg';
 
+  // Currency exchange rates (SAR as base currency)
+  const exchangeRates: Record<string, number> = {
+    'SAR': 1,
+    'AED': 0.98,      // 1 SAR = 0.98 AED
+    'KWD': 0.082,     // 1 SAR = 0.082 KWD
+    'QAR': 0.97,      // 1 SAR = 0.97 QAR
+    'BHD': 0.10,      // 1 SAR = 0.10 BHD
+    'OMR': 0.10,      // 1 SAR = 0.10 OMR
+    'JOD': 0.19,      // 1 SAR = 0.19 JOD
+    'EGP': 13.12,     // 1 SAR = 13.12 EGP
+    'LBP': 23850,     // 1 SAR = 23,850 LBP
+    'SYP': 3360,      // 1 SAR = 3,360 SYP
+    'IQD': 349,       // 1 SAR = 349 IQD
+    'TND': 0.83,      // 1 SAR = 0.83 TND
+    'MAD': 2.66,      // 1 SAR = 2.66 MAD
+    'DZD': 35.70,     // 1 SAR = 35.70 DZD
+    'USD': 0.27,      // 1 SAR = 0.27 USD
+    'EUR': 0.25,      // 1 SAR = 0.25 EUR
+  };
+
+  const getCurrencySymbol = (curr: string) => {
+    const symbols: Record<string, string> = {
+      'SAR': 'ر.س',
+      'AED': 'د.إ',
+      'KWD': 'د.ك',
+      'QAR': 'ر.ق',
+      'BHD': 'د.ب',
+      'OMR': 'ر.ع',
+      'JOD': 'د.أ',
+      'EGP': 'ج.م',
+      'LBP': 'ل.ل',
+      'SYP': 'ل.س',
+      'IQD': 'ع.د',
+      'TND': 'د.ت',
+      'MAD': 'د.م',
+      'DZD': 'د.ج',
+      'USD': '$',
+      'EUR': '€',
+    };
+    return symbols[curr] || 'ر.س';
+  };
+
   const getPrice = (product: any) => {
-    let amount, originalAmount, symbol;
+    const basePrice = product.price ?? 0;
+    const baseOriginalPrice = product.originalPrice || basePrice;
+    const rate = exchangeRates[currency] || 1;
     
-    switch (currency) {
-      case 'AED': 
-        amount = product.priceAED ?? product.price ?? 0;
-        originalAmount = product.originalPriceAED || (product.priceAED ?? product.price ?? 0) * 2;
-        symbol = 'د.إ';
-        break;
-      case 'KWD': 
-        amount = product.priceKWD ?? product.price ?? 0;
-        originalAmount = product.originalPriceKWD || (product.priceKWD ?? product.price ?? 0) * 2;
-        symbol = 'د.ك';
-        break;
-      case 'QAR': 
-        amount = product.priceQAR ?? product.price ?? 0;
-        originalAmount = product.originalPriceQAR || (product.priceQAR ?? product.price ?? 0) * 2;
-        symbol = 'ر.ق';
-        break;
-      case 'BHD': 
-        amount = product.priceBHD ?? product.price ?? 0;
-        originalAmount = product.originalPriceBHD || (product.priceBHD ?? product.price ?? 0) * 2;
-        symbol = 'د.ب';
-        break;
-      case 'OMR': 
-        amount = product.priceOMR ?? product.price ?? 0;
-        originalAmount = product.originalPriceOMR || (product.priceOMR ?? product.price ?? 0) * 2;
-        symbol = 'ر.ع';
-        break;
-      case 'JOD': 
-        amount = product.priceJOD ?? product.price ?? 0;
-        originalAmount = product.originalPriceJOD || (product.priceJOD ?? product.price ?? 0) * 2;
-        symbol = 'د.أ';
-        break;
-      case 'EGP': 
-        amount = product.priceEGP ?? product.price ?? 0;
-        originalAmount = product.originalPriceEGP || (product.priceEGP ?? product.price ?? 0) * 2;
-        symbol = 'ج.م';
-        break;
-      case 'LBP': 
-        amount = product.priceLBP ?? product.price ?? 0;
-        originalAmount = product.originalPriceLBP || (product.priceLBP ?? product.price ?? 0) * 2;
-        symbol = 'ل.ل';
-        break;
-      case 'SYP': 
-        amount = product.priceSYP ?? product.price ?? 0;
-        originalAmount = product.originalPriceSYP || (product.priceSYP ?? product.price ?? 0) * 2;
-        symbol = 'ل.س';
-        break;
-      case 'IQD': 
-        amount = product.priceIQD ?? product.price ?? 0;
-        originalAmount = product.originalPriceIQD || (product.priceIQD ?? product.price ?? 0) * 2;
-        symbol = 'ع.د';
-        break;
-      case 'TND': 
-        amount = product.priceTND ?? product.price ?? 0;
-        originalAmount = product.originalPriceTND || (product.priceTND ?? product.price ?? 0) * 2;
-        symbol = 'د.ت';
-        break;
-      case 'MAD': 
-        amount = product.priceMAD ?? product.price ?? 0;
-        originalAmount = product.originalPriceMAD || (product.priceMAD ?? product.price ?? 0) * 2;
-        symbol = 'د.م';
-        break;
-      case 'DZD': 
-        amount = product.priceDZD ?? product.price ?? 0;
-        originalAmount = product.originalPriceDZD || (product.priceDZD ?? product.price ?? 0) * 2;
-        symbol = 'د.ج';
-        break;
-      case 'USD': 
-        amount = product.priceUSD ?? product.price ?? 0;
-        originalAmount = product.originalPriceUSD || (product.priceUSD ?? product.price ?? 0) * 2;
-        symbol = '$';
-        break;
-      case 'EUR': 
-        amount = product.priceEUR ?? product.price ?? 0;
-        originalAmount = product.originalPriceEUR || (product.priceEUR ?? product.price ?? 0) * 2;
-        symbol = '€';
-        break;
-      default: 
-        amount = product.price ?? 0;
-        originalAmount = product.originalPrice || (product.price ?? 0) * 2;
-        symbol = 'ر.س';
-    }
-    
-    const discountPercentage = Math.round(((originalAmount - amount) / originalAmount) * 100);
+    const amount = basePrice * rate;
+    const originalAmount = baseOriginalPrice * rate;
+    const symbol = getCurrencySymbol(currency);
+    const discountPercentage = basePrice > 0 
+      ? Math.round(((baseOriginalPrice - basePrice) / baseOriginalPrice) * 100)
+      : 0;
     
     return { amount, originalAmount, symbol, discountPercentage };
   };

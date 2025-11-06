@@ -310,6 +310,39 @@ export default function ProductDetail({ product }: { product?: Product }) {
           </div>
         </div>
 
+        {/* Product Description */}
+        {product.description && (
+          <div className="mt-12 sm:mt-16">
+            <div className="bg-gradient-to-br from-dark-300/80 to-dark-400/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl border border-primary-300/10">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 bg-gradient-to-r from-primary-300 to-accent-600 bg-clip-text text-transparent">
+                عن المنتج
+              </h2>
+              <div className="prose prose-invert max-w-none">
+                {product.description.split('\n').map((paragraph, index) => {
+                  if (!paragraph.trim()) return null;
+                  
+                  // Check if it's a heading (starts with emoji or bullet)
+                  const isHeading = paragraph.match(/^[📘📚💡🎁🧩🎯🚀⚡📦📈📌•]/);
+                  
+                  if (isHeading) {
+                    return (
+                      <h3 key={index} className="text-lg sm:text-xl font-bold text-primary-300 mt-6 mb-3 first:mt-0">
+                        {paragraph}
+                      </h3>
+                    );
+                  }
+                  
+                  return (
+                    <p key={index} className="text-base sm:text-lg text-gray-300 leading-relaxed mb-4">
+                      {paragraph}
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Sectioned Details - Mobile First */}
         {product.sections && (
           <div className="mt-12 sm:mt-16">

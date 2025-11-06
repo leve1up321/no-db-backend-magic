@@ -58,7 +58,7 @@ interface Product {
   category?: string;
   image?: string;
   rating?: number;
-  buyers?: number;
+  buyers?: number | string;
   inStock?: boolean;
   featured?: boolean;
   features?: string[];
@@ -247,7 +247,11 @@ export default function ProductDetail({ product }: { product?: Product }) {
               </div>
               <div className="flex items-center gap-2 text-gray-300">
                 <Users className="w-5 h-5 text-primary-300" />
-                <span className="font-semibold">{(product.buyers ?? 0).toLocaleString()} مشتري</span>
+                <span className="font-semibold">
+                  {typeof product.buyers === 'string' 
+                    ? product.buyers 
+                    : `${(product.buyers ?? 0).toLocaleString()} مشتري`}
+                </span>
               </div>
             </div>
 

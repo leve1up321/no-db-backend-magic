@@ -194,7 +194,7 @@ export default function ProductGrid() {
                 <div className="absolute inset-0 bg-gradient-to-t from-dark-400/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 
                 {/* Featured Badge */}
-                {product.featured && (
+                {product.featured ?? false && (
                   <div className="absolute top-3 right-3 bg-gradient-to-r from-accent-600 to-accent-700 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm border border-accent-500/30">
                     مميز ⭐
                   </div>

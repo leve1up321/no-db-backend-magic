@@ -29,10 +29,9 @@ interface Product {
   filename?: string;
   file_size_mb?: number;
   tags?: string[];
-  active: boolean;
+  active?: boolean;
   
   // Legacy fields (for backward compatibility)
-  
   id?: number;
   name?: string;
   nameEn?: string;
@@ -68,24 +67,46 @@ interface Product {
 export default function ProductDetail({ product }: { product?: Product }) {
   const { currency, addToCart, addToWishlist, wishlist } = useApp();
 
+  // Early return if no product
+  if (!product) {
+    return (
+      <section className="pt-20 sm:pt-24 pb-12 bg-dark-500 transition-colors duration-300">
+        <div className="container-mobile">
+          <div className="text-center text-white">
+            <p className="text-xl">المنتج غير موجود</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Helper function to get unified product ID
+  const getProductId = () => product.id ?? product.product_id ?? 0;
+
+  // Helper function to get unified product name
+  const getProductName = () => product.name ?? product.product_name ?? 'منتج';
+
+  // Helper function to get unified product image
+  const getProductImage = () => product.image ?? product.product_image ?? '/placeholder.jpg';
+
   const getPrice = () => {
     switch (currency) {
-      case 'AED': return product.priceAED;
-      case 'KWD': return product.priceKWD;
-      case 'QAR': return product.priceQAR;
-      case 'BHD': return product.priceBHD;
-      case 'OMR': return product.priceOMR;
-      case 'JOD': return product.priceJOD;
-      case 'EGP': return product.priceEGP;
-      case 'LBP': return product.priceLBP;
-      case 'SYP': return product.priceSYP;
-      case 'IQD': return product.priceIQD;
-      case 'TND': return product.priceTND;
-      case 'MAD': return product.priceMAD;
-      case 'DZD': return product.priceDZD;
-      case 'USD': return product.priceUSD;
-      case 'EUR': return product.priceEUR;
-      default: return product.price;
+      case 'AED': return product.priceAED ?? product.price ?? 0;
+      case 'KWD': return product.priceKWD ?? product.price ?? 0;
+      case 'QAR': return product.priceQAR ?? product.price ?? 0;
+      case 'BHD': return product.priceBHD ?? product.price ?? 0;
+      case 'OMR': return product.priceOMR ?? product.price ?? 0;
+      case 'JOD': return product.priceJOD ?? product.price ?? 0;
+      case 'EGP': return product.priceEGP ?? product.price ?? 0;
+      case 'LBP': return product.priceLBP ?? product.price ?? 0;
+      case 'SYP': return product.priceSYP ?? product.price ?? 0;
+      case 'IQD': return product.priceIQD ?? product.price ?? 0;
+      case 'TND': return product.priceTND ?? product.price ?? 0;
+      case 'MAD': return product.priceMAD ?? product.price ?? 0;
+      case 'DZD': return product.priceDZD ?? product.price ?? 0;
+      case 'USD': return product.priceUSD ?? product.price ?? 0;
+      case 'EUR': return product.priceEUR ?? product.price ?? 0;
+      default: return product.price ?? 0;
     }
   };
 
@@ -112,25 +133,28 @@ export default function ProductDetail({ product }: { product?: Product }) {
 
   const price = getPrice();
   const currencySymbol = getCurrencySymbol();
+  const productId = getProductId();
+  const productName = getProductName();
+  const productImage = getProductImage();
 
   // Get testimonials for this product
-  const productTestimonials = testimonials.filter(t => t.productId === product.id);
+  const productTestimonials = testimonials.filter(t => t.productId === productId);
 
-  const isInWishlist = wishlist.includes(product.id);
+  const isInWishlist = wishlist.includes(productId);
 
   const handleAddToCart = () => {
     addToCart({
-      id: product.id,
-      name: product.name,
+      id: productId,
+      name: productName,
       price: price,
-      image: product.image,
+      image: productImage,
     });
     showToast('تمت إضافة المنتج إلى السلة بنجاح! ✅', 'cart');
   };
 
   const handleWishlist = () => {
     if (!isInWishlist) {
-      addToWishlist(product.id);
+      addToWishlist(productId);
       showToast('تمت إضافة المنتج إلى قائمة الأمنيات! ❤️', 'wishlist');
     }
   };
@@ -145,8 +169,8 @@ export default function ProductDetail({ product }: { product?: Product }) {
         body: JSON.stringify({ 
           amount: price, 
           currency: currency,
-          productName: product.name,
-          message: `دفع مقابل ${product.name}`,
+          productName: productName,
+          message: `دفع مقابل ${productName}`,
           test: true // غيّر إلى false للدفع الحقيقي
         }),
       });
@@ -158,11 +182,11 @@ export default function ProductDetail({ product }: { product?: Product }) {
         window.location.href = data.redirect_url;
       } else {
         showToast('حدث خطأ في إنشاء عملية الدفع. حاول مرة أخرى.', 'cart');
-        console.error("Payment error?:", data);
+        console.error("Payment error:", data);
       }
     } catch (error) {
       showToast('حدث خطأ في الاتصال. حاول مرة أخرى.', 'cart');
-      console.error("Payment error?:", error);
+      console.error("Payment error:", error);
     }
   };
 
@@ -170,12 +194,12 @@ export default function ProductDetail({ product }: { product?: Product }) {
     <section className="pt-20 sm:pt-24 pb-12 bg-dark-500 transition-colors duration-300">
       <div className="container-mobile">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Left Column?: Image */}
+          {/* Left Column: Image */}
           <div className="animate-scale-in">
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-dark-400 shadow-2xl">
               <Image
-                src={product.image}
-                alt={product.name}
+                src={productImage}
+                alt={productName}
                 fill
                 className="object-cover"
                 priority
@@ -183,18 +207,18 @@ export default function ProductDetail({ product }: { product?: Product }) {
             </div>
           </div>
 
-          {/* Right Column?: Product Info */}
+          {/* Right Column: Product Info */}
           <div className="animate-slide-up space-y-6">
             {/* Category Badge */}
             <div>
               <span className="inline-block px-4 py-2 bg-primary-300/20 border border-primary-300/40 text-primary-300 rounded-xl text-sm font-bold">
-                {product.category === 'ebooks' ? 'كتاب رقمي' : product.category}
+                {product.category === 'ebooks' ? 'كتاب رقمي' : product.category ?? 'منتج رقمي'}
               </span>
             </div>
 
             {/* Product Title - Large & Prominent */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-              {product.name}
+              {productName}
             </h1>
 
             {/* Short Description - Simple & Clear */}
@@ -211,19 +235,19 @@ export default function ProductDetail({ product }: { product?: Product }) {
                   <Star
                     key={i}
                     className={`w-5 h-5 ${
-                      i < Math.floor(product.rating)
+                      i < Math.floor(product.rating ?? 0)
                         ? 'text-yellow-400 fill-yellow-400'
                          : 'text-gray-600'
                     }`}
                   />
                 ))}
                 <span className="text-white font-bold text-lg">
-                  {product.rating}
+                  {product.rating ?? 0}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
                 <Users className="w-5 h-5 text-primary-300" />
-                <span className="font-semibold">{product.buyers.toLocaleString()} مشتري</span>
+                <span className="font-semibold">{(product.buyers ?? 0).toLocaleString()} مشتري</span>
               </div>
             </div>
 
@@ -293,7 +317,7 @@ export default function ProductDetail({ product }: { product?: Product }) {
                     {product.sections.features.title}
                   </h2>
                   <ul className="space-y-3 sm:space-y-4">
-                    {product.sections.features.items.map((item, index) => (
+                    {product.sections.features.items?.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
                         <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
@@ -312,7 +336,7 @@ export default function ProductDetail({ product }: { product?: Product }) {
                     {product.sections.whatYouWillLearn.title}
                   </h2>
                   <ul className="space-y-3 sm:space-y-4">
-                    {product.sections.whatYouWillLearn.items.map((item, index) => (
+                    {product.sections.whatYouWillLearn.items?.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
                         <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
@@ -331,7 +355,7 @@ export default function ProductDetail({ product }: { product?: Product }) {
                     {product.sections.requirements.title}
                   </h2>
                   <ul className="space-y-3 sm:space-y-4">
-                    {product.sections.requirements.items.map((item, index) => (
+                    {product.sections.requirements.items?.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
                         <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>
@@ -350,7 +374,7 @@ export default function ProductDetail({ product }: { product?: Product }) {
                     {product.sections.whatYouWillGet.title}
                   </h2>
                   <ul className="space-y-3 sm:space-y-4">
-                    {product.sections.whatYouWillGet.items.map((item, index) => (
+                    {product.sections.whatYouWillGet.items?.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-primary-300 flex-shrink-0 mt-0.5" />
                         <span className="text-base leading-relaxed" style={{ color: '#EAEAEA', fontSize: '16px' }}>

@@ -259,9 +259,25 @@ export default function ProductDetail({ product }: { product?: Product }) {
             <div className="flex items-center gap-4 p-4 sm:p-6 bg-dark-300/50 border border-primary-300/20 rounded-2xl">
               <div className="flex-1">
                 <p className="text-gray-400 text-sm mb-1">السعر</p>
-                <p className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-primary-300 to-accent-600 bg-clip-text text-transparent">
-                  {price.toFixed(2)} {currencySymbol}
-                </p>
+                {(product as any).originalPrice && price === 0 ? (
+                  <div className="flex flex-col gap-1">
+                    <p className="text-lg sm:text-xl text-gray-500 line-through">
+                      {(product as any).originalPrice.toFixed(2)} {currencySymbol}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-3xl sm:text-4xl font-extrabold text-green-400">
+                        مجاني! 🎉
+                      </p>
+                      <span className="px-3 py-1 bg-red-500/20 border border-red-500/40 rounded-lg text-red-400 text-sm font-bold">
+                        خصم 100%
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-primary-300 to-accent-600 bg-clip-text text-transparent">
+                    {price.toFixed(2)} {currencySymbol}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/40 rounded-xl">
                 <Zap className="w-5 h-5 text-green-400" />

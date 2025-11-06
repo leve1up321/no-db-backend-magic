@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Download, Mail, CheckCircle, Clock, Package, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
@@ -230,3 +230,23 @@ export default function OrderSuccessPage() {
   );
 }
 
+// Loading component for Suspense fallback
+function OrderSuccessLoading() {
+  return (
+    <div className="min-h-screen bg-dark-500 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-primary-300 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-white text-lg">جاري التحميل...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<OrderSuccessLoading />}>
+      <OrderSuccessContent />
+    </Suspense>
+  );
+}

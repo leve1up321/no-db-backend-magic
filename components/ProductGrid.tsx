@@ -228,7 +228,7 @@ export default function ProductGrid() {
                     <Star
                       key={i}
                       className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
-                        i < Math.floor(product.rating ?? 0)
+                        i < Math.floor((product as any).rating ?? 0)
                           ? 'text-yellow-400 fill-yellow-400'
                           : 'text-gray-600'
                       }`}
@@ -236,7 +236,7 @@ export default function ProductGrid() {
                   ))}
                 </div>
                 <span className="text-xs sm:text-sm text-gray-400">
-                  {(product.rating ?? 0).toFixed(1)}
+                  {((product as any).rating ?? 0).toFixed(1)}
                 </span>
               </div>
 

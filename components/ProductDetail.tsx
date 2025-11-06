@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { ShoppingCart, Heart, Star, Check, Users, Shield, Zap, CheckCircle, ShoppingBag, Download } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { showToast } from '@/components/ToastContainer';
 import testimonials from '@/data/testimonials.json';
 import Image from 'next/image';
 import WhyBuySection from './WhyBuySection';
+import FreeProductModal from './FreeProductModal';
 
 interface ProductSection {
   title?: string;
@@ -66,6 +68,7 @@ interface Product {
 
 export default function ProductDetail({ product }: { product?: Product }) {
   const { currency, addToCart, addToWishlist, wishlist } = useApp();
+  const [showFreeModal, setShowFreeModal] = useState(false);
 
   // Early return if no product
   if (!product) {
@@ -143,6 +146,12 @@ export default function ProductDetail({ product }: { product?: Product }) {
   const isInWishlist = wishlist.includes(productId);
 
   const handleAddToCart = () => {
+    // Check if product is free
+    if (price === 0 && (product as any).isFree) {
+      setShowFreeModal(true);
+      return;
+    }
+    
     addToCart({
       id: productId,
       name: productName,
@@ -513,6 +522,14 @@ export default function ProductDetail({ product }: { product?: Product }) {
         {/* Why Buy Section */}
         <WhyBuySection />
       </div>
+
+      {/* Free Product Modal */}
+      <FreeProductModal
+        isOpen={showFreeModal}
+        onClose={() => setShowFreeModal(false)}
+        productName={productName}
+        downloadUrl={(product as any).download_url}
+      />
     </section>
   );
 }

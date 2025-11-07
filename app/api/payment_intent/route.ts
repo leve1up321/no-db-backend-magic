@@ -2,15 +2,17 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { amount, productName, productFile, customerEmail } = await req.json();
+    const { amount, currency_code, productName, productFile, customerEmail } = await req.json();
 
-    console.log("💰 Received amount:", amount, "AED");
+    const finalCurrency = currency_code || "AED";
+
+    console.log("💰 Received amount:", amount, finalCurrency);
     console.log("📦 Product:", productName);
     console.log("📧 Customer email:", customerEmail);
 
     const payload = {
-      amount: Math.round(amount * 100),
-      currency_code: "AED",
+      amount,
+      currency_code: finalCurrency,
       message: `دفع مقابل ${productName}`,
       metadata: {
         productName,

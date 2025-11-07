@@ -1,7 +1,9 @@
 "use client";
+
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+// ✅ هذا المكون الداخلي يحتوي على المنطق الرئيسي للدفع
 function CheckoutContent() {
   const params = useSearchParams();
   const productName = decodeURIComponent(
@@ -25,6 +27,8 @@ function CheckoutContent() {
 
     setError(null);
     setLoading(true);
+
+    // نحفظ البريد والمنتج محلياً لعرضها بعد الدفع
     localStorage.setItem("leve1up_email", email);
     localStorage.setItem("leve1up_product", productName);
 
@@ -36,8 +40,12 @@ function CheckoutContent() {
       });
 
       const data = await res.json();
-      if (data.redirect_url) window.location.href = data.redirect_url;
-      else setError("حدث خطأ أثناء إنشاء الدفع.");
+
+      if (data.redirect_url) {
+        window.location.href = data.redirect_url;
+      } else {
+        setError("حدث خطأ أثناء إنشاء الدفع.");
+      }
     } catch (err) {
       setError("فشل الاتصال بالخادم.");
     } finally {
@@ -47,8 +55,9 @@ function CheckoutContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white px-4">
-      <div className="max-w-md w-full bg-gray-800/70 p-8 rounded-2xl shadow-lg text-center">
+      <div className="max-w-md w-full bg-gray-800/70 p-8 rounded-2xl shadow-lg text-center backdrop-blur-md">
         <h1 className="text-3xl font-bold mb-4 text-green-400">💳 متابعة الدفع</h1>
+
         <p className="text-gray-300 mb-2">المنتج:</p>
         <h2 className="text-xl font-semibold text-white mb-4">{productName}</h2>
         <p className="text-green-400 text-2xl mb-6">
@@ -62,6 +71,7 @@ function CheckoutContent() {
           placeholder="example@gmail.com"
           className="border border-gray-600 bg-gray-900 text-white p-3 rounded-lg w-full text-center mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
         />
+
         {error && <p className="text-red-400 mb-3 text-sm">{error}</p>}
 
         <button
@@ -80,6 +90,11 @@ function CheckoutContent() {
   );
 }
 
+// ✅ نغلف المكون داخل Suspense لتفادي خطأ useSearchParams
 export default function CheckoutPage() {
   return (
-    <S
+    <Suspense fallback={<div className="text-white text-center mt-10">⏳ جاري تحميل الصفحة...</div>}>
+      <CheckoutContent />
+    </Suspense>
+  );
+}

@@ -10,8 +10,50 @@ export async function POST(req: Request) {
     console.log("📦 Product:", productName);
     console.log("📧 Customer email:", customerEmail);
 
+    /**
+     * 🧮 خريطة تحويل العملات إلى الوحدة الأدق (subunit)
+     * Ziina تتطلب أن يُرسل المبلغ بالوحدة الأدق:
+     * - AED, SAR, USD, EUR = ×100
+     * - BHD, KWD, OMR = ×1000
+     * - باقي العملات = ×100 كافٍ
+     */
+    const subunitMap: Record<string, number> = {
+      AED: 100,
+      SAR: 100,
+      QAR: 100,
+      JOD: 100,
+      USD: 100,
+      EUR: 100,
+      EGP: 100,
+      MAD: 100,
+      DZD: 100,
+      TND: 100,
+      LBP: 100,
+      SYP: 100,
+      IQD: 1000,
+      BHD: 1000,
+      KWD: 1000,
+      OMR: 1000,
+    };
+
+    const multiplier = subunitMap[finalCurrency] || 100;
+
+    // 🔢 تحويل المبلغ إلى الوحدة الأدق
+    const amountInSubunit = Math.round(amount * multiplier);
+
+    // 🚨 تحقق من الحد الأدنى (2 AED أو ما يعادله)
+    const minSubunit = finalCurrency === "BHD" || finalCurrency === "KWD" || finalCurrency === "OMR" ? 210 : 200;
+
+    if (amountInSubunit < minSubunit) {
+      console.error(`❌ الحد الأدنى للدفع هو ${minSubunit / multiplier} ${finalCurrency}`);
+      return NextResponse.json(
+        { error: `الحد الأدنى للدفع هو ${minSubunit / multiplier} ${finalCurrency}` },
+        { status: 400 }
+      );
+    }
+
     const payload = {
-      amount,
+      amount: amountInSubunit,
       currency_code: finalCurrency,
       message: `دفع مقابل ${productName}`,
       metadata: {

@@ -15,9 +15,12 @@ export async function POST(req: Request) {
       },
       success_url: "https://leve1up.store/success?payment_intent={CHECKOUT_SESSION_ID}",
       cancel_url: "https://leve1up.store/cancel",
+      failure_url: "https://leve1up.store/cancel",
+      test: true,
+      allow_tips: false,
     };
 
-    const res = await fetch("https://api.ziina.com/v1/payment_intents", {
+    const res = await fetch("https://api-v2.ziina.com/api/payment_intent", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.ZIINA_SECRET_KEY}`,
@@ -40,4 +43,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-

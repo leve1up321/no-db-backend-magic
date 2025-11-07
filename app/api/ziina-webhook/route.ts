@@ -67,3 +67,22 @@ export async function POST(req: Request) {
             to: "leve1upbackup@gmail.com",
             subject: "⚠️ فشل إرسال الإيميل للعميل - إعادة توجيه النسخة",
             html: `
+              <div style="font-family:Arial;padding:20px">
+                <h3>⚠️ فشل إرسال البريد للعميل</h3>
+                <p>البريد الأصلي: ${customerEmail}</p>
+                <p>رقم العملية: ${paymentId}</p>
+                <p>المبلغ: ${amount} درهم</p>
+              </div>
+            `,
+          });
+
+          console.log("📨 Backup email sent successfully!");
+        } catch (backupError) {
+          console.error("🚨 Failed to send backup email as well:", backupError);
+        }
+      }
+    }
+  }
+
+  return NextResponse.json({ received: true }, { status: 200 });
+}

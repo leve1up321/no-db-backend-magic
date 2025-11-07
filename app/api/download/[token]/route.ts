@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// In-memory storage (same as in create-free-order)
-const orders = new Map<string, {
-  orderId: string;
-  email: string;
-  phone?: string;
-  productId: number;
-  productName: string;
-  downloadUrl: string;
-  expiresAt: number;
-}>();
+import { findOrderBySessionId } from '@/lib/orders-store';
 
 export async function GET(
   request: NextRequest,
@@ -18,8 +8,8 @@ export async function GET(
   try {
     const token = params.token;
 
-    // Check if order exists
-    const order = orders.get(token);
+    // Check if order exists using shared store
+    const order = findOrderBySessionId(token);
     
     if (!order) {
       return new NextResponse(
@@ -33,17 +23,28 @@ export async function GET(
       );
     }
 
-    // Check if token has expired
-    if (Date.now() > order.expiresAt) {
-      // Remove expired token
-      orders.delete(token);
-      
+    // Check if token has expired (if metadata.expiresAt exists)
+    const expiresAt = order.metadata?.expiresAt;
+    if (expiresAt && Date.now() > expiresAt) {
       return new NextResponse(
         JSON.stringify({ 
           error: 'انتهت صلاحية الرابط. يمكنك طلب رابط جديد من صفحة المنتج.' 
         }),
         { 
           status: 410,
+          headers: { 'Content-Type': 'application/json; charset=utf-8' }
+        }
+      );
+    }
+
+    // Get download URL
+    if (!order.downloadUrl) {
+      return new NextResponse(
+        JSON.stringify({ 
+          error: 'رابط التحميل غير متوفر' 
+        }),
+        { 
+          status: 404,
           headers: { 'Content-Type': 'application/json; charset=utf-8' }
         }
       );
@@ -60,7 +61,8 @@ export async function GET(
     const fileBlob = await fileResponse.blob();
     
     // Create filename from product name (sanitize it)
-    const filename = `${order.productName.replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '')}.pdf`;
+    const productName = order.items[0]?.name || 'product';
+    const filename = `${productName.replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '')}.pdf`;
 
     // Return the file with secure headers
     return new NextResponse(fileBlob, {
@@ -87,7 +89,3 @@ export async function GET(
     );
   }
 }
-
-// Share the orders Map
-export { orders };
-

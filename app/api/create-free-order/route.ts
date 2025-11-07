@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-
-// In-memory storage (replace with Vercel KV or database in production)
-const orders = new Map<string, {
-  orderId: string;
-  email: string;
-  phone?: string;
-  productId: number;
-  productName: string;
-  downloadUrl: string;
-  expiresAt: number;
-}>();
+import { createOrder } from '@/lib/orders-store';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,21 +22,34 @@ export async function POST(request: NextRequest) {
     // Set expiry time (30 minutes from now)
     const expiresAt = Date.now() + (30 * 60 * 1000);
 
-    // Store order data
-    orders.set(token, {
-      orderId,
-      email,
-      phone,
-      productId,
-      productName,
+    // Create order using shared store
+    const order = createOrder({
+      id: orderId,
+      sessionId: token,
+      status: 'paid', // Free products are automatically "paid"
+      amount: 0,
+      currency: 'AED',
+      customerEmail: email,
+      items: [{
+        id: productId,
+        name: productName,
+        quantity: 1,
+        price: 0,
+      }],
       downloadUrl,
-      expiresAt,
+      createdAt: new Date().toISOString(),
+      paidAt: new Date().toISOString(),
+      metadata: {
+        isFree: true,
+        expiresAt,
+        phone,
+      }
     });
 
     // Return order details
     return NextResponse.json({
       success: true,
-      orderId,
+      orderId: order.id,
       token,
       expiresAt,
     });
@@ -59,7 +62,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-// Export orders Map for use in download API
-export { orders };
-

@@ -33,37 +33,75 @@ function SuccessContent() {
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    const fetchLatestPayment = async () => {
+    const fetchPayment = async () => {
       try {
-        console.log(`🔍 Fetching latest payment (attempt ${retryCount + 1}/20)...`);
-        
-        // جلب آخر دفع من API
-        const res = await fetch('/api/payments/latest');
-        const data = await res.json();
+        // أولاً: تحقق من وجود payment_intent في الرابط
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentIntent = urlParams.get("payment_intent");
 
-        console.log("📥 Response:", data);
+        if (paymentIntent) {
+          // ✅ إذا وُجد payment_intent: استخدم /api/payment_status
+          console.log(`🔍 Found payment_intent in URL: ${paymentIntent}`);
+          
+          const res = await fetch('/api/payment_status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payment_intent: paymentIntent }),
+          });
 
-        if (data.success && data.payment) {
-          setPaymentData(data.payment);
-          setLoading(false);
-          console.log("✅ Payment data loaded successfully!");
-        } else {
-          // إذا لم يُعثر على دفع، نحاول مرة أخرى (webhook قد يتأخر)
-          if (retryCount < 20) {
-            console.log(`⏳ No payment found yet, retry ${retryCount + 1}/20...`);
-            setTimeout(() => {
-              setRetryCount(prev => prev + 1);
-            }, 2000); // محاولة كل ثانيتين
-          } else {
-            setError(data.message || "لم يتم العثور على عملية دفع مكتملة. يرجى تحديث الصفحة أو التواصل مع الدعم.");
+          const data = await res.json();
+
+          if (data.error) {
+            setError('حدث خطأ أثناء جلب تفاصيل الدفع.');
             setLoading(false);
+          } else {
+            // تحويل البيانات للصيغة المتوقعة
+            setPaymentData({
+              payment_id: data.paymentId,
+              message: data.message || 'عملية شراء ناجحة',
+              amount: data.amount,
+              currency: 'AED',
+              status: data.status,
+              download_url: data.fileUrl,
+              created_at: new Date().toISOString(),
+            });
+            setLoading(false);
+            console.log("✅ Payment data loaded successfully from payment_intent!");
+          }
+        } else {
+          // ❌ إذا لم يوجد payment_intent: استخدم /api/payments/latest
+          console.log(`🔍 No payment_intent in URL, fetching latest payment (attempt ${retryCount + 1}/20)...`);
+          
+          const res = await fetch('/api/payments/latest');
+          const data = await res.json();
+
+          console.log("📥 Response:", data);
+
+          if (data.success && data.payment) {
+            setPaymentData(data.payment);
+            setLoading(false);
+            console.log("✅ Payment data loaded successfully from latest!");
+          } else {
+            // إذا لم يُعثر على دفع، نحاول مرة أخرى (webhook قد يتأخر)
+            if (retryCount < 20) {
+              console.log(`⏳ No payment found yet, retry ${retryCount + 1}/20...`);
+              setTimeout(() => {
+                setRetryCount(prev => prev + 1);
+              }, 2000); // محاولة كل ثانيتين
+            } else {
+              setError(data.message || "لم يتم العثور على عملية دفع مكتملة. يرجى تحديث الصفحة أو التواصل مع الدعم.");
+              setLoading(false);
+            }
           }
         }
       } catch (err: any) {
         console.error("Error fetching payment:", err);
         
-        // محاولة أخرى في حالة الخطأ
-        if (retryCount < 20) {
+        // محاولة أخرى في حالة الخطأ (فقط إذا لم يكن هناك payment_intent)
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentIntent = urlParams.get("payment_intent");
+        
+        if (!paymentIntent && retryCount < 20) {
           setTimeout(() => {
             setRetryCount(prev => prev + 1);
           }, 2000);
@@ -74,7 +112,7 @@ function SuccessContent() {
       }
     };
 
-    fetchLatestPayment();
+    fetchPayment();
   }, [retryCount]);
 
   // 🔄 حالة التحميل
@@ -363,4 +401,3 @@ export default function SuccessPage() {
     </Suspense>
   );
 }
-

@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     console.log("📧 Customer email:", customerEmail);
 
     const payload = {
-      amount,
+      amount: Math.round(amount * 100),
       currency_code: "AED",
       message: `دفع مقابل ${productName}`,
       metadata: {

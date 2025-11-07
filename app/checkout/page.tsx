@@ -36,7 +36,12 @@ function CheckoutContent() {
       const res = await fetch("/api/payment_intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productName, customerEmail: email }),
+        body: JSON.stringify({
+          amount: parseFloat(price), // المبلغ بالدرهم (ليس بالفلس!)
+          productName: productName,
+          productFile: "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D8%AA%D8%A7%D8%A8%20%D9%81%D9%87%D9%85%20%D9%88%D8%A7%D8%B6%D8%AD%20%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9.pdf",
+          customerEmail: email,
+        }),
       });
 
       const data = await res.json();
@@ -44,9 +49,10 @@ function CheckoutContent() {
       if (data.redirect_url) {
         window.location.href = data.redirect_url;
       } else {
-        setError("حدث خطأ أثناء إنشاء الدفع.");
+        setError(data.error || "حدث خطأ أثناء إنشاء الدفع.");
       }
     } catch (err) {
+      console.error(err);
       setError("فشل الاتصال بالخادم.");
     } finally {
       setLoading(false);

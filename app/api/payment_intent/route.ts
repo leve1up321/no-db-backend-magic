@@ -4,6 +4,10 @@ export async function POST(req: Request) {
   try {
     const { amount, productName, productFile, customerEmail } = await req.json();
 
+    console.log("💰 Received amount:", amount, "AED");
+    console.log("📦 Product:", productName);
+    console.log("📧 Customer email:", customerEmail);
+
     const payload = {
       amount,
       currency_code: "AED",
@@ -19,6 +23,8 @@ export async function POST(req: Request) {
       test: true,
       allow_tips: false,
     };
+
+    console.log("📤 Sending payload to Ziina:", JSON.stringify(payload, null, 2));
 
     const res = await fetch("https://api-v2.ziina.com/api/payment_intent", {
       method: "POST",

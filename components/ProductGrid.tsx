@@ -41,22 +41,16 @@ export default function ProductGrid() {
 
   const getCurrencySymbol = (curr: string) => {
     const symbols: Record<string, string> = {
-      'SAR': 'ر.س',
       'AED': 'د.إ',
-      'KWD': 'د.ك',
-      'QAR': 'ر.ق',
+      'SAR': 'ر.س',
       'BHD': 'د.ب',
+      'KWD': 'د.ك',
       'OMR': 'ر.ع',
-      'JOD': 'د.أ',
-      'EGP': 'ج.م',
-      'LBP': 'ل.ل',
-      'SYP': 'ل.س',
-      'IQD': 'ع.د',
-      'TND': 'د.ت',
-      'MAD': 'د.م',
-      'DZD': 'د.ج',
+      'QAR': 'ر.ق',
       'USD': '$',
       'EUR': '€',
+      'GBP': '£',
+      'INR': '₹',
     };
     return symbols[curr] || 'ر.س';
   };

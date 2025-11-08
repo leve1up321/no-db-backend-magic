@@ -35,22 +35,16 @@ function SuccessPageContent() {
 
   const getCurrencySymbol = (curr: string) => {
     switch (curr) {
-      case 'SAR': return 'ر.س';
       case 'AED': return 'د.إ';
-      case 'KWD': return 'د.ك';
-      case 'QAR': return 'ر.ق';
+      case 'SAR': return 'ر.س';
       case 'BHD': return 'د.ب';
+      case 'KWD': return 'د.ك';
       case 'OMR': return 'ر.ع';
-      case 'JOD': return 'د.أ';
-      case 'EGP': return 'ج.م';
-      case 'LBP': return 'ل.ل';
-      case 'SYP': return 'ل.س';
-      case 'IQD': return 'ع.د';
-      case 'TND': return 'د.ت';
-      case 'MAD': return 'د.م';
-      case 'DZD': return 'د.ج';
+      case 'QAR': return 'ر.ق';
       case 'USD': return '$';
       case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'INR': return '₹';
       default: return '';
     }
   };
@@ -114,4 +108,3 @@ export default function SuccessPage() {
     </Suspense>
   );
 }
-

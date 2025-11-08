@@ -16,16 +16,14 @@ function CheckoutContent() {
   const currency = searchParams.get("currency") || "AED";
 
   const currencyCodeMap: Record<string, string> = {
-    SAR: "SAR", AED: "AED", KWD: "KWD", QAR: "QAR", BHD: "BHD",
-    OMR: "OMR", JOD: "JOD", EGP: "EGP", LBP: "LBP", SYP: "SYP",
-    IQD: "IQD", TND: "TND", MAD: "MAD", DZD: "DZD", USD: "USD", EUR: "EUR",
+    AED: "AED", SAR: "SAR", BHD: "BHD", KWD: "KWD",
+    OMR: "OMR", QAR: "QAR", USD: "USD", EUR: "EUR", GBP: "GBP", INR: "INR",
   };
 
   const getCurrencySymbol = (curr: string) => {
     const map: Record<string, string> = {
-      SAR: "ر.س", AED: "د.إ", KWD: "د.ك", QAR: "ر.ق", BHD: "د.ب",
-      OMR: "ر.ع", JOD: "د.أ", EGP: "ج.م", LBP: "ل.ل", SYP: "ل.س",
-      IQD: "ع.د", TND: "د.ت", MAD: "د.م", DZD: "د.ج", USD: "$", EUR: "€",
+      AED: "د.إ", SAR: "ر.س", BHD: "د.ب", KWD: "د.ك",
+      OMR: "ر.ع", QAR: "ر.ق", USD: "$", EUR: "€", GBP: "£", INR: "₹",
     };
     return map[curr] || "";
   };
@@ -45,8 +43,18 @@ function CheckoutContent() {
     setError(null);
 
     try {
-      // حفظ جميع البيانات في LocalStorage لاستخدامها في صفحة النجاح
-      const productFile = "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D8%AA%D8%A7%D8%A8%20%D9%81%D9%87%D9%85%20%D9%88%D8%A7%D8%B6%D8%AD%20%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9.pdf";
+      // تحديد رابط المنتج بناءً على معرف المنتج
+      let productFile = "";
+      if (productId === "1" || productName.includes("15 فكرة") || productName.includes("15")) {
+        // المنتج الأول: 15 فكرة مشروع رقمي
+        productFile = "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/15%D9%81%D9%83%D8%B1%D8%A9%20%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20%D8%B1%D9%82%D9%85%D9%8A%20%D9%85%D8%B1%D8%A8%D8%AD%20%D9%8A%D9%85%D9%83%D9%86%D9%83%20%D8%A7%D9%84%D8%A8%D8%AF%D8%A1%20%D8%A8%D9%87%D8%A7%20%D9%85%D9%86%20%D8%A7%D9%84%D8%B5%D9%81%D8%B1.pdf";
+      } else if (productId === "2" || productName.includes("كيف تربح") || productName.includes("دليل")) {
+        // المنتج الثاني: كيف تربح المال من المنتجات الرقمية
+        productFile = "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D9%8A%D9%81%20%D8%AA%D8%B1%D8%A8%D8%AD%20%D8%A7%D9%84%D9%85%D8%A7%D9%84%20%D9%85%D9%86%20%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9%20%D8%AF%D9%84%D9%8A%D9%84%D9%83%20%D8%A7%D9%84%D9%83%D8%A7%D9%85%D9%84%20%281%29.pdf";
+      } else {
+        // افتراضي: المنتج الثاني
+        productFile = "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D9%8A%D9%81%20%D8%AA%D8%B1%D8%A8%D8%AD%20%D8%A7%D9%84%D9%85%D8%A7%D9%84%20%D9%85%D9%86%20%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9%20%D8%AF%D9%84%D9%8A%D9%84%D9%83%20%D8%A7%D9%84%D9%83%D8%A7%D9%85%D9%84%20%281%29.pdf";
+      }
       
       localStorage.setItem("leve1up_email", email);
       localStorage.setItem("leve1up_product_name", productName);

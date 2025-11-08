@@ -93,24 +93,18 @@ export default function ProductDetail({ product }: { product?: Product }) {
   const getProductImage = () => product.image ?? product.product_image ?? '/placeholder.jpg';
 
   const getPrice = () => {
-    // استخدام الأسعار المخزنة لكل عملة إذا كانت موجودة
+    // استخدام الأسعار المخزنة لكل عملة (العملات المدعومة من Ziina فقط)
     switch (currency) {
       case 'AED': return product.priceAED ?? product.price ?? 0;
-      case 'KWD': return product.priceKWD ?? product.price ?? 0;
-      case 'QAR': return product.priceQAR ?? product.price ?? 0;
+      case 'SAR': return product.price ?? 0;
       case 'BHD': return product.priceBHD ?? product.price ?? 0;
+      case 'KWD': return product.priceKWD ?? product.price ?? 0;
       case 'OMR': return product.priceOMR ?? product.price ?? 0;
-      case 'JOD': return product.priceJOD ?? product.price ?? 0;
-      case 'EGP': return product.priceEGP ?? product.price ?? 0;
-      case 'LBP': return product.priceLBP ?? product.price ?? 0;
-      case 'SYP': return product.priceSYP ?? product.price ?? 0;
-      case 'IQD': return product.priceIQD ?? product.price ?? 0;
-      case 'TND': return product.priceTND ?? product.price ?? 0;
-      case 'MAD': return product.priceMAD ?? product.price ?? 0;
-      case 'DZD': return product.priceDZD ?? product.price ?? 0;
+      case 'QAR': return product.priceQAR ?? product.price ?? 0;
       case 'USD': return product.priceUSD ?? product.price ?? 0;
       case 'EUR': return product.priceEUR ?? product.price ?? 0;
-      case 'SAR':
+      case 'GBP': return product.priceUSD ? product.priceUSD * 0.79 : (product.price ?? 0) * 0.79; // تقريبي
+      case 'INR': return product.priceUSD ? product.priceUSD * 83 : (product.price ?? 0) * 83; // تقريبي
       default: return product.price ?? 0;
     }
   };
@@ -128,20 +122,15 @@ export default function ProductDetail({ product }: { product?: Product }) {
   const getCurrencySymbol = () => {
     switch (currency) {
       case 'AED': return 'د.إ';
-      case 'KWD': return 'د.ك';
-      case 'QAR': return 'ر.ق';
+      case 'SAR': return 'ر.س';
       case 'BHD': return 'د.ب';
+      case 'KWD': return 'د.ك';
       case 'OMR': return 'ر.ع';
-      case 'JOD': return 'د.أ';
-      case 'EGP': return 'ج.م';
-      case 'LBP': return 'ل.ل';
-      case 'SYP': return 'ل.س';
-      case 'IQD': return 'ع.د';
-      case 'TND': return 'د.ت';
-      case 'MAD': return 'د.م';
-      case 'DZD': return 'د.ج';
+      case 'QAR': return 'ر.ق';
       case 'USD': return '$';
       case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'INR': return '₹';
       default: return 'ر.س';
     }
   };

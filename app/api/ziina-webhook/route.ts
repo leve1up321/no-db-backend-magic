@@ -3,25 +3,19 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// دالة للحصول على رمز العملة
+// دالة للحصول على رمز العملة (العملات المدعومة من Ziina فقط)
 function getCurrencySymbol(currencyCode: string): string {
   const symbols: Record<string, string> = {
-    'SAR': 'ر.س',
     'AED': 'د.إ',
-    'KWD': 'د.ك',
-    'QAR': 'ر.ق',
+    'SAR': 'ر.س',
     'BHD': 'د.ب',
+    'KWD': 'د.ك',
     'OMR': 'ر.ع',
-    'JOD': 'د.أ',
-    'EGP': 'ج.م',
-    'LBP': 'ل.ل',
-    'SYP': 'ل.س',
-    'IQD': 'ع.د',
-    'TND': 'د.ت',
-    'MAD': 'د.م',
-    'DZD': 'د.ج',
+    'QAR': 'ر.ق',
     'USD': '$',
     'EUR': '€',
+    'GBP': '£',
+    'INR': '₹',
   };
   return symbols[currencyCode] || currencyCode;
 }
@@ -128,4 +122,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true }, { status: 200 });
 }
-

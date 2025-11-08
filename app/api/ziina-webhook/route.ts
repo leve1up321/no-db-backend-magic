@@ -3,6 +3,29 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// دالة للحصول على رمز العملة
+function getCurrencySymbol(currencyCode: string): string {
+  const symbols: Record<string, string> = {
+    'SAR': 'ر.س',
+    'AED': 'د.إ',
+    'KWD': 'د.ك',
+    'QAR': 'ر.ق',
+    'BHD': 'د.ب',
+    'OMR': 'ر.ع',
+    'JOD': 'د.أ',
+    'EGP': 'ج.م',
+    'LBP': 'ل.ل',
+    'SYP': 'ل.س',
+    'IQD': 'ع.د',
+    'TND': 'د.ت',
+    'MAD': 'د.م',
+    'DZD': 'د.ج',
+    'USD': '$',
+    'EUR': '€',
+  };
+  return symbols[currencyCode] || currencyCode;
+}
+
 export async function POST(req: Request) {
   const body = await req.json();
 
@@ -16,6 +39,8 @@ export async function POST(req: Request) {
   if (event === "payment_intent.status.updated" || data?.status === "completed") {
     const status = data?.status;
     const amount = data?.amount ? data.amount / 100 : null;
+    const currencyCode = data?.currency || "AED";
+    const currencySymbol = getCurrencySymbol(currencyCode);
     const paymentId = data?.id;
     const message = data?.message || "عملية شراء من Leve1Up";
 
@@ -31,6 +56,8 @@ export async function POST(req: Request) {
       meta.productFile || "https://leve1up.store/files/digital-products-guide.pdf";
 
     console.log("🎯 Ready to send email to:", customerEmail);
+    console.log("💰 Amount:", amount, currencySymbol);
+    console.log("📦 Product:", productName);
 
     if (status === "completed") {
       try {
@@ -39,19 +66,30 @@ export async function POST(req: Request) {
           to: customerEmail,
           subject: `تم استلام دفعتك بنجاح - ${productName}`,
           html: `
-            <div style="font-family:Arial;padding:20px">
-              <h2>🎉 شكرًا لشرائك من Leve1Up!</h2>
-              <p>تم استلام دفعتك بنجاح.</p>
-              <p><strong>المنتج:</strong> ${productName}</p>
-              <p><strong>المبلغ:</strong> ${amount} درهم</p>
-              <p><strong>رقم العملية:</strong> ${paymentId}</p>
-              <a href="${productFile}" target="_blank"
-                 style="background:#111;color:#fff;padding:10px 14px;border-radius:8px;text-decoration:none;display:inline-block;margin:10px 0">
-                 📦 تحميل المنتج
-              </a>
-              <p style="color:#666;font-size:13px;margin-top:20px">
-                إذا واجهت أي مشكلة، راسلنا على support@leve1up.store
-              </p>
+            <div style="font-family:Arial;padding:20px;background:#f9f9f9">
+              <div style="max-width:600px;margin:0 auto;background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)">
+                <h2 style="color:#16a34a">🎉 شكراً لشرائك من Leve1Up!</h2>
+                <p style="font-size:16px;color:#333">تم استلام دفعتك بنجاح.</p>
+                
+                <div style="background:#f3f4f6;padding:20px;border-radius:8px;margin:20px 0">
+                  <p style="margin:10px 0"><strong>💼 المنتج:</strong> ${productName}</p>
+                  <p style="margin:10px 0"><strong>💰 المبلغ:</strong> ${amount} ${currencySymbol}</p>
+                  <p style="margin:10px 0"><strong>🔢 رقم العملية:</strong> ${paymentId}</p>
+                </div>
+                
+                <a href="${productFile}" target="_blank"
+                   style="background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin:20px 0;font-weight:bold">
+                   📦 تحميل المنتج الآن
+                </a>
+                
+                <p style="color:#666;font-size:14px;margin-top:30px;padding-top:20px;border-top:1px solid #e5e7eb">
+                  إذا واجهت أي مشكلة، راسلنا على <a href="mailto:leve1up999q@gmail.com" style="color:#16a34a">leve1up999q@gmail.com</a>
+                </p>
+                
+                <p style="color:#999;font-size:12px;margin-top:10px">
+                  هذا البريد تم إرساله تلقائياً من نظام Leve1Up
+                </p>
+              </div>
             </div>
           `,
         });
@@ -69,9 +107,13 @@ export async function POST(req: Request) {
             html: `
               <div style="font-family:Arial;padding:20px">
                 <h3>⚠️ فشل إرسال البريد للعميل</h3>
-                <p>البريد الأصلي: ${customerEmail}</p>
-                <p>رقم العملية: ${paymentId}</p>
-                <p>المبلغ: ${amount} درهم</p>
+                <p><strong>البريد الأصلي:</strong> ${customerEmail}</p>
+                <p><strong>رقم العملية:</strong> ${paymentId}</p>
+                <p><strong>المبلغ:</strong> ${amount} ${currencySymbol}</p>
+                <p><strong>المنتج:</strong> ${productName}</p>
+                <p><strong>رابط التحميل:</strong> <a href="${productFile}">${productFile}</a></p>
+                <hr/>
+                <p style="color:#666">يُرجى إرسال البريد يدوياً للعميل على: ${customerEmail}</p>
               </div>
             `,
           });
@@ -86,3 +128,4 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true }, { status: 200 });
 }
+

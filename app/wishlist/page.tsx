@@ -37,22 +37,17 @@ export default function WishlistPage() {
 
   const getPrice = (product: any) => {
     switch (currency) {
-      case 'AED': return product.priceAED;
-      case 'KWD': return product.priceKWD;
-      case 'QAR': return product.priceQAR;
-      case 'BHD': return product.priceBHD;
-      case 'OMR': return product.priceOMR;
-      case 'JOD': return product.priceJOD;
-      case 'EGP': return product.priceEGP;
-      case 'LBP': return product.priceLBP;
-      case 'SYP': return product.priceSYP;
-      case 'IQD': return product.priceIQD;
-      case 'TND': return product.priceTND;
-      case 'MAD': return product.priceMAD;
-      case 'DZD': return product.priceDZD;
-      case 'USD': return product.priceUSD;
-      case 'EUR': return product.priceEUR;
-      default: return product.price;
+      case 'AED': return product.priceAED ?? product.price ?? 0;
+      case 'SAR': return product.price ?? 0;
+      case 'BHD': return product.priceBHD ?? product.price ?? 0;
+      case 'KWD': return product.priceKWD ?? product.price ?? 0;
+      case 'OMR': return product.priceOMR ?? product.price ?? 0;
+      case 'QAR': return product.priceQAR ?? product.price ?? 0;
+      case 'USD': return product.priceUSD ?? product.price ?? 0;
+      case 'EUR': return product.priceEUR ?? product.price ?? 0;
+      case 'GBP': return product.priceUSD ? product.priceUSD * 0.79 : (product.price ?? 0) * 0.79;
+      case 'INR': return product.priceUSD ? product.priceUSD * 83 : (product.price ?? 0) * 83;
+      default: return product.price ?? 0;
     }
   };
 

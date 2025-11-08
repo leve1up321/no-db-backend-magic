@@ -115,6 +115,16 @@ export default function ProductDetail({ product }: { product?: Product }) {
     }
   };
 
+  const getOriginalPrice = () => {
+    // للمنتجات المجانية التي لها سعر أصلي قبل الخصم
+    const originalPrice = (product as any).originalPrice;
+    if (!originalPrice) return 0;
+    
+    // نفس المنطق: استخدام الأسعار المخزنة حسب العملة
+    // لكن هنا نستخدم originalPrice كقاعدة
+    return originalPrice;
+  };
+
   const getCurrencySymbol = () => {
     switch (currency) {
       case 'AED': return 'د.إ';
@@ -248,7 +258,7 @@ export default function ProductDetail({ product }: { product?: Product }) {
                 {(product as any).originalPrice && price === 0 ? (
                   <div className="flex flex-col gap-1">
                     <p className="text-lg sm:text-xl text-gray-500 line-through">
-                      {((product as any).originalPrice * (exchangeRates[currency] || 1)).toFixed(2)} {currencySymbol}
+                      {getOriginalPrice().toFixed(2)} {currencySymbol}
                     </p>
                     <div className="flex items-center gap-2">
                       <p className="text-3xl sm:text-4xl font-extrabold text-green-400">

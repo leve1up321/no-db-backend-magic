@@ -1,13 +1,59 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function SuccessPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState<string | null>(null);
+  const [productName, setProductName] = useState<string>("المنتج");
+  const [price, setPrice] = useState<string>("0");
+  const [currency, setCurrency] = useState<string>("AED");
+  const [productFile, setProductFile] = useState<string>("");
 
   useEffect(() => {
-    setEmail(localStorage.getItem("leve1up_email"));
-  }, []);
+    // قراءة البيانات من LocalStorage
+    const savedEmail = localStorage.getItem("leve1up_email");
+    const savedProductName = localStorage.getItem("leve1up_product_name");
+    const savedPrice = localStorage.getItem("leve1up_price");
+    const savedCurrency = localStorage.getItem("leve1up_currency");
+    const savedProductFile = localStorage.getItem("leve1up_product_file");
+
+    if (savedEmail) setEmail(savedEmail);
+    if (savedProductName) setProductName(savedProductName);
+    if (savedPrice) setPrice(savedPrice);
+    if (savedCurrency) setCurrency(savedCurrency);
+    if (savedProductFile) setProductFile(savedProductFile);
+
+    // يمكن أيضاً قراءة payment_intent من query string لاحقاً
+    const paymentIntentId = searchParams.get("payment_intent");
+    if (paymentIntentId) {
+      console.log("Payment Intent ID:", paymentIntentId);
+      // يمكن استخدام هذا لاحقاً للتحقق من الدفع
+    }
+  }, [searchParams]);
+
+  const getCurrencySymbol = (curr: string) => {
+    switch (curr) {
+      case 'SAR': return 'ر.س';
+      case 'AED': return 'د.إ';
+      case 'KWD': return 'د.ك';
+      case 'QAR': return 'ر.ق';
+      case 'BHD': return 'د.ب';
+      case 'OMR': return 'ر.ع';
+      case 'JOD': return 'د.أ';
+      case 'EGP': return 'ج.م';
+      case 'LBP': return 'ل.ل';
+      case 'SYP': return 'ل.س';
+      case 'IQD': return 'ع.د';
+      case 'TND': return 'د.ت';
+      case 'MAD': return 'د.م';
+      case 'DZD': return 'د.ج';
+      case 'USD': return '$';
+      case 'EUR': return '€';
+      default: return '';
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white px-4">
@@ -21,18 +67,20 @@ export default function SuccessPage() {
         </p>
 
         <div className="bg-gray-700/40 p-4 rounded-lg mb-6">
-          <p className="text-lg">💼 المنتج: <strong>الربح من المنتجات الرقمية</strong></p>
-          <p className="text-lg">💰 السعر: <strong>39 درهم</strong></p>
+          <p className="text-lg">💼 المنتج: <strong>{productName}</strong></p>
+          <p className="text-lg">💰 السعر: <strong>{price} {getCurrencySymbol(currency)}</strong></p>
         </div>
 
-        <a
-          href="https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D8%AA%D8%A7%D8%A8%20%D9%81%D9%87%D9%85%20%D9%88%D8%A7%D8%B6%D8%AD%20%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg mb-4 transition"
-        >
-          📦 تحميل المنتج الآن
-        </a>
+        {productFile && (
+          <a
+            href={productFile}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg mb-4 transition"
+          >
+            📦 تحميل المنتج الآن
+          </a>
+        )}
 
         <Link
           href="/"

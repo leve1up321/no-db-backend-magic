@@ -45,7 +45,15 @@ function CheckoutContent() {
     setError(null);
 
     try {
+      // حفظ جميع البيانات في LocalStorage لاستخدامها في صفحة النجاح
+      const productFile = "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D8%AA%D8%A7%D8%A8%20%D9%81%D9%87%D9%85%20%D9%88%D8%A7%D8%B6%D8%AD%20%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9.pdf";
+      
       localStorage.setItem("leve1up_email", email);
+      localStorage.setItem("leve1up_product_name", productName);
+      localStorage.setItem("leve1up_price", price);
+      localStorage.setItem("leve1up_currency", currency);
+      localStorage.setItem("leve1up_product_file", productFile);
+      
       const currencyCode = currencyCodeMap[currency] || "AED";
 
       const res = await fetch("/api/payment_intent", {
@@ -55,8 +63,7 @@ function CheckoutContent() {
           amount: parseFloat(price),
           currency_code: currencyCode,
           productName,
-          productFile:
-            "https://cix55jnodh8jj42w.public.blob.vercel-storage.com/%D9%83%D8%AA%D8%A7%D8%A8%20%D9%81%D9%87%D9%85%20%D9%88%D8%A7%D8%B6%D8%AD%20%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9.pdf",
+          productFile,
           customerEmail: email,
         }),
       });

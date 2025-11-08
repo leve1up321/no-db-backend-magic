@@ -92,38 +92,14 @@ export default function ProductGrid() {
     }
   };
 
-  const handleDirectPayment = async (product: any) => {
-    try {
-      const { amount } = getPrice(product);
-      const productName = getProductName(product);
-      
-      showToast('جاري تحضير صفحة الدفع... ⏳', 'cart');
-      
-      const response = await fetch("/api/payment_intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          amount: amount, 
-          currency: currency,
-          productName: productName,
-          message: `دفع مقابل ${productName}`,
-          test: true // غيّر إلى false للدفع الحقيقي
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (data.redirect_url) {
-        // Redirect to Ziina payment page
-        window.location.href = data.redirect_url;
-      } else {
-        showToast('حدث خطأ في إنشاء عملية الدفع. حاول مرة أخرى.', 'cart');
-        console.error("Payment error:", data);
-      }
-    } catch (error) {
-      showToast('حدث خطأ في الاتصال. حاول مرة أخرى.', 'cart');
-      console.error("Payment error:", error);
-    }
+  const handleDirectPayment = (product: any) => {
+    // التوجيه إلى صفحة checkout مع السعر المحسوب حسب العملة المختارة
+    const { amount } = getPrice(product);
+    const productId = getProductId(product);
+    const productName = getProductName(product);
+    
+    const checkoutUrl = `/checkout?product=${productId}&name=${encodeURIComponent(productName)}&price=${amount.toFixed(2)}&currency=${currency}`;
+    window.location.href = checkoutUrl;
   };
 
   return (

@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Currency = 'SAR' | 'AED' | 'KWD' | 'QAR' | 'BHD' | 'OMR' | 'JOD' | 'EGP' | 'LBP' | 'SYP' | 'IQD' | 'TND' | 'MAD' | 'DZD' | 'USD' | 'EUR';
+// العملات المدعومة من Ziina فقط
+type Currency = 'AED' | 'SAR' | 'BHD' | 'KWD' | 'OMR' | 'QAR' | 'USD' | 'EUR' | 'GBP' | 'INR';
 type Theme = 'light' | 'dark';
 
 interface CartItem {

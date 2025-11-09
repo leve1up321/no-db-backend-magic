@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getCurrencySymbol, subunitMap, type Currency } from "@/lib/currency";
-import { getOrderBySessionId, updateOrderStatus } from "@/lib/orders-store";
+import { findOrderBySessionId, updateOrder } from "@/lib/orders-store";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

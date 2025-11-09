@@ -29,7 +29,7 @@ function SuccessPageContent() {
   const [loading, setLoading] = useState(true);
 
   // رقم الواتساب (يمكن تخصيصه)
-  const WHATSAPP_NUMBER = "966500000000"; // ضع رقم الواتساب الخاص بك هنا
+  const WHATSAPP_NUMBER = "971503492848"; // ضع رقم الواتساب الخاص بك هنا
   const WHATSAPP_MESSAGE = "مرحباً، لدي استفسار بخصوص طلبي";
 
   useEffect(() => {

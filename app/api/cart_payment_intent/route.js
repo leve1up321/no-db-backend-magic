@@ -4,7 +4,7 @@ import { subunitMap } from "@/lib/currency";
 import crypto from "crypto";
 
 // 🧮 تحويل المبلغ إلى الوحدة الصغرى (fils, cents, etc)
-function convertToSubunit(amount: number, currency: string) {
+function convertToSubunit(amount, currency) {
   const multiplier = subunitMap[currency] || 100;
   return Math.round(amount * multiplier);
 }

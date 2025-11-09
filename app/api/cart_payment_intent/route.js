@@ -1,26 +1,27 @@
 import { NextResponse } from "next/server";
 import { createOrder } from "@/lib/orders-store";
 import { subunitMap } from "@/lib/currency";
+import crypto from "crypto";
 
-// دالة تحويل المبلغ إلى الوحدة الصغرى (fils, cents, etc)
-function convertToSubunit(amount, currency) {
+// 🧮 تحويل المبلغ إلى الوحدة الصغرى (fils, cents, etc)
+function convertToSubunit(amount: number, currency: string) {
   const multiplier = subunitMap[currency] || 100;
   return Math.round(amount * multiplier);
 }
 
-export async function POST(req) {
+export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { cartItems, totalAmount, currency, customerEmail } = body;
-    
-    // 🔍 التحقق من المتغيرات البيئية
+
+    // 🧾 توليد sessionId فريد محلياً
+    const sessionId = crypto.randomUUID();
+    console.log("🆕 Generated sessionId:", sessionId);
+
+    // 🧩 متغيرات البيئة
     const apiKey = process.env.ZIINA_SECRET_KEY;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-    
-    console.log("🛒 Cart Payment - API Key exists:", !!apiKey);
-    console.log("🛒 Cart Payment - API Key prefix:", apiKey?.substring(0, 10) + "...");
-    console.log("🛒 Cart Payment - App URL:", appUrl);
-    
+
     if (!apiKey) {
       console.error("❌ ZIINA_SECRET_KEY is not set!");
       return NextResponse.json(
@@ -28,7 +29,7 @@ export async function POST(req) {
         { status: 500 }
       );
     }
-    
+
     if (!appUrl) {
       console.error("❌ NEXT_PUBLIC_APP_URL is not set!");
       return NextResponse.json(
@@ -36,26 +37,20 @@ export async function POST(req) {
         { status: 500 }
       );
     }
-    
-    // 🛒 حساب المبلغ الكلي للسلة
+
+    // 🛒 التحقق من بيانات السلة
     const items = cartItems || [];
-    const finalCurrency = currency || 'AED';
-    const email = customerEmail || '';
-    
-    console.log("🛒 Cart items count:", items.length);
-    console.log("🛒 Total amount:", totalAmount, finalCurrency);
-    console.log("📧 Customer email:", email);
-    
-    // 🔴 تحذير حرج إذا لم يكن هناك email
-    if (!email || email === '') {
+    const finalCurrency = currency || "AED";
+    const email = customerEmail || "";
+
+    if (!email) {
       console.error("🚨 CRITICAL: No customer email provided!");
-      console.error("🚨 Request body:", JSON.stringify(body, null, 2));
       return NextResponse.json(
         { error: "يرجى إدخال البريد الإلكتروني" },
         { status: 400 }
       );
     }
-    
+
     if (totalAmount <= 0) {
       console.error("❌ Invalid total amount:", totalAmount);
       return NextResponse.json(
@@ -63,149 +58,118 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    
-    // 🔢 تحويل المبلغ إلى الوحدة الصغرى حسب العملة
+
+    // 💰 تحويل المبلغ إلى الوحدة الصغرى (فلس / سنت)
     const amountInSubunit = convertToSubunit(totalAmount, finalCurrency);
     console.log(`💰 Converted amount (${finalCurrency} subunit):`, amountInSubunit);
-    
-    // 📦 بناء الطلب
-    // احسب expiry بالميلي ثانية (10 دقائق من الآن)
-    // Ziina تتوقع timestamp بالميلي ثانية كـ string
-    const expiry = (Date.now() + 10 * 60 * 1000).toString(); // بعد 10 دقائق من الآن
-    console.log("⏰ Expiry timestamp (milliseconds, string):", expiry);
+
+    // ⏰ إعداد صلاحية الدفع (10 دقائق)
+    const expiry = (Date.now() + 10 * 60 * 1000).toString();
     console.log("⏰ Expiry date:", new Date(parseInt(expiry)).toISOString());
-    
-    // إنشاء رسالة قصيرة (Ziina لها حد أقصى لطول الرسالة)
-    const itemCount = items.length;
-    const message = itemCount === 1 
-      ? `دفع لمنتج واحد` 
-      : `دفع لـ ${itemCount} منتجات`;
-    
-    console.log("📝 Payment message:", message);
-    
+
+    // 📝 الرسالة المختصرة
+    const message =
+      items.length === 1 ? `دفع لمنتج واحد` : `دفع لـ ${items.length} منتجات`;
+
+    // 📦 بيانات الدفع المرسلة إلى Ziina
     const paymentData = {
       amount: amountInSubunit,
       currency_code: finalCurrency,
-      message: message,
-      success_url: `${appUrl}/success`,
-      cancel_url: `${appUrl}/cancel`,
-      failure_url: `${appUrl}/cancel`,
+      message,
+      success_url: `${appUrl}/success?session=${sessionId}`,
+      cancel_url: `${appUrl}/cancel?session=${sessionId}`,
+      failure_url: `${appUrl}/cancel?session=${sessionId}`,
       test: true,
-      expiry: expiry, // string بالميلي ثانية
-      allow_tips: false
+      expiry,
+      allow_tips: false,
+      metadata: {
+        sessionId,
+        customerEmail: email,
+        cartItems: items,
+      },
     };
-    
+
     console.log("📤 Sending cart payment data:", JSON.stringify(paymentData, null, 2));
 
     const response = await fetch("https://api-v2.ziina.com/api/payment_intent", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(paymentData),
     });
 
-    console.log("📥 Response status:", response.status);
-    console.log("📥 Response headers:", Object.fromEntries(response.headers));
-    
     const text = await response.text();
-    console.log("📥 Response text (first 500 chars):", text.slice(0, 500));
-
-    let data;
+    let data: any;
     try {
       data = JSON.parse(text);
-      console.log("✅ Parsed response data:", JSON.stringify(data, null, 2));
     } catch (err) {
-      console.error("❌ Failed to parse JSON response");
-      console.error("❌ Raw response:", text.slice(0, 500));
+      console.error("❌ Failed to parse JSON response:", text);
       return NextResponse.json(
-        { error: "Ziina returned invalid response", details: text.slice(0, 300) },
+        { error: "Ziina returned invalid response", details: text },
         { status: 502 }
       );
     }
 
-    if (!response.ok) {
-      console.error("❌ Ziina API Error - Status:", response.status);
-      console.error("❌ Error details:", JSON.stringify(data, null, 2));
+    if (!response.ok || !data.redirect_url) {
+      console.error("❌ Error from Ziina:", JSON.stringify(data, null, 2));
       return NextResponse.json(
-        { error: "Payment creation failed", details: data },
+        { error: "Failed to create payment intent", details: data },
         { status: response.status }
       );
     }
 
-    // ✅ التحقق من وجود redirect_url
-    if (!data.redirect_url) {
-      console.error("❌ No redirect_url in response!");
-      console.error("❌ Response data:", JSON.stringify(data, null, 2));
-      return NextResponse.json(
-        { error: "No redirect URL received from Ziina", details: data },
-        { status: 500 }
-      );
-    }
-
-    const paymentIntentId = data.id || data.payment_intent_id;
-    
-    console.log("✅ Cart payment intent created successfully!");
-    console.log("✅ Payment Intent ID:", paymentIntentId);
+    const paymentIntentId = data.id;
+    console.log("✅ Payment Intent created:", paymentIntentId);
     console.log("✅ Redirect URL:", data.redirect_url);
-    
-    // 🆕 حفظ الطلب مع payment_intent_id الفعلي
-    const orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    console.log("📝 Creating order with ID:", orderId);
-    console.log("📝 Payment Intent ID (sessionId):", paymentIntentId);
-    console.log("📝 Customer Email:", email);
-    console.log("📝 Items count:", items.length);
-    
+
+    // 📝 إنشاء الطلب وتخزينه محلياً
+    const orderId = `order_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 8)}`;
+
     const savedOrder = await createOrder({
       id: orderId,
-      sessionId: paymentIntentId, // ✨ نستخدم payment_intent_id الفعلي للربط
-      status: 'pending',
+      sessionId, // 🧩 نستخدم sessionId المحلي
+      paymentId: paymentIntentId, // من Ziina
+      status: "pending",
       amount: totalAmount,
       currency: finalCurrency,
       customerEmail: email,
-      items: items.map(item => ({
+      items: items.map((item: any) => ({
         id: item.id,
         name: item.name,
         quantity: item.quantity || 1,
         price: item.price,
         image: item.image,
-        downloadUrl: item.download_url || item.downloadUrl // ✨ حفظ رابط التحميل
+        downloadUrl: item.download_url || item.downloadUrl,
       })),
       createdAt: new Date().toISOString(),
       metadata: {
-        paymentIntentId: paymentIntentId,
-        customerEmail: email
-      }
+        paymentIntentId,
+        sessionId,
+        customerEmail: email,
+      },
     });
-    
-    console.log("✅ Order saved successfully!");
-    console.log("✅ Order ID:", savedOrder.id);
-    console.log("✅ Session ID:", savedOrder.sessionId);
-    
-    // التحقق من إمكانية استرجاع الطلب فوراً
-    const { findOrderBySessionId } = await import('@/lib/orders-store');
-    const testOrder = await findOrderBySessionId(paymentIntentId);
-    console.log("🧪 Test retrieval - Order found:", !!testOrder);
-    if (testOrder) {
-      console.log("🧪 Retrieved order ID:", testOrder.id);
-      console.log("🧪 Retrieved order email:", testOrder.customerEmail);
-    } else {
-      console.error("❌ Failed to retrieve order immediately after creation!");
-    }
+
+    console.log("✅ Order saved successfully:", savedOrder.id);
+
+    // 🧪 اختبار سريع لاسترجاع الطلب
+    const { findOrderBySessionId } = await import("@/lib/orders-store");
+    const testOrder = await findOrderBySessionId(sessionId);
+    console.log("🧪 Order retrieval test:", !!testOrder);
 
     return NextResponse.json({
       success: true,
       redirect_url: data.redirect_url,
       payment_intent_id: paymentIntentId,
+      session_id: sessionId,
       total_amount: totalAmount,
       items_count: items.length,
     });
-  } catch (error) {
-    console.error("💥 Cart Payment Intent Error:");
-    console.error("💥 Error name:", error.name);
-    console.error("💥 Error message:", error.message);
-    console.error("💥 Error stack:", error.stack);
+  } catch (error: any) {
+    console.error("💥 Cart Payment Intent Error:", error);
     return NextResponse.json(
       { error: "Internal Server Error", message: error.message },
       { status: 500 }

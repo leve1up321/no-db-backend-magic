@@ -87,7 +87,7 @@ export async function POST(req) {
       amount: amountInSubunit,
       currency_code: finalCurrency,
       message: message,
-      success_url: `${appUrl}/success?payment_intent={CHECKOUT_SESSION_ID}`,
+      success_url: `${appUrl}/success`,
       cancel_url: `${appUrl}/cancel`,
       failure_url: `${appUrl}/cancel`,
       test: true,

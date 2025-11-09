@@ -94,12 +94,36 @@ function SuccessPageContent() {
         if (savedCartItems && savedEmail) {
           const items: CartItem[] = JSON.parse(savedCartItems);
           
-          setOrderData({
-            email: savedEmail,
-            items,
-            totalAmount: savedTotalAmount ? parseFloat(savedTotalAmount) : 0,
-            currency: savedCurrency,
-          });
+          // جلب روابط التحميل من products.json
+          try {
+            const productsResponse = await fetch('/data/products.json');
+            const products = await productsResponse.json();
+            
+            const downloadLinks = items.map(item => {
+              const product = products.find((p: any) => p.product_id === item.id || p.id === item.id);
+              return {
+                productId: item.id,
+                productName: item.name,
+                downloadUrl: product?.download_url || '#'
+              };
+            });
+            
+            setOrderData({
+              email: savedEmail,
+              items,
+              totalAmount: savedTotalAmount ? parseFloat(savedTotalAmount) : 0,
+              currency: savedCurrency,
+              downloadLinks
+            });
+          } catch (e) {
+            console.error("Error fetching products:", e);
+            setOrderData({
+              email: savedEmail,
+              items,
+              totalAmount: savedTotalAmount ? parseFloat(savedTotalAmount) : 0,
+              currency: savedCurrency,
+            });
+          }
 
           // تنظيف localStorage بعد عرض النجاح
           localStorage.removeItem("cart");
@@ -342,4 +366,3 @@ export default function SuccessPage() {
     </Suspense>
   );
 }
-

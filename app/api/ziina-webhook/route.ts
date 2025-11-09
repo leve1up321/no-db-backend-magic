@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     console.log("🔍 Searching for order with payment ID:", paymentId);
     
     // 🆕 البحث عن الطلب في orders store باستخدام payment_intent ID
-    const order = getOrderBySessionId(paymentId);
+    const order = await findOrderBySessionId(paymentId);
     
     if (!order) {
       console.error("❌ No order found for payment ID:", paymentId);

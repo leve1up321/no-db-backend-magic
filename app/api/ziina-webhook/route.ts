@@ -69,10 +69,15 @@ export async function POST(req: Request) {
     console.log("🎯 Ready to send email to:", customerEmail);
     console.log("💰 Amount:", amount, currencySymbol);
     console.log("📦 Product:", productName);
+    console.log("📧 Full metadata:", JSON.stringify(meta, null, 2));
 
     if (status === "completed") {
       try {
-        await resend.emails.send({
+        console.log("📤 Attempting to send email via Resend...");
+        console.log("📤 To:", customerEmail);
+        console.log("📤 From:", "Leve1Up Store <support@leve1up.store>");
+        
+        const emailResponse = await resend.emails.send({
           from: "Leve1Up Store <support@leve1up.store>",
           to: customerEmail,
           subject: `تم استلام دفعتك بنجاح - ${productName}`,
@@ -105,6 +110,7 @@ export async function POST(req: Request) {
           `,
         });
 
+        console.log(`✅ Resend API Response:`, JSON.stringify(emailResponse, null, 2));
         console.log(`📨 Email sent successfully to: ${customerEmail}`);
       } catch (error) {
         console.error("❌ Error sending email:", error);

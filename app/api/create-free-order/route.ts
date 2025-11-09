@@ -51,10 +51,16 @@ export async function POST(request: NextRequest) {
 
     console.log('🎁 Free product order created:', orderId);
     console.log('📧 Sending email to:', email);
+    console.log('📧 Product:', productName);
+    console.log('📧 Download URL:', downloadUrl);
 
     // إرسال البريد الإلكتروني
     try {
-      await resend.emails.send({
+      console.log('📤 Attempting to send free product email via Resend...');
+      console.log('📤 To:', email);
+      console.log('📤 From:', 'Leve1Up Store <support@leve1up.store>');
+      
+      const emailResponse = await resend.emails.send({
         from: 'Leve1Up Store <support@leve1up.store>',
         to: email,
         subject: `🎁 منتجك المجاني جاهز - ${productName}`,
@@ -87,6 +93,7 @@ export async function POST(request: NextRequest) {
         `,
       });
 
+      console.log('✅ Resend API Response:', JSON.stringify(emailResponse, null, 2));
       console.log('✅ Email sent successfully to:', email);
     } catch (emailError) {
       console.error('❌ Error sending email to customer:', emailError);

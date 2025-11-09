@@ -69,8 +69,8 @@ export async function POST(req: Request) {
     const orderItems = order.items || [];
     
     // تحديث حالة الطلب
-    await updateOrder(order.id, { status: 'completed' });
-    console.log("✅ Order status updated to completed");
+    await updateOrder(order.id, { status: 'paid' });
+    console.log("✅ Order status updated to paid");
     
     // استخدام بيانات الطلب
     const productName = orderItems.length === 1 

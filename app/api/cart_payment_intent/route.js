@@ -46,6 +46,16 @@ export async function POST(req) {
     console.log("🛒 Total amount:", totalAmount, finalCurrency);
     console.log("📧 Customer email:", email);
     
+    // 🔴 تحذير حرج إذا لم يكن هناك email
+    if (!email || email === '') {
+      console.error("🚨 CRITICAL: No customer email provided!");
+      console.error("🚨 Request body:", JSON.stringify(body, null, 2));
+      return NextResponse.json(
+        { error: "يرجى إدخال البريد الإلكتروني" },
+        { status: 400 }
+      );
+    }
+    
     if (totalAmount <= 0) {
       console.error("❌ Invalid total amount:", totalAmount);
       return NextResponse.json(

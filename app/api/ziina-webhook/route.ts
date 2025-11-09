@@ -32,7 +32,15 @@ export async function POST(req: Request) {
 
     // نحاول التقاط البريد من بيانات الدفع أو metadata
     const meta = data?.metadata || {};
+    
+    console.log("🔍 DEBUG - Full webhook data:", JSON.stringify(data, null, 2));
+    console.log("🔍 DEBUG - Metadata:", JSON.stringify(meta, null, 2));
+    console.log("🔍 DEBUG - meta.customerEmail:", meta.customerEmail);
+    console.log("🔍 DEBUG - data.customer_email:", data?.customer_email);
+    
     const customerEmail = meta.customerEmail || data?.customer_email;
+    
+    console.log("🔍 DEBUG - Final customerEmail:", customerEmail);
 
     // إذا لم يكن هناك بريد إلكتروني، نرسل تنبيه فقط
     if (!customerEmail) {

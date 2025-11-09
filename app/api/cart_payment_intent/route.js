@@ -14,6 +14,7 @@ function generateSessionId() {
 export async function POST(req) {
   try {
     const body = await req.json();
+    const { cartItems, totalAmount, currency, customerEmail } = body;
     
     // 🔍 التحقق من المتغيرات البيئية
     const apiKey = process.env.ZIINA_SECRET_KEY;
@@ -40,13 +41,13 @@ export async function POST(req) {
     }
     
     // 🛒 حساب المبلغ الكلي للسلة
-    const cartItems = body.cartItems || [];
-    const totalAmount = cartItems.reduce((total, item) => {
-      return total + (item.price * (item.quantity || 1));
-    }, 0);
+    const items = cartItems || [];
+    const finalCurrency = currency || 'AED';
+    const email = customerEmail || '';
     
-    console.log("🛒 Cart items count:", cartItems.length);
-    console.log("🛒 Total amount (AED):", totalAmount);
+    console.log("🛒 Cart items count:", items.length);
+    console.log("🛒 Total amount:", totalAmount, finalCurrency);
+    console.log("📧 Customer email:", email);
     
     if (totalAmount <= 0) {
       console.error("❌ Invalid total amount:", totalAmount);
@@ -68,7 +69,7 @@ export async function POST(req) {
     console.log("⏰ Expiry date:", new Date(parseInt(expiry)).toISOString());
     
     // إنشاء رسالة قصيرة (Ziina لها حد أقصى لطول الرسالة)
-    const itemCount = cartItems.length;
+    const itemCount = items.length;
     const message = itemCount === 1 
       ? `دفع لمنتج واحد` 
       : `دفع لـ ${itemCount} منتجات`;
@@ -85,8 +86,9 @@ export async function POST(req) {
       sessionId: trackingToken, // نستخدم sessionId لحفظ tracking token
       status: 'pending',
       amount: totalAmount,
-      currency: 'AED',
-      items: cartItems.map(item => ({
+      currency: finalCurrency,
+      customerEmail: email,
+      items: items.map(item => ({
         id: item.id,
         name: item.name,
         quantity: item.quantity || 1,
@@ -95,8 +97,9 @@ export async function POST(req) {
       })),
       createdAt: new Date().toISOString(),
       metadata: {
-        cartItems: cartItems,
-        trackingToken: trackingToken
+        cartItems: items,
+        trackingToken: trackingToken,
+        customerEmail: email
       }
     });
     
@@ -104,7 +107,7 @@ export async function POST(req) {
     
     const paymentData = {
       amount: amountInFils,
-      currency_code: "AED",
+      currency_code: finalCurrency,
       message: message,
       success_url: `${appUrl}/success?token=${trackingToken}`, // ✨ نستخدم token بدل payment_intent
       cancel_url: `${appUrl}/cancel`,
@@ -114,7 +117,8 @@ export async function POST(req) {
       allow_tips: false,
       metadata: {
         trackingToken: trackingToken, // ✨ مهم جداً للربط في webhook
-        cartItems: JSON.stringify(cartItems)
+        customerEmail: email,
+        cartItems: JSON.stringify(items)
       }
     };
     
@@ -175,7 +179,7 @@ export async function POST(req) {
       redirect_url: data.redirect_url,
       payment_intent_id: data.id || data.payment_intent_id,
       total_amount: totalAmount,
-      items_count: cartItems.length,
+      items_count: items.length,
     });
   } catch (error) {
     console.error("💥 Cart Payment Intent Error:");

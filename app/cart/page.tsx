@@ -12,6 +12,7 @@ export default function CartPage() {
   const { cart, removeFromCart, updateCartQuantity, cartTotal, currency, clearCart } = useApp();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [error, setError] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
 
   const getCurrencySymbol = () => {
     switch (currency) {
@@ -45,6 +46,11 @@ export default function CartPage() {
 
       console.log('🛒 Sending cart data:', { cartItems, totalAmount: cartTotal });
 
+      // التحقق من البريد الإلكتروني
+      if (!customerEmail || !customerEmail.includes('@')) {
+        throw new Error('يرجى إدخال بريد إلكتروني صحيح');
+      }
+
       // 📤 إرسال الطلب إلى API
       const response = await fetch('/api/cart_payment_intent', {
         method: 'POST',
@@ -53,7 +59,9 @@ export default function CartPage() {
         },
         body: JSON.stringify({
           cartItems: cartItems,
-          totalAmount: cartTotal
+          totalAmount: cartTotal,
+          currency: currency,
+          customerEmail: customerEmail
         }),
       });
 
@@ -229,9 +237,27 @@ export default function CartPage() {
                   </div>
                 </div>
 
+                {/* Email Input */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    البريد الإلكتروني *
+                  </label>
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 dark:focus:border-primary-400 transition-colors"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    سيتم إرسال المنتجات إلى هذا البريد الإلكتروني
+                  </p>
+                </div>
+
                 <button
                   onClick={handleCheckout}
-                  disabled={isCheckingOut}
+                  disabled={isCheckingOut || !customerEmail}
                   className="w-full bg-gradient-to-r from-primary-600 to-accent-600 text-white py-4 rounded-lg font-bold hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isCheckingOut ? (

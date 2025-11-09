@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ShoppingCart, Heart, Star, Check, Users, Shield, Zap, CheckCircle, ShoppingBag, Download } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { showToast } from '@/components/ToastContainer';
+import { calculatePrice, formatPrice } from '@/lib/currency';
 import testimonials from '@/data/testimonials.json';
 import Image from 'next/image';
 import WhyBuySection from './WhyBuySection';
@@ -92,51 +93,8 @@ export default function ProductDetail({ product }: { product?: Product }) {
   // Helper function to get unified product image
   const getProductImage = () => product.image ?? product.product_image ?? '/placeholder.jpg';
 
-  const getPrice = () => {
-    // استخدام الأسعار المخزنة لكل عملة (العملات المدعومة من Ziina فقط)
-    switch (currency) {
-      case 'AED': return product.priceAED ?? product.price ?? 0;
-      case 'SAR': return product.price ?? 0;
-      case 'BHD': return product.priceBHD ?? product.price ?? 0;
-      case 'KWD': return product.priceKWD ?? product.price ?? 0;
-      case 'OMR': return product.priceOMR ?? product.price ?? 0;
-      case 'QAR': return product.priceQAR ?? product.price ?? 0;
-      case 'USD': return product.priceUSD ?? product.price ?? 0;
-      case 'EUR': return product.priceEUR ?? product.price ?? 0;
-      case 'GBP': return product.priceUSD ? product.priceUSD * 0.79 : (product.price ?? 0) * 0.79; // تقريبي
-      case 'INR': return product.priceUSD ? product.priceUSD * 83 : (product.price ?? 0) * 83; // تقريبي
-      default: return product.price ?? 0;
-    }
-  };
-
-  const getOriginalPrice = () => {
-    // للمنتجات المجانية التي لها سعر أصلي قبل الخصم
-    const originalPrice = (product as any).originalPrice;
-    if (!originalPrice) return 0;
-    
-    // نفس المنطق: استخدام الأسعار المخزنة حسب العملة
-    // لكن هنا نستخدم originalPrice كقاعدة
-    return originalPrice;
-  };
-
-  const getCurrencySymbol = () => {
-    switch (currency) {
-      case 'AED': return 'د.إ';
-      case 'SAR': return 'ر.س';
-      case 'BHD': return 'د.ب';
-      case 'KWD': return 'د.ك';
-      case 'OMR': return 'ر.ع';
-      case 'QAR': return 'ر.ق';
-      case 'USD': return '$';
-      case 'EUR': return '€';
-      case 'GBP': return '£';
-      case 'INR': return '₹';
-      default: return 'ر.س';
-    }
-  };
-
-  const price = getPrice();
-  const currencySymbol = getCurrencySymbol();
+  // حساب السعر باستخدام النظام الموحد
+  const priceCalc = calculatePrice(product, currency);
   const productId = getProductId();
   const productName = getProductName();
   const productImage = getProductImage();
@@ -148,7 +106,7 @@ export default function ProductDetail({ product }: { product?: Product }) {
 
   const handleAddToCart = () => {
     // Check if product is free
-    if (price === 0 && (product as any).isFree) {
+    if (priceCalc.finalPrice === 0 && (product as any).isFree) {
       setShowFreeModal(true);
       return;
     }
@@ -156,7 +114,7 @@ export default function ProductDetail({ product }: { product?: Product }) {
     addToCart({
       id: productId,
       name: productName,
-      price: price,
+      price: priceCalc.finalPrice,
       image: productImage,
     });
     showToast('تمت إضافة المنتج إلى السلة بنجاح! ✅', 'cart');
@@ -244,24 +202,40 @@ export default function ProductDetail({ product }: { product?: Product }) {
             <div className="flex items-center gap-4 p-4 sm:p-6 bg-dark-300/50 border border-primary-300/20 rounded-2xl">
               <div className="flex-1">
                 <p className="text-gray-400 text-sm mb-1">السعر</p>
-                {(product as any).originalPrice && price === 0 ? (
+                {priceCalc.finalPrice === 0 ? (
                   <div className="flex flex-col gap-1">
-                    <p className="text-lg sm:text-xl text-gray-500 line-through">
-                      {getOriginalPrice().toFixed(2)} {currencySymbol}
-                    </p>
+                    {priceCalc.originalPrice > 0 && (
+                      <p className="text-lg sm:text-xl text-gray-500 line-through">
+                        {formatPrice(priceCalc.originalPrice, currency)}
+                      </p>
+                    )}
                     <div className="flex items-center gap-2">
                       <p className="text-3xl sm:text-4xl font-extrabold text-green-400">
                         مجاني! 🎉
                       </p>
                       <span className="px-3 py-1 bg-red-500/20 border border-red-500/40 rounded-lg text-red-400 text-sm font-bold">
-                        خصم 100%
+                        خصم {priceCalc.discountPercentage}%
                       </span>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-primary-300 to-accent-600 bg-clip-text text-transparent">
-                    {price.toFixed(2)} {currencySymbol}
-                  </p>
+                  <div className="flex flex-col gap-1">
+                    {priceCalc.discountPercentage > 0 && (
+                      <p className="text-lg sm:text-xl text-gray-500 line-through">
+                        {formatPrice(priceCalc.originalPrice, currency)}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <p className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-primary-300 to-accent-600 bg-clip-text text-transparent">
+                        {priceCalc.finalPrice.toFixed(2)} {priceCalc.symbol}
+                      </p>
+                      {priceCalc.discountPercentage > 0 && (
+                        <span className="px-3 py-1 bg-red-500/20 border border-red-500/40 rounded-lg text-red-400 text-sm font-bold">
+                          خصم {priceCalc.discountPercentage}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
               <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/40 rounded-xl">
@@ -274,22 +248,31 @@ export default function ProductDetail({ product }: { product?: Product }) {
             <div className="space-y-3">
               {/* Buy Now / Direct Payment Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                {/* Hide "Buy Now" button for free products */}
-                {!(price === 0 && (product as any).isFree) && (
+                {/* Show appropriate button based on product type */}
+                {priceCalc.finalPrice === 0 && (product as any).isFree ? (
                   <button
-                    onClick={handlePayment}
-                    className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-green-500 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-green-500/30 active:scale-95 transition-all duration-300 touch-manipulation"
+                    onClick={handleAddToCart}
+                    className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-green-500/30 active:scale-95 transition-all duration-300 touch-manipulation"
                     style={{ fontSize: '16px' }}
                   >
-                    <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
-                    استثمر الآن ⚡
+                    <Download className="w-5 h-5 sm:w-6 sm:h-6" />
+                    احصل عليه مجاناً 🎁
                   </button>
-                )}
-                <button
-                  onClick={handleAddToCart}
-                  className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-primary-300 to-accent-600 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-300/30 active:scale-95 transition-all duration-300 touch-manipulation"
-                  style={{ fontSize: '16px' }}
-                >
+                ) : (
+                  <>
+                    <button
+                      onClick={handlePayment}
+                      className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-green-500 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-green-500/30 active:scale-95 transition-all duration-300 touch-manipulation"
+                      style={{ fontSize: '16px' }}
+                    >
+                      <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
+                      استثمر الآن ⚡
+                    </button>
+                    <button
+                      onClick={handleAddToCart}
+                      className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-primary-300 to-accent-600 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-300/30 active:scale-95 transition-all duration-300 touch-manipulation"
+                      style={{ fontSize: '16px' }}
+                    >
                   <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                   أضف للسلة
                 </button>

@@ -148,6 +148,8 @@ export async function POST(req: Request) {
 
         // لو فشل الإرسال، نحاول إرسال نسخة إلى بريدك الاحتياطي
         try {
+          const itemsList = orderItems.map(item => `- ${item.name} (الكمية: ${item.quantity || 1})`).join('\n');
+          
           await resend.emails.send({
             from: "Leve1Up System <support@leve1up.store>",
             to: "leve1upbackup@gmail.com",
@@ -158,10 +160,11 @@ export async function POST(req: Request) {
                 <p><strong>البريد الأصلي:</strong> ${customerEmail}</p>
                 <p><strong>رقم العملية:</strong> ${paymentId}</p>
                 <p><strong>المبلغ:</strong> ${amount} ${currencySymbol}</p>
-                <p><strong>المنتج:</strong> ${productName}</p>
-                <p><strong>رابط التحميل:</strong> <a href="${productFile}">${productFile}</a></p>
+                <p><strong>المنتجات:</strong></p>
+                <pre>${itemsList}</pre>
                 <hr/>
                 <p style="color:#666">يُرجى إرسال البريد يدوياً للعميل على: ${customerEmail}</p>
+                <p style="color:#999;font-size:12px">السبب: ${error instanceof Error ? error.message : 'خطأ غير معروف'}</p>
               </div>
             `,
           });

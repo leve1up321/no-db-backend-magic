@@ -26,16 +26,16 @@ export async function GET(
     
     // تحديد نوع المعرف والبحث المناسب
     if (id.startsWith('session_')) {
-      order = findOrderBySessionId(id);
+      order = await findOrderBySessionId(id);
     } else if (id.startsWith('pi_') || id.startsWith('payment_')) {
-      order = findOrderByPaymentId(id);
+      order = await findOrderByPaymentId(id);
     } else if (id.startsWith('order_')) {
-      order = findOrderById(id);
+      order = await findOrderById(id);
     } else {
       // محاولة البحث بجميع الطرق
-      order = findOrderById(id) || 
-              findOrderBySessionId(id) || 
-              findOrderByPaymentId(id);
+      order = await findOrderById(id) || 
+              await findOrderBySessionId(id) || 
+              await findOrderByPaymentId(id);
     }
     
     if (!order) {

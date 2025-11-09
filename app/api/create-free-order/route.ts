@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = Date.now() + (7 * 24 * 60 * 60 * 1000);
 
     // Create order using shared store
-    const order = createOrder({
+    const order = await createOrder({
       id: orderId,
       sessionId: token,
       status: 'paid', // Free products are automatically "paid"

@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 
     // البحث برقم الطلب
     if (orderId) {
-      const order = findOrderById(orderId);
+      const order = await findOrderById(orderId);
       
       if (!order) {
         return NextResponse.json({
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
 
     // البحث برقم الدفعة
     if (paymentId) {
-      const order = findOrderByPaymentId(paymentId);
+      const order = await findOrderByPaymentId(paymentId);
       
       if (!order) {
         return NextResponse.json({

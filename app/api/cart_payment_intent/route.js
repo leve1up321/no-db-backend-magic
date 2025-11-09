@@ -157,7 +157,7 @@ export async function POST(req) {
     console.log("📝 Customer Email:", email);
     console.log("📝 Items count:", items.length);
     
-    const savedOrder = createOrder({
+    const savedOrder = await createOrder({
       id: orderId,
       sessionId: paymentIntentId, // ✨ نستخدم payment_intent_id الفعلي للربط
       status: 'pending',
@@ -184,11 +184,13 @@ export async function POST(req) {
     
     // التحقق من إمكانية استرجاع الطلب فوراً
     const { findOrderBySessionId } = await import('@/lib/orders-store');
-    const testOrder = findOrderBySessionId(paymentIntentId);
+    const testOrder = await findOrderBySessionId(paymentIntentId);
     console.log("🧪 Test retrieval - Order found:", !!testOrder);
     if (testOrder) {
       console.log("🧪 Retrieved order ID:", testOrder.id);
       console.log("🧪 Retrieved order email:", testOrder.customerEmail);
+    } else {
+      console.error("❌ Failed to retrieve order immediately after creation!");
     }
 
     return NextResponse.json({

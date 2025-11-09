@@ -9,7 +9,7 @@ export async function GET(
     const token = params.token;
 
     // Check if order exists using shared store
-    const order = findOrderBySessionId(token);
+    const order = await findOrderBySessionId(token);
     
     if (!order) {
       return new NextResponse(

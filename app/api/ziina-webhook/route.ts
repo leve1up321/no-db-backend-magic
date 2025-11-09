@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     console.log("🔍 Searching for order with payment ID:", paymentId);
     
     // 🆕 البحث عن الطلب في orders store باستخدام payment_intent ID
-    const order = findOrderBySessionId(paymentId);
+    const order = await findOrderBySessionId(paymentId);
     
     if (!order) {
       console.error("❌ No order found for payment ID:", paymentId);
@@ -69,8 +69,8 @@ export async function POST(req: Request) {
     const orderItems = order.items || [];
     
     // تحديث حالة الطلب
-    updateOrder(order.id, { status: 'paid', paidAt: new Date().toISOString() });
-    console.log("✅ Order status updated to paid");
+    await updateOrder(order.id, { status: 'completed', paidAt: new Date().toISOString() });
+    console.log("✅ Order status updated to completed");
     
     // استخدام بيانات الطلب
     const productName = orderItems.length === 1 

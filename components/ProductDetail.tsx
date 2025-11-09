@@ -111,10 +111,12 @@ export default function ProductDetail({ product }: { product?: Product }) {
       return;
     }
     
+    // نحفظ السعر المخفض بـ SAR (discountedPrice) وليس finalPrice
+    // لأن AppContext سيحوله تلقائياً للعملة الحالية
     addToCart({
       id: productId,
       name: productName,
-      price: priceCalc.finalPrice,
+      price: priceCalc.discountedPrice, // السعر بـ SAR بعد الخصم
       image: productImage,
     });
     showToast('تمت إضافة المنتج إلى السلة بنجاح! ✅', 'cart');

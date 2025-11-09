@@ -74,6 +74,12 @@ export default function CartPage() {
 
       if (data.success && data.redirect_url) {
         console.log('✅ Redirecting to:', data.redirect_url);
+        
+        // 💾 حفظ بيانات السلة في localStorage لعرضها في صفحة النجاح
+        localStorage.setItem('leve1up_email', customerEmail);
+        localStorage.setItem('leve1up_total_amount', cartTotal.toString());
+        // السلة محفوظة بالفعل في AppContext
+        
         // 🔄 التوجيه إلى صفحة الدفع
         window.location.href = data.redirect_url;
       } else {

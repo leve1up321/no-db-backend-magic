@@ -3,34 +3,69 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+}
+
+interface OrderData {
+  email: string;
+  items: CartItem[];
+  totalAmount: number;
+  currency: string;
+}
+
 function SuccessPageContent() {
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState<string | null>(null);
-  const [productName, setProductName] = useState<string>("المنتج");
-  const [price, setPrice] = useState<string>("0");
-  const [currency, setCurrency] = useState<string>("AED");
-  const [productFile, setProductFile] = useState<string>("");
+  const [orderData, setOrderData] = useState<OrderData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // قراءة البيانات من LocalStorage
-    const savedEmail = localStorage.getItem("leve1up_email");
-    const savedProductName = localStorage.getItem("leve1up_product_name");
-    const savedPrice = localStorage.getItem("leve1up_price");
-    const savedCurrency = localStorage.getItem("leve1up_currency");
-    const savedProductFile = localStorage.getItem("leve1up_product_file");
+    const token = searchParams.get("token");
+    
+    // محاولة جلب بيانات الطلب من localStorage أو API
+    const fetchOrderData = async () => {
+      try {
+        // أولاً: نحاول جلب من localStorage (للسلة)
+        const savedCartItems = localStorage.getItem("cart");
+        const savedEmail = localStorage.getItem("leve1up_email");
+        const savedCurrency = localStorage.getItem("currency") || "SAR";
+        const savedTotalAmount = localStorage.getItem("leve1up_total_amount");
 
-    if (savedEmail) setEmail(savedEmail);
-    if (savedProductName) setProductName(savedProductName);
-    if (savedPrice) setPrice(savedPrice);
-    if (savedCurrency) setCurrency(savedCurrency);
-    if (savedProductFile) setProductFile(savedProductFile);
+        if (savedCartItems && savedEmail) {
+          const items: CartItem[] = JSON.parse(savedCartItems);
+          
+          setOrderData({
+            email: savedEmail,
+            items,
+            totalAmount: savedTotalAmount ? parseFloat(savedTotalAmount) : 0,
+            currency: savedCurrency,
+          });
 
-    // يمكن أيضاً قراءة payment_intent من query string لاحقاً
-    const paymentIntentId = searchParams.get("payment_intent");
-    if (paymentIntentId) {
-      console.log("Payment Intent ID:", paymentIntentId);
-      // يمكن استخدام هذا لاحقاً للتحقق من الدفع
-    }
+          // تنظيف localStorage بعد عرض النجاح
+          localStorage.removeItem("cart");
+          localStorage.removeItem("leve1up_email");
+          localStorage.removeItem("leve1up_total_amount");
+          localStorage.removeItem("leve1up_product_name");
+          localStorage.removeItem("leve1up_price");
+          localStorage.removeItem("leve1up_currency");
+          localStorage.removeItem("leve1up_product_file");
+        } else if (token) {
+          // ثانياً: إذا كان هناك token، نحاول جلب من API
+          console.log("🔍 Fetching order by token:", token);
+          // يمكن تطوير هذا لاحقاً لجلب من /api/orders?token=...
+        }
+      } catch (error) {
+        console.error("Error fetching order data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderData();
   }, [searchParams]);
 
   const getCurrencySymbol = (curr: string) => {
@@ -49,42 +84,93 @@ function SuccessPageContent() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-400 mx-auto mb-4"></div>
+          <p className="text-xl">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!orderData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white px-4">
+        <div className="bg-gray-800/60 backdrop-blur-md rounded-2xl shadow-xl p-8 text-center max-w-xl">
+          <h1 className="text-4xl font-bold mb-4 text-yellow-400">⚠️ لم يتم العثور على بيانات الطلب</h1>
+          <p className="text-gray-300 mb-6">
+            يرجى التحقق من بريدك الإلكتروني للحصول على روابط التحميل.
+          </p>
+          <Link
+            href="/"
+            className="inline-block bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg"
+          >
+            العودة للرئيسية
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { email, items, totalAmount, currency } = orderData;
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white px-4">
-      <div className="bg-gray-800/60 backdrop-blur-md rounded-2xl shadow-xl p-8 text-center max-w-xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white px-4 py-12">
+      <div className="bg-gray-800/60 backdrop-blur-md rounded-2xl shadow-xl p-8 text-center max-w-2xl w-full">
         <h1 className="text-4xl font-bold mb-4 text-green-400">✅ تم الدفع بنجاح!</h1>
 
         <p className="text-gray-300 mb-6">
-          {email
-            ? `تم إرسال رابط المنتج إلى بريدك الإلكتروني: ${email}`
-            : "تم إرسال رابط المنتج إلى بريدك الإلكتروني"}
+          تم إرسال روابط التحميل إلى بريدك الإلكتروني: <strong className="text-green-400">{email}</strong>
         </p>
 
-        <div className="bg-gray-700/40 p-4 rounded-lg mb-6">
-          <p className="text-lg">💼 المنتج: <strong>{productName}</strong></p>
-          <p className="text-lg">💰 السعر: <strong>{price} {getCurrencySymbol(currency)}</strong></p>
+        {/* عرض المنتجات المشتراة */}
+        <div className="bg-gray-700/40 p-6 rounded-lg mb-6 space-y-4">
+          <h2 className="text-2xl font-bold mb-4">📦 المنتجات المشتراة</h2>
+          
+          {items.map((item, index) => (
+            <div key={index} className="bg-gray-800/50 p-4 rounded-lg flex items-center justify-between">
+              <div className="text-right">
+                <p className="text-lg font-semibold text-white">{item.name}</p>
+                <p className="text-sm text-gray-400">الكمية: {item.quantity}</p>
+              </div>
+              <div className="text-left">
+                <p className="text-lg font-bold text-green-400">
+                  {(item.price * item.quantity).toFixed(2)} {getCurrencySymbol(currency)}
+                </p>
+              </div>
+            </div>
+          ))}
+
+          {/* المجموع الكلي */}
+          <div className="border-t border-gray-600 pt-4 mt-4">
+            <div className="flex justify-between items-center">
+              <p className="text-xl font-bold">المجموع الكلي:</p>
+              <p className="text-2xl font-bold text-green-400">
+                {totalAmount.toFixed(2)} {getCurrencySymbol(currency)}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {productFile && (
-          <a
-            href={productFile}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg mb-4 transition"
-          >
-            📦 تحميل المنتج الآن
-          </a>
-        )}
+        <div className="bg-blue-900/30 border border-blue-500/50 p-4 rounded-lg mb-6">
+          <p className="text-blue-200">
+            📧 تم إرسال روابط التحميل لجميع المنتجات إلى بريدك الإلكتروني.
+            <br />
+            يرجى التحقق من صندوق الوارد (أو البريد المزعج).
+          </p>
+        </div>
 
         <Link
           href="/"
-          className="inline-block bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg"
+          className="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg transition"
         >
-          العودة للرئيسية
+          العودة للرئيسية 🏠
         </Link>
 
         <p className="text-sm text-gray-400 mt-6">
-          إذا لم يصلك المنتج على بريدك، تواصل معنا عبر{" "}
+          إذا لم تصلك المنتجات على بريدك، تواصل معنا عبر{" "}
           <a href="mailto:leve1up999q@gmail.com" className="text-green-400 hover:underline">
             leve1up999q@gmail.com
           </a>

@@ -32,10 +32,35 @@ export async function POST(req: Request) {
 
     // نحاول التقاط البريد من بيانات الدفع أو metadata
     const meta = data?.metadata || {};
-    const customerEmail =
-      meta.customerEmail ||
-      data?.customer_email ||
-      "leve1upbackup@gmail.com"; // بريد احتياطي في حال لم يُرسل Ziina الإيميل
+    const customerEmail = meta.customerEmail || data?.customer_email;
+
+    // إذا لم يكن هناك بريد إلكتروني، نرسل تنبيه فقط
+    if (!customerEmail) {
+      console.error("❌ No customer email found in webhook data!");
+      console.log("📦 Metadata:", JSON.stringify(meta, null, 2));
+      
+      // إرسال تنبيه للإدارة فقط
+      try {
+        await resend.emails.send({
+          from: "Leve1Up System <support@leve1up.store>",
+          to: "leve1upbackup@gmail.com",
+          subject: "⚠️ دفع ناجح بدون بريد إلكتروني",
+          html: `
+            <div style="font-family:Arial;padding:20px">
+              <h3>⚠️ تم استلام دفع ناجح لكن لا يوجد بريد إلكتروني للعميل</h3>
+              <p><strong>رقم العملية:</strong> ${paymentId}</p>
+              <p><strong>المبلغ:</strong> ${amount} ${currencySymbol}</p>
+              <p><strong>Metadata:</strong></p>
+              <pre>${JSON.stringify(meta, null, 2)}</pre>
+            </div>
+          `,
+        });
+      } catch (alertError) {
+        console.error("🚨 Failed to send admin alert:", alertError);
+      }
+      
+      return NextResponse.json({ received: true, error: "No customer email" }, { status: 200 });
+    }
 
     const productName = meta.productName || "الربح من المنتجات الرقمية";
     const productFile =

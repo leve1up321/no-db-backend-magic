@@ -101,6 +101,8 @@ export async function POST(req: Request) {
           </div>
         `).join('');
         
+        const downloadUrl = order.downloadUrl || "https://leve1up.store/files/default.pdf";
+        
         const emailResponse = await resend.emails.send({
           from: "Leve1Up Store <support@leve1up.store>",
           to: customerEmail as string,

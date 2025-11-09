@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { getCurrencySymbol, subunitMap, type Currency } from "@/lib/currency";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// دالة للحصول على رمز العملة (العملات المدعومة من Ziina فقط)
-function getCurrencySymbol(currencyCode: string): string {
-  const symbols: Record<string, string> = {
-    'AED': 'د.إ',
-    'SAR': 'ر.س',
-    'BHD': 'د.ب',
-    'KWD': 'د.ك',
-    'OMR': 'ر.ع',
-    'QAR': 'ر.ق',
-    'USD': '$',
-    'EUR': '€',
-    'GBP': '£',
-    'INR': '₹',
-  };
-  return symbols[currencyCode] || currencyCode;
+// دالة تحويل من الوحدة الصغرى إلى المبلغ الأساسي
+function convertFromSubunit(amount: number, currency: string): number {
+  const divisor = subunitMap[currency as Currency] || 100;
+  return amount / divisor;
 }
 
 export async function POST(req: Request) {
@@ -32,9 +22,11 @@ export async function POST(req: Request) {
   // فقط نهتم بحدث الدفع الناجح
   if (event === "payment_intent.status.updated" || data?.status === "completed") {
     const status = data?.status;
-    const amount = data?.amount ? data.amount / 100 : null;
-    const currencyCode = data?.currency || "AED";
-    const currencySymbol = getCurrencySymbol(currencyCode);
+    const currencyCode = data?.currency_code || data?.currency || "SAR";
+    const amountInSubunit = data?.amount || 0;
+    // تحويل من الوحدة الصغرى إلى المبلغ الأساسي
+    const amount = convertFromSubunit(amountInSubunit, currencyCode);
+    const currencySymbol = getCurrencySymbol(currencyCode as Currency);
     const paymentId = data?.id;
     const message = data?.message || "عملية شراء من Leve1Up";
 

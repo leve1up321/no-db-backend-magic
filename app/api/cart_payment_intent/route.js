@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
 import { createOrder } from "@/lib/orders-store";
+import { subunitMap } from "@/lib/currency";
 
-// دالة تحويل الدراهم إلى فلسات
-function convertAEDtoFils(amountInAED) {
-  return Math.round(amountInAED * 100);
-}
-
-// دالة توليد session ID فريد
-function generateSessionId() {
-  return `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+// دالة تحويل المبلغ إلى الوحدة الصغرى (fils, cents, etc)
+function convertToSubunit(amount, currency) {
+  const multiplier = subunitMap[currency] || 100;
+  return Math.round(amount * multiplier);
 }
 
 export async function POST(req) {
@@ -57,9 +54,9 @@ export async function POST(req) {
       );
     }
     
-    // 🔢 تحويل المبلغ إلى فلسات
-    const amountInFils = convertAEDtoFils(totalAmount);
-    console.log("💰 Converted amount (fils):", amountInFils);
+    // 🔢 تحويل المبلغ إلى الوحدة الصغرى حسب العملة
+    const amountInSubunit = convertToSubunit(totalAmount, finalCurrency);
+    console.log(`💰 Converted amount (${finalCurrency} subunit):`, amountInSubunit);
     
     // 📦 بناء الطلب
     // احسب expiry بالميلي ثانية (10 دقائق من الآن)
@@ -106,7 +103,7 @@ export async function POST(req) {
     console.log("📝 Temporary order created:", tempOrder.id, "with token:", trackingToken);
     
     const paymentData = {
-      amount: amountInFils,
+      amount: amountInSubunit,
       currency_code: finalCurrency,
       message: message,
       success_url: `${appUrl}/success?token=${trackingToken}`, // ✨ نستخدم token بدل payment_intent

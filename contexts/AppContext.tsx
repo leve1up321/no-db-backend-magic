@@ -1,15 +1,16 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { convertPrice, type Currency as CurrencyType } from '@/lib/currency';
 
-// العملات المدعومة من Ziina فقط
-type Currency = 'AED' | 'SAR' | 'BHD' | 'KWD' | 'OMR' | 'QAR' | 'USD' | 'EUR' | 'GBP' | 'INR';
+// إعادة تصدير Currency من lib/currency للتوافق
+type Currency = CurrencyType;
 type Theme = 'light' | 'dark';
 
 interface CartItem {
   id: number;
   name: string;
-  price: number;
+  price: number; // السعر المحفوظ بـ SAR
   quantity: number;
   image: string;
 }
@@ -27,7 +28,7 @@ interface AppContextType {
   wishlist: number[];
   addToWishlist: (id: number) => void;
   removeFromWishlist: (id: number) => void;
-  cartTotal: number;
+  cartTotal: number; // الآن يُحسب بالعملة الحالية
   cartCount: number;
 }
 
@@ -121,7 +122,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setWishlist(prev => prev.filter(itemId => itemId !== id));
   };
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // حساب المجموع بالعملة الحالية (السعر محفوظ بـ SAR)
+  const cartTotal = cart.reduce((sum, item) => {
+    // تحويل السعر من SAR إلى العملة الحالية
+    const convertedPrice = convertPrice(item.price, currency);
+    return sum + (convertedPrice * item.quantity);
+  }, 0);
+  
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (

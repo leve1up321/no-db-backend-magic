@@ -101,7 +101,7 @@ export async function POST(req) {
     });
 
     const text = await response.text();
-    let data: any;
+    let data;
     try {
       data = JSON.parse(text);
     } catch (err) {
@@ -137,7 +137,7 @@ export async function POST(req) {
       amount: totalAmount,
       currency: finalCurrency,
       customerEmail: email,
-      items: items.map((item: any) => ({
+      items: items.map((item) => ({
         id: item.id,
         name: item.name,
         quantity: item.quantity || 1,
@@ -168,7 +168,7 @@ export async function POST(req) {
       total_amount: totalAmount,
       items_count: items.length,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("💥 Cart Payment Intent Error:", error);
     return NextResponse.json(
       { error: "Internal Server Error", message: error.message },

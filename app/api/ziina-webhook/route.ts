@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getCurrencySymbol, subunitMap, type Currency } from "@/lib/currency";
+import { getOrderBySessionId, updateOrderStatus } from "@/lib/orders-store";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -30,36 +31,26 @@ export async function POST(req: Request) {
     const paymentId = data?.id;
     const message = data?.message || "عملية شراء من Leve1Up";
 
-    // نحاول التقاط البريد من بيانات الدفع أو metadata
-    const meta = data?.metadata || {};
+    console.log("🔍 Searching for order with payment ID:", paymentId);
     
-    console.log("🔍 DEBUG - Full webhook data:", JSON.stringify(data, null, 2));
-    console.log("🔍 DEBUG - Metadata:", JSON.stringify(meta, null, 2));
-    console.log("🔍 DEBUG - meta.customerEmail:", meta.customerEmail);
-    console.log("🔍 DEBUG - data.customer_email:", data?.customer_email);
+    // 🆕 البحث عن الطلب في orders store باستخدام payment_intent ID
+    const order = getOrderBySessionId(paymentId);
     
-    const customerEmail = meta.customerEmail || data?.customer_email;
-    
-    console.log("🔍 DEBUG - Final customerEmail:", customerEmail);
-
-    // إذا لم يكن هناك بريد إلكتروني، نرسل تنبيه فقط
-    if (!customerEmail) {
-      console.error("❌ No customer email found in webhook data!");
-      console.log("📦 Metadata:", JSON.stringify(meta, null, 2));
+    if (!order) {
+      console.error("❌ No order found for payment ID:", paymentId);
       
-      // إرسال تنبيه للإدارة فقط
+      // إرسال تنبيه للإدارة
       try {
         await resend.emails.send({
           from: "Leve1Up System <support@leve1up.store>",
           to: "leve1upbackup@gmail.com",
-          subject: "⚠️ دفع ناجح بدون بريد إلكتروني",
+          subject: "⚠️ دفع ناجح لكن لم يتم العثور على الطلب",
           html: `
             <div style="font-family:Arial;padding:20px">
-              <h3>⚠️ تم استلام دفع ناجح لكن لا يوجد بريد إلكتروني للعميل</h3>
-              <p><strong>رقم العملية:</strong> ${paymentId}</p>
+              <h3>⚠️ تم استلام دفع ناجح لكن لم يتم العثور على الطلب المرتبط</h3>
+              <p><strong>Payment ID:</strong> ${paymentId}</p>
               <p><strong>المبلغ:</strong> ${amount} ${currencySymbol}</p>
-              <p><strong>Metadata:</strong></p>
-              <pre>${JSON.stringify(meta, null, 2)}</pre>
+              <p><strong>الرسالة:</strong> ${message}</p>
             </div>
           `,
         });
@@ -67,17 +58,28 @@ export async function POST(req: Request) {
         console.error("🚨 Failed to send admin alert:", alertError);
       }
       
-      return NextResponse.json({ received: true, error: "No customer email" }, { status: 200 });
+      return NextResponse.json({ received: true, error: "Order not found" }, { status: 200 });
     }
 
-    const productName = meta.productName || "الربح من المنتجات الرقمية";
-    const productFile =
-      meta.productFile || "https://leve1up.store/files/digital-products-guide.pdf";
+    console.log("✅ Order found:", order.id);
+    console.log("📧 Customer email:", order.customerEmail);
+    console.log("📦 Order items:", order.items?.length || 0);
+    
+    const customerEmail = order.customerEmail;
+    const orderItems = order.items || [];
+    
+    // تحديث حالة الطلب
+    updateOrderStatus(order.id, 'completed');
+    console.log("✅ Order status updated to completed");
+    
+    // استخدام بيانات الطلب
+    const productName = orderItems.length === 1 
+      ? orderItems[0].name 
+      : `${orderItems.length} منتجات`;
 
     console.log("🎯 Ready to send email to:", customerEmail);
     console.log("💰 Amount:", amount, currencySymbol);
-    console.log("📦 Product:", productName);
-    console.log("📧 Full metadata:", JSON.stringify(meta, null, 2));
+    console.log("📦 Items count:", orderItems.length);
 
     if (status === "completed") {
       try {
@@ -91,6 +93,14 @@ export async function POST(req: Request) {
           console.warn("⚠️ This should NOT happen unless no customer email was provided!");
         }
         
+        // بناء قائمة المنتجات لعرضها في الإيميل
+        const productsListHtml = orderItems.map(item => `
+          <div style="background:#fff;padding:15px;border-radius:6px;margin:10px 0;border:1px solid #e5e7eb">
+            <p style="margin:5px 0;font-size:16px"><strong>📦 ${item.name}</strong></p>
+            <p style="margin:5px 0;color:#666">الكمية: ${item.quantity || 1}</p>
+          </div>
+        `).join('');
+        
         const emailResponse = await resend.emails.send({
           from: "Leve1Up Store <support@leve1up.store>",
           to: customerEmail,
@@ -102,15 +112,20 @@ export async function POST(req: Request) {
                 <p style="font-size:16px;color:#333">تم استلام دفعتك بنجاح.</p>
                 
                 <div style="background:#f3f4f6;padding:20px;border-radius:8px;margin:20px 0">
-                  <p style="margin:10px 0"><strong>💼 المنتج:</strong> ${productName}</p>
-                  <p style="margin:10px 0"><strong>💰 المبلغ:</strong> ${amount} ${currencySymbol}</p>
-                  <p style="margin:10px 0"><strong>🔢 رقم العملية:</strong> ${paymentId}</p>
+                  <h3 style="margin-top:0;color:#333">📦 المنتجات المشتراة:</h3>
+                  ${productsListHtml}
+                  
+                  <div style="border-top:2px solid #16a34a;margin-top:15px;padding-top:15px">
+                    <p style="margin:10px 0;font-size:18px"><strong>💰 المجموع الكلي:</strong> ${amount} ${currencySymbol}</p>
+                    <p style="margin:10px 0;color:#666"><strong>🔢 رقم العملية:</strong> ${paymentId}</p>
+                  </div>
                 </div>
                 
-                <a href="${productFile}" target="_blank"
-                   style="background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin:20px 0;font-weight:bold">
-                   📦 تحميل المنتج الآن
-                </a>
+                <p style="background:#fef3c7;padding:15px;border-radius:6px;border-left:4px solid #f59e0b">
+                  <strong>📧 روابط التحميل:</strong><br/>
+                  سيتم إرسال روابط تحميل المنتجات إلى بريدك الإلكتروني خلال دقائق. 
+                  إذا لم تستلم الروابط، تواصل معنا.
+                </p>
                 
                 <p style="color:#666;font-size:14px;margin-top:30px;padding-top:20px;border-top:1px solid #e5e7eb">
                   إذا واجهت أي مشكلة، راسلنا على <a href="mailto:leve1up999q@gmail.com" style="color:#16a34a">leve1up999q@gmail.com</a>

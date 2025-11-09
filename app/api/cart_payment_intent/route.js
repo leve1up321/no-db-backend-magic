@@ -83,50 +83,16 @@ export async function POST(req) {
     
     console.log("📝 Payment message:", message);
     
-    // 🎫 إنشاء tracking token فريد
-    const trackingToken = `track_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-    console.log("🎫 Generated tracking token:", trackingToken);
-    
-    // 📝 حفظ الطلب المؤقت مع tracking token
-    const tempOrder = createOrder({
-      id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      sessionId: trackingToken, // نستخدم sessionId لحفظ tracking token
-      status: 'pending',
-      amount: totalAmount,
-      currency: finalCurrency,
-      customerEmail: email,
-      items: items.map(item => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity || 1,
-        price: item.price,
-        image: item.image
-      })),
-      createdAt: new Date().toISOString(),
-      metadata: {
-        cartItems: items,
-        trackingToken: trackingToken,
-        customerEmail: email
-      }
-    });
-    
-    console.log("📝 Temporary order created:", tempOrder.id, "with token:", trackingToken);
-    
     const paymentData = {
       amount: amountInSubunit,
       currency_code: finalCurrency,
       message: message,
-      success_url: `${appUrl}/success?token=${trackingToken}`, // ✨ نستخدم token بدل payment_intent
+      success_url: `${appUrl}/success?payment_intent={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/cancel`,
       failure_url: `${appUrl}/cancel`,
       test: true,
       expiry: expiry, // string بالميلي ثانية
-      allow_tips: false,
-      metadata: {
-        trackingToken: trackingToken, // ✨ مهم جداً للربط في webhook
-        customerEmail: email,
-        cartItems: JSON.stringify(items)
-      }
+      allow_tips: false
     };
     
     console.log("📤 Sending cart payment data:", JSON.stringify(paymentData, null, 2));
@@ -178,13 +144,40 @@ export async function POST(req) {
       );
     }
 
+    const paymentIntentId = data.id || data.payment_intent_id;
+    
     console.log("✅ Cart payment intent created successfully!");
+    console.log("✅ Payment Intent ID:", paymentIntentId);
     console.log("✅ Redirect URL:", data.redirect_url);
+    
+    // 🆕 تحديث الطلب مع payment_intent_id الفعلي
+    const updatedOrder = createOrder({
+      id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      sessionId: paymentIntentId, // ✨ نستخدم payment_intent_id الفعلي للربط
+      status: 'pending',
+      amount: totalAmount,
+      currency: finalCurrency,
+      customerEmail: email,
+      items: items.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity || 1,
+        price: item.price,
+        image: item.image
+      })),
+      createdAt: new Date().toISOString(),
+      metadata: {
+        paymentIntentId: paymentIntentId,
+        customerEmail: email
+      }
+    });
+    
+    console.log("📝 Order updated with payment intent ID:", paymentIntentId);
 
     return NextResponse.json({
       success: true,
       redirect_url: data.redirect_url,
-      payment_intent_id: data.id || data.payment_intent_id,
+      payment_intent_id: paymentIntentId,
       total_amount: totalAmount,
       items_count: items.length,
     });

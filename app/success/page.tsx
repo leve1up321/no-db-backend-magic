@@ -16,6 +16,7 @@ interface OrderData {
   items: CartItem[];
   totalAmount: number;
   currency: string;
+  downloadLinks?: { productId: number; productName: string; downloadUrl: string }[];
 }
 
 function SuccessPageContent() {
@@ -24,12 +25,58 @@ function SuccessPageContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const payment_intent = searchParams.get("payment_intent");
     const token = searchParams.get("token");
     
     // محاولة جلب بيانات الطلب من localStorage أو API
     const fetchOrderData = async () => {
       try {
-        // أولاً: نحاول جلب من localStorage (للسلة)
+        // ✨ أولاً: إذا كان هناك payment_intent من Ziina، نجلب من API
+        if (payment_intent) {
+          console.log("🔍 Fetching order by payment_intent:", payment_intent);
+          
+          try {
+            const response = await fetch(`/api/orders/${payment_intent}`);
+            const result = await response.json();
+            
+            if (result.success && result.order) {
+              const order = result.order;
+              console.log("✅ Order found from API:", order);
+              
+              // إنشاء روابط التحميل لكل منتج
+              const downloadLinks = order.items.map((item: CartItem) => ({
+                productId: item.id,
+                productName: item.name,
+                downloadUrl: `/api/download/${order.sessionId}?product=${item.id}`
+              }));
+              
+              setOrderData({
+                email: order.customerEmail,
+                items: order.items,
+                totalAmount: order.amount,
+                currency: order.currency,
+                downloadLinks
+              });
+              
+              // تنظيف localStorage بعد النجاح
+              localStorage.removeItem("cart");
+              localStorage.removeItem("leve1up_email");
+              localStorage.removeItem("leve1up_total_amount");
+              localStorage.removeItem("leve1up_product_name");
+              localStorage.removeItem("leve1up_price");
+              localStorage.removeItem("leve1up_currency");
+              localStorage.removeItem("leve1up_product_file");
+              
+              setLoading(false);
+              return;
+            }
+          } catch (apiError) {
+            console.error("❌ Error fetching from API:", apiError);
+            // نتابع للـ fallback
+          }
+        }
+        
+        // ثانياً: نحاول جلب من localStorage (للسلة) - Fallback
         const savedCartItems = localStorage.getItem("cart");
         const savedEmail = localStorage.getItem("leve1up_email");
         const savedCurrency = localStorage.getItem("currency") || "SAR";
@@ -54,7 +101,7 @@ function SuccessPageContent() {
           localStorage.removeItem("leve1up_currency");
           localStorage.removeItem("leve1up_product_file");
         } else if (token) {
-          // ثانياً: إذا كان هناك token، نحاول جلب من API
+          // ثالثاً: إذا كان هناك token، نحاول جلب من API
           console.log("🔍 Fetching order by token:", token);
           // يمكن تطوير هذا لاحقاً لجلب من /api/orders?token=...
         }
@@ -114,7 +161,7 @@ function SuccessPageContent() {
     );
   }
 
-  const { email, items, totalAmount, currency } = orderData;
+  const { email, items, totalAmount, currency, downloadLinks } = orderData;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white px-4 py-12">
@@ -122,8 +169,30 @@ function SuccessPageContent() {
         <h1 className="text-4xl font-bold mb-4 text-green-400">✅ تم الدفع بنجاح!</h1>
 
         <p className="text-gray-300 mb-6">
-          تم إرسال روابط التحميل إلى بريدك الإلكتروني: <strong className="text-green-400">{email}</strong>
+          شكراً لك! بريدك الإلكتروني: <strong className="text-green-400">{email}</strong>
         </p>
+
+        {/* 🎁 روابط التحميل المباشرة */}
+        {downloadLinks && downloadLinks.length > 0 && (
+          <div className="bg-green-900/30 border border-green-500/50 p-6 rounded-lg mb-6">
+            <h3 className="text-2xl font-bold mb-4 text-green-400">🎁 روابط التحميل</h3>
+            <p className="text-sm text-gray-300 mb-4">يمكنك تحميل منتجاتك مباشرة من الروابط التالية:</p>
+            
+            <div className="space-y-3">
+              {downloadLinks.map((link, index) => (
+                <a
+                  key={index}
+                  href={link.downloadUrl}
+                  className="block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition transform hover:scale-105"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  📥 تحميل: {link.productName}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* عرض المنتجات المشتراة */}
         <div className="bg-gray-700/40 p-6 rounded-lg mb-6 space-y-4">
@@ -154,13 +223,23 @@ function SuccessPageContent() {
           </div>
         </div>
 
-        <div className="bg-blue-900/30 border border-blue-500/50 p-4 rounded-lg mb-6">
-          <p className="text-blue-200">
-            📧 تم إرسال روابط التحميل لجميع المنتجات إلى بريدك الإلكتروني.
-            <br />
-            يرجى التحقق من صندوق الوارد (أو البريد المزعج).
-          </p>
-        </div>
+        {!downloadLinks || downloadLinks.length === 0 ? (
+          <div className="bg-blue-900/30 border border-blue-500/50 p-4 rounded-lg mb-6">
+            <p className="text-blue-200">
+              📧 سيتم إرسال روابط التحميل لجميع المنتجات إلى بريدك الإلكتروني قريباً.
+              <br />
+              يرجى التحقق من صندوق الوارد (أو البريد المزعج).
+            </p>
+          </div>
+        ) : (
+          <div className="bg-yellow-900/30 border border-yellow-500/50 p-4 rounded-lg mb-6">
+            <p className="text-yellow-200 text-sm">
+              💡 <strong>نصيحة:</strong> احفظ هذه الصفحة أو الروابط في مكان آمن.
+              <br />
+              كما سيتم إرسال نسخة احتياطية إلى بريدك الإلكتروني.
+            </p>
+          </div>
+        )}
 
         <Link
           href="/"

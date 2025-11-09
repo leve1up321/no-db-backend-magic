@@ -7,11 +7,16 @@ export async function GET(
 ) {
   try {
     const token = params.token;
+    const { searchParams } = new URL(request.url);
+    const productId = searchParams.get('product');
+
+    console.log('🔍 Download request - Token:', token, 'Product ID:', productId);
 
     // Check if order exists using shared store
     const order = await findOrderBySessionId(token);
     
     if (!order) {
+      console.log('❌ Order not found for token:', token);
       return new NextResponse(
         JSON.stringify({ 
           error: 'رابط التحميل غير صحيح أو انتهت صلاحيته' 
@@ -22,6 +27,8 @@ export async function GET(
         }
       );
     }
+
+    console.log('✅ Order found:', order.id, 'Items count:', order.items?.length);
 
     // Check if token has expired (if metadata.expiresAt exists)
     const expiresAt = order.metadata?.expiresAt;
@@ -37,8 +44,36 @@ export async function GET(
       );
     }
 
+    // ✨ إذا كان هناك productId محدد، نبحث عن المنتج في items
+    let downloadUrl = order.downloadUrl;
+    let productName = order.items?.[0]?.name || 'product';
+    
+    if (productId && order.items) {
+      const product = order.items.find((item: any) => item.id.toString() === productId);
+      
+      if (!product) {
+        console.log('❌ Product not found in order. Product ID:', productId);
+        return new NextResponse(
+          JSON.stringify({ 
+            error: 'المنتج المطلوب غير موجود في هذا الطلب' 
+          }),
+          { 
+            status: 404,
+            headers: { 'Content-Type': 'application/json; charset=utf-8' }
+          }
+        );
+      }
+      
+      // استخدم رابط التحميل الخاص بالمنتج إذا كان متوفراً
+      downloadUrl = product.downloadUrl || product.image || downloadUrl;
+      productName = product.name;
+      
+      console.log('✅ Product found:', productName, 'Download URL:', downloadUrl);
+    }
+
     // Get download URL
-    if (!order.downloadUrl) {
+    if (!downloadUrl) {
+      console.log('❌ No download URL available');
       return new NextResponse(
         JSON.stringify({ 
           error: 'رابط التحميل غير متوفر' 
@@ -50,18 +85,22 @@ export async function GET(
       );
     }
 
+    console.log('📥 Fetching file from:', downloadUrl);
+
     // Fetch the file from Vercel Blob or original URL
-    const fileResponse = await fetch(order.downloadUrl);
+    const fileResponse = await fetch(downloadUrl);
     
     if (!fileResponse.ok) {
+      console.error('❌ Failed to fetch file. Status:', fileResponse.status);
       throw new Error('Failed to fetch file');
     }
 
     // Get the file as blob
     const fileBlob = await fileResponse.blob();
     
+    console.log('✅ File fetched successfully. Size:', fileBlob.size);
+    
     // Create filename from product name (sanitize it)
-    const productName = order.items[0]?.name || 'product';
     const filename = `${productName.replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '')}.pdf`;
 
     // Return the file with secure headers

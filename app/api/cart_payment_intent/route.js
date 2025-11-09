@@ -169,7 +169,8 @@ export async function POST(req) {
         name: item.name,
         quantity: item.quantity || 1,
         price: item.price,
-        image: item.image
+        image: item.image,
+        downloadUrl: item.download_url || item.downloadUrl // ✨ حفظ رابط التحميل
       })),
       createdAt: new Date().toISOString(),
       metadata: {

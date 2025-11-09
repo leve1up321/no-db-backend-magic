@@ -13,6 +13,7 @@ export interface OrderItem {
   quantity: number;
   price: number;
   image?: string;
+  downloadUrl?: string; // ✨ رابط التحميل الخاص بالمنتج
 }
 
 export interface Order {

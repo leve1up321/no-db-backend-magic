@@ -77,6 +77,12 @@ export async function POST(req: Request) {
         console.log("📤 To:", customerEmail);
         console.log("📤 From:", "Leve1Up Store <support@leve1up.store>");
         
+        // التأكد المطلق من البريد
+        if (customerEmail === "leve1upbackup@gmail.com") {
+          console.warn("⚠️ WARNING: Attempting to send to backup email!");
+          console.warn("⚠️ This should NOT happen unless no customer email was provided!");
+        }
+        
         const emailResponse = await resend.emails.send({
           from: "Leve1Up Store <support@leve1up.store>",
           to: customerEmail,

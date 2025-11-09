@@ -150,9 +150,15 @@ export async function POST(req) {
     console.log("✅ Payment Intent ID:", paymentIntentId);
     console.log("✅ Redirect URL:", data.redirect_url);
     
-    // 🆕 تحديث الطلب مع payment_intent_id الفعلي
-    const updatedOrder = createOrder({
-      id: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+    // 🆕 حفظ الطلب مع payment_intent_id الفعلي
+    const orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    console.log("📝 Creating order with ID:", orderId);
+    console.log("📝 Payment Intent ID (sessionId):", paymentIntentId);
+    console.log("📝 Customer Email:", email);
+    console.log("📝 Items count:", items.length);
+    
+    const savedOrder = createOrder({
+      id: orderId,
       sessionId: paymentIntentId, // ✨ نستخدم payment_intent_id الفعلي للربط
       status: 'pending',
       amount: totalAmount,
@@ -172,7 +178,18 @@ export async function POST(req) {
       }
     });
     
-    console.log("📝 Order updated with payment intent ID:", paymentIntentId);
+    console.log("✅ Order saved successfully!");
+    console.log("✅ Order ID:", savedOrder.id);
+    console.log("✅ Session ID:", savedOrder.sessionId);
+    
+    // التحقق من إمكانية استرجاع الطلب فوراً
+    const { findOrderBySessionId } = await import('@/lib/orders-store');
+    const testOrder = findOrderBySessionId(paymentIntentId);
+    console.log("🧪 Test retrieval - Order found:", !!testOrder);
+    if (testOrder) {
+      console.log("🧪 Retrieved order ID:", testOrder.id);
+      console.log("🧪 Retrieved order email:", testOrder.customerEmail);
+    }
 
     return NextResponse.json({
       success: true,

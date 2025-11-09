@@ -103,7 +103,7 @@ export async function POST(req: Request) {
         
         const emailResponse = await resend.emails.send({
           from: "Leve1Up Store <support@leve1up.store>",
-          to: customerEmail,
+          to: customerEmail as string,
           subject: `تم استلام دفعتك بنجاح - ${productName}`,
           html: `
             <div style="font-family:Arial;padding:20px;background:#f9f9f9">

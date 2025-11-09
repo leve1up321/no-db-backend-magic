@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     const orderItems = order.items || [];
     
     // تحديث حالة الطلب
-    updateOrderStatus(order.id, 'completed');
+    await updateOrder(order.id, { status: 'completed' });
     console.log("✅ Order status updated to completed");
     
     // استخدام بيانات الطلب

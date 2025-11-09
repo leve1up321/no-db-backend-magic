@@ -129,7 +129,7 @@ export default function ProductDetail({ product }: { product?: Product }) {
 
   const handlePayment = () => {
     // التوجيه إلى صفحة checkout مع السعر المحسوب حسب العملة المختارة
-    const checkoutUrl = `/checkout?product=${productId}&name=${encodeURIComponent(productName)}&price=${price.toFixed(2)}&currency=${currency}`;
+    const checkoutUrl = `/checkout?product=${productId}&name=${encodeURIComponent(productName)}&price=${priceCalc.finalPrice.toFixed(2)}&currency=${currency}`;
     window.location.href = checkoutUrl;
   };
 
@@ -273,9 +273,11 @@ export default function ProductDetail({ product }: { product?: Product }) {
                       className="w-full sm:flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-primary-300 to-accent-600 text-white px-6 sm:px-8 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-300/30 active:scale-95 transition-all duration-300 touch-manipulation"
                       style={{ fontSize: '16px' }}
                     >
-                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
-                  أضف للسلة
-                </button>
+                      <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+                      أضف للسلة
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 

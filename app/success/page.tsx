@@ -33,17 +33,20 @@ function SuccessPageContent() {
   const WHATSAPP_MESSAGE = "مرحباً، لدي استفسار بخصوص طلبي";
 
   useEffect(() => {
-    const payment_intent = searchParams.get("payment_intent");
+    const session = searchParams.get("session"); // ✅ استخدام session بدلاً من payment_intent
+    const payment_intent = searchParams.get("payment_intent"); // للتوافق مع الطلبات القديمة
     const token = searchParams.get("token");
     
     const fetchOrderData = async () => {
       try {
-        // ✨ أولاً: إذا كان هناك payment_intent من Ziina، نجلب من API
-        if (payment_intent) {
-          console.log("🔍 Fetching order by payment_intent:", payment_intent);
+        // ✨ أولاً: إذا كان هناك session ID، نجلب من API
+        const searchId = session || payment_intent;
+        
+        if (searchId) {
+          console.log("🔍 Fetching order by ID:", searchId);
           
           try {
-            const response = await fetch(`/api/orders/${payment_intent}`);
+            const response = await fetch(`/api/orders/${searchId}`);
             const result = await response.json();
             
             if (result.success && result.order) {
@@ -63,7 +66,7 @@ function SuccessPageContent() {
                 totalAmount: order.amount,
                 currency: order.currency,
                 orderId: order.id,
-                paymentId: order.paymentId || payment_intent,
+                paymentId: order.paymentId || searchId,
                 createdAt: order.createdAt,
                 downloadLinks
               });

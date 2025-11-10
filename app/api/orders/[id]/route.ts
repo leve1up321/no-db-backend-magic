@@ -1,66 +1,53 @@
-import { NextRequest, NextResponse } from "next/server";
-import { 
-  findOrderById, 
-  findOrderBySessionId, 
-  findOrderByPaymentId 
-} from "@/lib/orders-store";
+import { NextRequest, NextResponse } from 'next/server';
+import { findOrderById, findOrderBySessionId, findOrderByPaymentId } from '@/lib/orders-store';
 
 /**
- * 🔍 API للبحث عن طلب معين
+ * 🔍 GET /api/orders/[id]
  * 
- * يدعم البحث بـ:
- * - Order ID: /api/orders/order_xxx
- * - Session ID: /api/orders/session_xxx
- * - Payment ID: /api/orders/pi_xxx
+ * البحث عن طلب باستخدام:
+ * - orderId (معرف الطلب الداخلي)
+ * - sessionId (المعرف المُنشأ محلياً للـ success URL)
+ * - paymentId (معرف الدفع من Ziina)
  */
-
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const id = params.id;
-    console.log(`🔍 Looking for order: ${id}`);
+    console.log('🔍 Looking for order with ID:', id);
+
+    // 1️⃣ محاولة البحث بالـ orderId مباشرة
+    let order = await findOrderById(id);
     
-    let order = null;
-    
-    // تحديد نوع المعرف والبحث المناسب
-    if (id.startsWith('session_')) {
-      order = await findOrderBySessionId(id);
-    } else if (id.startsWith('pi_') || id.startsWith('payment_')) {
-      order = await findOrderByPaymentId(id);
-    } else if (id.startsWith('order_')) {
-      order = await findOrderById(id);
-    } else {
-      // محاولة البحث بجميع الطرق
-      order = await findOrderById(id) || 
-              await findOrderBySessionId(id) || 
-              await findOrderByPaymentId(id);
-    }
-    
+    // 2️⃣ إذا لم نجد، نحاول البحث بالـ sessionId
     if (!order) {
-      console.log(`❌ Order not found: ${id}`);
-      return NextResponse.json({
-        success: false,
-        message: "الطلب غير موجود",
-        error: "ORDER_NOT_FOUND"
-      }, { status: 404 });
+      console.log('🔄 Trying to find by sessionId...');
+      order = await findOrderBySessionId(id);
     }
     
-    console.log(`✅ Order found: ${order.id}`);
-    
-    return NextResponse.json({
-      success: true,
-      order: order
-    });
-    
-  } catch (error: any) {
-    console.error("❌ Error fetching order:", error);
-    
-    return NextResponse.json({
-      success: false,
-      message: "حدث خطأ أثناء جلب الطلب",
-      error: error.message
-    }, { status: 500 });
+    // 3️⃣ إذا لم نجد، نحاول البحث بالـ paymentId
+    if (!order) {
+      console.log('🔄 Trying to find by paymentId...');
+      order = await findOrderByPaymentId(id);
+    }
+
+    if (!order) {
+      console.log('❌ No order found for:', id);
+      return NextResponse.json(
+        { success: false, error: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
+    console.log('✅ Order found:', order.id);
+    return NextResponse.json({ success: true, order });
+  } catch (error) {
+    console.error('❌ Error fetching order:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
+

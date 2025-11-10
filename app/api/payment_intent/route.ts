@@ -11,6 +11,10 @@ export async function POST(req: Request) {
     console.log("💰 Received amount:", amount, finalCurrency);
     console.log("📦 Product:", productName);
     console.log("📧 Customer email:", customerEmail);
+    
+    // 🆔 إنشاء sessionId فريد محلياً (قبل الاتصال بـ Ziina)
+    const sessionId = crypto.randomUUID();
+    console.log("🆕 Generated sessionId:", sessionId);
 
     /**
      * 🧮 خريطة تحويل العملات إلى الوحدة الأدق (subunit)
@@ -52,13 +56,14 @@ export async function POST(req: Request) {
       currency_code: finalCurrency,
       message: `دفع مقابل ${productName}`,
       metadata: {
+        sessionId, // ✅ إضافة sessionId في metadata
         productName,
         productFile,
         customerEmail,
       },
-      success_url: "https://leve1up.store/success?payment_intent={CHECKOUT_SESSION_ID}",
-      cancel_url: "https://leve1up.store/cancel",
-      failure_url: "https://leve1up.store/cancel",
+      success_url: `https://leve1up.store/success?session=${sessionId}`, // ✅ استخدام sessionId بدلاً من placeholder
+      cancel_url: `https://leve1up.store/cancel?session=${sessionId}`,
+      failure_url: `https://leve1up.store/cancel?session=${sessionId}`,
       test: true,
       allow_tips: false,
     };
@@ -90,7 +95,8 @@ export async function POST(req: Request) {
     try {
       await saveOrder({
         id: orderId,
-        paymentId: paymentIntentId,
+        sessionId: sessionId, // ✅ إضافة sessionId للبحث من صفحة success
+        paymentId: paymentIntentId, // ✅ paymentId للبحث من webhook
         status: 'pending',
         amount: amount,
         currency: currency_code || 'AED',
@@ -104,6 +110,7 @@ export async function POST(req: Request) {
         }],
         createdAt: new Date().toISOString(),
         metadata: {
+          sessionId,
           productName,
           productFile,
           paymentIntentId
@@ -111,6 +118,8 @@ export async function POST(req: Request) {
       });
       
       console.log("💾 Order saved successfully:", orderId);
+      console.log("🔗 SessionId:", sessionId);
+      console.log("🔗 PaymentId:", paymentIntentId);
     } catch (saveError) {
       console.error("⚠️ Failed to save order (payment will still proceed):", saveError);
     }

@@ -1,0 +1,428 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-rgb: 18, 18, 18;
+  --background-start-rgb: 18, 18, 18;
+  --background-end-rgb: 10, 10, 10;
+  
+  /* Primary Color: Light Blue #5AC8FA */
+  --primary-rgb: 90, 200, 250;
+  --primary-color: #5AC8FA;
+  
+  /* Accent Color: Dark Purple #6A0DAD */
+  --accent-rgb: 106, 13, 173;
+  --accent-color: #6A0DAD;
+  
+  /* Dark Background #121212 */
+  --dark-bg: #121212;
+  --dark-bg-lighter: #1a1a1a;
+  --dark-bg-darker: #0d0d0d;
+}
+
+* {
+  -webkit-tap-highlight-color: rgba(90, 200, 250, 0.2);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  direction: rtl;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: #121212;
+  background: linear-gradient(
+    135deg,
+    #121212 0%,
+    #1a1a1a 50%,
+    #0d0d0d 100%
+  );
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  font-family: 'IBM Plex Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Mobile-First optimization */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  input, select, textarea, button {
+    font-size: 16px !important;
+  }
+  
+  /* Better spacing for mobile */
+  h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+}
+
+/* Touch target size for mobile - WCAG AAA compliance */
+@media (hover: none) and (pointer: coarse) {
+  button, a, input[type="button"], input[type="submit"] {
+    min-height: 48px;
+    min-width: 48px;
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Safe area insets for mobile notches/islands */
+  .safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-left {
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+  
+  .safe-right {
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  
+  /* Mobile-optimized container */
+  .container-mobile {
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @media (min-width: 640px) {
+    .container-mobile {
+      max-width: 640px;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .container-mobile {
+      max-width: 768px;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-mobile {
+      max-width: 1024px;
+    }
+  }
+}
+
+/* Custom animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.4s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out forwards;
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+/* Gradient animation for hero title */
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
+/* Grid pattern background */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(90, 200, 250, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(90, 200, 250, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+@media (max-width: 768px) {
+  .bg-grid-pattern {
+    background-size: 30px 30px;
+  }
+}
+
+/* Slow gradient animation for background */
+@keyframes gradient-slow {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.5;
+  }
+}
+
+.animate-gradient-slow {
+  animation: gradient-slow 15s ease-in-out infinite;
+}
+
+/* Button styles with new colors */
+.btn-primary {
+  background: linear-gradient(135deg, #5AC8FA 0%, #33b8f5 100%);
+  color: white;
+  font-weight: bold;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(90, 200, 250, 0.3);
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(90, 200, 250, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(90, 200, 250, 0.3);
+}
+
+@media (max-width: 768px) {
+  .btn-primary {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    font-size: 1.125rem;
+    border-radius: 1.5rem;
+  }
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, #6A0DAD 0%, #5a0b91 100%);
+  color: white;
+  font-weight: bold;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(106, 13, 173, 0.3);
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(106, 13, 173, 0.4);
+}
+
+.btn-accent:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(106, 13, 173, 0.3);
+}
+
+@media (max-width: 768px) {
+  .btn-accent {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    font-size: 1.125rem;
+    border-radius: 1.5rem;
+  }
+}
+
+/* Card styles with dark theme */
+.card-dark {
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(90, 200, 250, 0.1);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.card-dark:hover {
+  border-color: rgba(90, 200, 250, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .card-dark {
+    border-radius: 0.75rem;
+  }
+  
+  .card-dark:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Image optimization */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Lazy loading blur effect */
+.lazy-img {
+  filter: blur(10px);
+  transition: filter 0.3s;
+}
+
+.lazy-img.loaded {
+  filter: blur(0);
+}
+
+/* Text contrast for dark theme */
+.text-contrast-high {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.text-contrast-medium {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.text-contrast-low {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #121212;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5AC8FA;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #33b8f5;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #5AC8FA;
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #5AC8FA;
+  outline-offset: 4px;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  border: 3px solid rgba(90, 200, 250, 0.3);
+  border-top-color: #5AC8FA;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 0.8s linear infinite;
+}
+

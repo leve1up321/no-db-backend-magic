@@ -1,11 +1,15 @@
 /**
- * 🗄️ مخزن الطلبات باستخدام Vercel KV (Redis)
+ * 🗄️ مخزن الطلبات باستخدام Upstash Redis
  * 
  * يستخدم Redis بدلاً من memory لضمان بقاء البيانات
  * في بيئة serverless functions
+ * 
+ * يتصل تلقائياً باستخدام متغيرات البيئة:
+ * - KV_REST_API_URL
+ * - KV_REST_API_TOKEN
  */
 
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 
 export interface OrderItem {
   id: number;
@@ -35,38 +39,54 @@ export interface Order {
 // 🗂️ fallback: تخزين مؤقت في الذاكرة للتطوير المحلي
 const ordersStore = new Map<string, Order>();
 
-// 🔧 helper: التحقق من توفر KV
-const isKVAvailable = () => {
-  return process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN;
+// 🔧 helper: التحقق من توفر Redis
+const isRedisAvailable = () => {
+  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+};
+
+// 🔧 إنشاء اتصال Redis (lazy initialization)
+let redis: Redis | null = null;
+const getRedis = () => {
+  if (!redis && isRedisAvailable()) {
+    redis = new Redis({
+      url: process.env.KV_REST_API_URL!,
+      token: process.env.KV_REST_API_TOKEN!,
+    });
+  }
+  return redis;
 };
 
 /**
- * إنشاء طلب جديد
+ * 💾 حفظ طلب جديد في Redis
+ * 
+ * يُستخدم عند إنشاء payment intent قبل الدفع
+ * لحفظ معلومات الطلب مؤقتاً
  */
-export async function createOrder(order: Order): Promise<Order> {
-  if (isKVAvailable()) {
+export async function saveOrder(order: Order): Promise<Order> {
+  if (isRedisAvailable()) {
     try {
       // حفظ في Redis
-      await kv.set(`order:${order.id}`, JSON.stringify(order));
+      await getRedis()?.set(`order:${order.id}`, JSON.stringify(order));
       
       // إضافة index بالـ sessionId إذا كان موجود
       if (order.sessionId) {
-        await kv.set(`session:${order.sessionId}`, order.id);
-        console.log(`📝 Redis index created: session:${order.sessionId} -> ${order.id}`);
+        await getRedis()?.set(`session:${order.sessionId}`, order.id);
       }
       
       // إضافة index بالـ paymentId إذا كان موجود
       if (order.paymentId) {
-        await kv.set(`payment:${order.paymentId}`, order.id);
+        await getRedis()?.set(`payment:${order.paymentId}`, order.id);
       }
       
       // Set expiry: 7 days for orders
-      await kv.expire(`order:${order.id}`, 60 * 60 * 24 * 7);
+      await getRedis()?.expire(`order:${order.id}`, 60 * 60 * 24 * 7);
       
-      console.log(`📝 Order created in Redis: ${order.id} (session: ${order.sessionId})`);
+      console.log(`💾 Order saved to Redis: ${order.id}`);
+      console.log(`📧 Customer: ${order.customerEmail}`);
+      console.log(`📦 Items: ${order.items?.length || 0} product(s)`);
       return order;
     } catch (error) {
-      console.error('❌ KV Error, falling back to memory:', error);
+      console.error('❌ Redis Error, falling back to memory:', error);
       // Fallback to memory
     }
   }
@@ -82,28 +102,35 @@ export async function createOrder(order: Order): Promise<Order> {
     ordersStore.set(`payment:${order.paymentId}`, order);
   }
   
-  console.log(`📝 Order created in memory: ${order.id} (session: ${order.sessionId})`);
+  console.log(`💾 Order saved to memory: ${order.id}`);
   return order;
 }
 
 /**
- * البحث عن طلب بالـ ID
+ * إنشاء طلب جديد (alias for saveOrder)
+ */
+export async function createOrder(order: Order): Promise<Order> {
+  return saveOrder(order);
+}
+
+/**
+ * 🔍 البحث عن طلب بالـ ID
  */
 export async function findOrderById(orderId: string): Promise<Order | null> {
-  if (isKVAvailable()) {
+  if (isRedisAvailable()) {
     try {
-      const orderJson = await kv.get<string>(`order:${orderId}`);
+      const orderJson = await getRedis()?.get<string>(`order:${orderId}`);
       
       if (!orderJson) {
         console.log(`🔍 No order found in Redis for ID: ${orderId}`);
         return null;
       }
       
-      const order = JSON.parse(orderJson);
+      const order = typeof orderJson === 'string' ? JSON.parse(orderJson) : orderJson;
       console.log(`✅ Order found in Redis by ID: ${order.id}`);
       return order;
     } catch (error) {
-      console.error('❌ KV Error during findById, falling back to memory:', error);
+      console.error('❌ Redis Error during findById, falling back to memory:', error);
       // Fallback to memory
     }
   }
@@ -113,32 +140,36 @@ export async function findOrderById(orderId: string): Promise<Order | null> {
 }
 
 /**
- * البحث عن طلب بالـ sessionId
+ * 🔍 البحث عن طلب بالـ sessionId
+ * 
+ * يُستخدم في webhook للبحث عن الطلب بعد الدفع
  */
 export async function findOrderBySessionId(sessionId: string): Promise<Order | null> {
-  if (isKVAvailable()) {
+  console.log(`🔍 Searching for order with session: ${sessionId}`);
+  
+  if (isRedisAvailable()) {
     try {
       // البحث في Redis
-      const orderId = await kv.get<string>(`session:${sessionId}`);
-      console.log(`🔍 Redis lookup for session: ${sessionId}, found orderId:`, orderId);
+      const orderId = await getRedis()?.get<string>(`session:${sessionId}`);
       
       if (!orderId) {
         console.log(`❌ No order ID found for session: ${sessionId}`);
         return null;
       }
       
-      const orderJson = await kv.get<string>(`order:${orderId}`);
+      const orderJson = await getRedis()?.get<string>(`order:${orderId}`);
       
       if (!orderJson) {
         console.log(`❌ No order data found for ID: ${orderId}`);
         return null;
       }
       
-      const order = JSON.parse(orderJson);
-      console.log(`✅ Order found in Redis: ${order.id}, email: ${order.customerEmail}`);
+      const order = typeof orderJson === 'string' ? JSON.parse(orderJson) : orderJson;
+      console.log(`✅ Order found in Redis: ${order.id}`);
+      console.log(`📧 Customer: ${order.customerEmail}`);
       return order;
     } catch (error) {
-      console.error('❌ KV Error during lookup, falling back to memory:', error);
+      console.error('❌ Redis Error during lookup, falling back to memory:', error);
       // Fallback to memory
     }
   }
@@ -150,26 +181,30 @@ export async function findOrderBySessionId(sessionId: string): Promise<Order | n
 }
 
 /**
- * البحث عن طلب بالـ paymentId
+ * 🔍 البحث عن طلب بالـ paymentId
+ * 
+ * يُستخدم في webhook للبحث عن الطلب بعد الدفع من Ziina
  */
 export async function findOrderByPaymentId(paymentId: string): Promise<Order | null> {
-  if (isKVAvailable()) {
+  console.log(`🔍 Searching for order with payment ID: ${paymentId}`);
+  
+  if (isRedisAvailable()) {
     try {
-      const orderId = await kv.get<string>(`payment:${paymentId}`);
-      console.log(`🔍 Redis lookup for payment: ${paymentId}, found orderId:`, orderId);
+      const orderId = await getRedis()?.get<string>(`payment:${paymentId}`);
       
       if (!orderId) {
+        console.log(`ℹ️ No order found for payment ID: ${paymentId}`);
         return null;
       }
       
-      const orderJson = await kv.get<string>(`order:${orderId}`);
+      const orderJson = await getRedis()?.get<string>(`order:${orderId}`);
       if (!orderJson) return null;
       
-      const order = JSON.parse(orderJson);
+      const order = typeof orderJson === 'string' ? JSON.parse(orderJson) : orderJson;
       console.log(`✅ Order found by payment ID in Redis: ${order.id}`);
       return order;
     } catch (error) {
-      console.error('❌ KV Error during payment lookup, falling back to memory:', error);
+      console.error('❌ Redis Error during payment lookup, falling back to memory:', error);
     }
   }
   
@@ -195,38 +230,41 @@ export async function updateOrderBySessionId(sessionId: string, updates: Partial
 }
 
 /**
- * تحديث طلب موجود بالـ ID
+ * 🟢 تحديث طلب موجود بالـ ID
+ * 
+ * يُستخدم في webhook لتحديث حالة الطلب بعد الدفع
  */
 export async function updateOrder(orderId: string, updates: Partial<Order>): Promise<Order | null> {
-  if (isKVAvailable()) {
+  if (isRedisAvailable()) {
     try {
       // جلب الطلب من Redis
-      const orderJson = await kv.get<string>(`order:${orderId}`);
+      const orderJson = await getRedis()?.get<string>(`order:${orderId}`);
       
       if (!orderJson) {
         console.error(`❌ Order not found in Redis: ${orderId}`);
         return null;
       }
       
-      const order = JSON.parse(orderJson);
+      const order = typeof orderJson === 'string' ? JSON.parse(orderJson) : orderJson;
       const updatedOrder = { ...order, ...updates };
       
       // تحديث في Redis
-      await kv.set(`order:${orderId}`, JSON.stringify(updatedOrder));
+      await getRedis()?.set(`order:${orderId}`, JSON.stringify(updatedOrder));
       
       // تحديث الـ indexes إذا تغيرت
       if (updatedOrder.sessionId) {
-        await kv.set(`session:${updatedOrder.sessionId}`, orderId);
+        await getRedis()?.set(`session:${updatedOrder.sessionId}`, orderId);
       }
       
       if (updatedOrder.paymentId) {
-        await kv.set(`payment:${updatedOrder.paymentId}`, orderId);
+        await getRedis()?.set(`payment:${updatedOrder.paymentId}`, orderId);
       }
       
-      console.log(`✏️ Order updated in Redis: ${orderId}, status: ${updatedOrder.status}`);
+      console.log(`🟢 Order updated: ${orderId}`);
+      console.log(`📊 Status: ${order.status} → ${updatedOrder.status}`);
       return updatedOrder;
     } catch (error) {
-      console.error('❌ KV Error during update, falling back to memory:', error);
+      console.error('❌ Redis Error during update, falling back to memory:', error);
       // Fallback to memory
     }
   }
@@ -250,7 +288,7 @@ export async function updateOrder(orderId: string, updates: Partial<Order>): Pro
     ordersStore.set(`payment:${updatedOrder.paymentId}`, updatedOrder);
   }
   
-  console.log(`✏️ Order updated in memory: ${orderId}`);
+  console.log(`🟢 Order updated in memory: ${orderId}`);
   return updatedOrder;
 }
 

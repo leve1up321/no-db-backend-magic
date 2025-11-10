@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { saveOrder } from "@/lib/orders-store";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
   try {
@@ -79,7 +81,40 @@ export async function POST(req: Request) {
     }
 
     const data = await res.json();
-    console.log("✅ Payment intent created:", data.id);
+    const paymentIntentId = data.id;
+    console.log("✅ Payment intent created:", paymentIntentId);
+    
+    // 💾 حفظ الطلب في Redis قبل إرجاع الرابط للعميل
+    const orderId = `order_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+    
+    try {
+      await saveOrder({
+        id: orderId,
+        paymentId: paymentIntentId,
+        status: 'pending',
+        amount: amount,
+        currency: currency_code || 'AED',
+        customerEmail: customerEmail || '',
+        items: [{
+          id: 0,
+          name: productName || 'منتج رقمي',
+          quantity: 1,
+          price: amount,
+          downloadUrl: productFile || ''
+        }],
+        createdAt: new Date().toISOString(),
+        metadata: {
+          productName,
+          productFile,
+          paymentIntentId
+        }
+      });
+      
+      console.log("💾 Order saved successfully:", orderId);
+    } catch (saveError) {
+      console.error("⚠️ Failed to save order (payment will still proceed):", saveError);
+    }
+    
     return NextResponse.json(data);
   } catch (err) {
     console.error("❌ Error creating payment intent:", err);

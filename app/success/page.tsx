@@ -91,8 +91,16 @@ function SuccessPageContent() {
         const savedCurrency = localStorage.getItem("currency") || "SAR";
         const savedTotalAmount = localStorage.getItem("leve1up_total_amount");
 
+        console.log('📦 localStorage data:', {
+          cart: savedCartItems,
+          email: savedEmail,
+          currency: savedCurrency,
+          total: savedTotalAmount
+        });
+
         if (savedCartItems && savedEmail) {
           const items: CartItem[] = JSON.parse(savedCartItems);
+          console.log('🛒 Cart items parsed:', items);
           
           // جلب روابط التحميل من products.json
           try {
@@ -100,13 +108,25 @@ function SuccessPageContent() {
             const products = await productsResponse.json();
             
             const downloadLinks = items.map(item => {
-              const product = products.find((p: any) => p.product_id === item.id || p.id === item.id);
+              // البحث بكل الطرق الممكنة
+              const product = products.find((p: any) => 
+                p.product_id === item.id || 
+                p.id === item.id ||
+                p.product_id === parseInt(String(item.id)) ||
+                p.id === parseInt(String(item.id))
+              );
+              
+              console.log('🔍 Looking for product ID:', item.id, 'Found:', !!product);
+              if (product) {
+                console.log('✅ Product found:', product.product_name, '- URL:', product.download_url);
+              }
+              
               return {
                 productId: item.id,
                 productName: item.name,
-                downloadUrl: product?.download_url || '#'
+                downloadUrl: product?.download_url || ''
               };
-            });
+            }).filter(link => link.downloadUrl); // إزالة المنتجات التي لا تحتوي على رابط تحميل
             
             setOrderData({
               email: savedEmail,
@@ -245,38 +265,55 @@ function SuccessPageContent() {
         </div>
 
         {/* 🎁 روابط التحميل المباشرة */}
-        {downloadLinks && downloadLinks.length > 0 && (
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl shadow-lg p-8 mb-6">
-            <div className="text-center mb-6">
-              <h2 className="text-3xl font-bold text-emerald-700 mb-2">🎁 روابط التحميل</h2>
-              <p className="text-gray-600">يمكنك تحميل منتجاتك مباشرة من الروابط التالية</p>
-            </div>
-            
-            <div className="space-y-4">
-              {downloadLinks.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.downloadUrl}
-                  className="flex items-center justify-between bg-white hover:bg-emerald-50 border-2 border-emerald-300 hover:border-emerald-400 text-emerald-700 font-semibold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] shadow-md hover:shadow-lg group"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="flex items-center gap-3">
-                    <FaDownload className="text-2xl group-hover:animate-bounce" />
-                    <span className="text-right">{link.productName}</span>
-                  </span>
-                  <span className="text-sm text-emerald-600">تحميل →</span>
-                </a>
-              ))}
-            </div>
-
-            <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-              <p className="text-sm text-yellow-800">
-                <span className="font-bold">💡 نصيحة مهمة:</span> احفظ هذه الصفحة أو الروابط في مكان آمن للرجوع إليها لاحقاً
-              </p>
-            </div>
+        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl shadow-lg p-8 mb-6">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold text-emerald-700 mb-2">🎁 روابط التحميل</h2>
+            <p className="text-gray-600">يمكنك تحميل منتجاتك مباشرة من الروابط التالية</p>
           </div>
-        )}
+          
+          {downloadLinks && downloadLinks.length > 0 ? (
+            <>
+              <div className="space-y-4">
+                {downloadLinks.map((link, index) => (
+                  <a
+                    key={index}
+                    href={link.downloadUrl}
+                    className="flex items-center justify-between bg-white hover:bg-emerald-50 border-2 border-emerald-300 hover:border-emerald-400 text-emerald-700 font-semibold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] shadow-md hover:shadow-lg group"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="flex items-center gap-3">
+                      <FaDownload className="text-2xl group-hover:animate-bounce" />
+                      <span className="text-right">{link.productName}</span>
+                    </span>
+                    <span className="text-sm text-emerald-600">تحميل →</span>
+                  </a>
+                ))}
+              </div>
+
+              <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <p className="text-sm text-yellow-800">
+                  <span className="font-bold">💡 نصيحة مهمة:</span> احفظ هذه الصفحة أو الروابط في مكان آمن للرجوع إليها لاحقاً
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+              <p className="text-yellow-800 mb-4">
+                <span className="text-3xl mb-2 block">⚠️</span>
+                <span className="font-bold">لم نتمكن من جلب روابط التحميل تلقائياً</span>
+              </p>
+              <p className="text-sm text-yellow-700 mb-4">
+                سيتم إرسال روابط التحميل إلى بريدك الإلكتروني قريباً، أو يمكنك التواصل معنا مباشرة.
+              </p>
+              <div className="text-xs text-gray-600 bg-white p-3 rounded">
+                معلومات للدعم: <br/>
+                البريد: {email} <br/>
+                {orderId && `رقم الطلب: ${orderId}`}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* 📦 تفاصيل المنتجات المشتراة */}
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6 border border-gray-100">
